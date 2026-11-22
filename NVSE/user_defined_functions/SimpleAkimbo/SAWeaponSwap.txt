@@ -1,0 +1,41 @@
+Begin Function {}
+	; The right weapon changed while Akimbo is running (called by SAEquipWatch, SACheck and SAMenuClose).
+	; Other one-handed weapon: Akimbo is switched off briefly and switched on again after *_SASwapGap seconds (default 0.6),
+	; so the left weapon is re-attached and SAToggle plays the equip animation. Anything else: Akimbo just goes off.
+	; *_SASwapBusy blocks parallel swaps until SAWeaponSwapOn has run.
+	ref rEquip
+	int iWT
+	int iForce
+	float fGap
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SASwapBusy" == 1
+		return
+	endif
+
+	let rEquip = Player.GetEquippedObject 5
+	Player.AuxVarSetRef "*_SAEquipLast" rEquip
+	let iForce = 0 - 1
+	let iWT = 0 - 1
+	if rEquip != 0
+		let iWT = GetWeaponType rEquip
+	endif
+
+	if iWT != 3 && iWT != 4
+		PrintC "SA WeaponSwap: new weapon is not one-handed, Akimbo off"
+		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iForce
+		return
+	endif
+
+	let fGap = Player.AuxVarGetFlt "*_SASwapGap"
+	if fGap <= 0
+		let fGap = 0.6
+	endif
+	PrintC "SA WeaponSwap: Akimbo off and on again in %g s (weapon %i)" fGap rEquip
+	Player.AuxVarSetFlt "*_SASwapBusy" 1
+	Player.AuxVarSetFlt "*_SASwapping" 1
+	Call (CompileScript "SimpleAkimbo\SAToggle.txt") iForce
+	Player.CallAfterSeconds fGap (CompileScript "SimpleAkimbo\SAWeaponSwapOn.txt")
+End

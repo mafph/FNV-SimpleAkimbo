@@ -28,22 +28,24 @@ Begin Function {int iKey}
 	let fState = Player.AuxVarGetFlt "*_SAkimbo"
 
 	if fState == 0
-		; Model of the left weapon: remembered weapon (M), otherwise vanilla 9mm
-		let rWeap = Player.AuxVarGetRef "*_SALeftW"
-		if rWeap == 0
-			PrintC "SimpleAkimbo: no left weapon set, press J on a weapon in the inventory"
-			return
-		endif
-		; The equipped weapon must not be its own left weapon, unless there is a second copy
+		; The equipped weapon is checked first, so the warning also appears when no left weapon is set yet
 		let rEquip = Player.GetEquippedObject 5
 		if rEquip == 0
 			PrintC "SimpleAkimbo: no weapon equipped"
 			return
 		endif
-		; only one-handed weapons (type 3 and 4)
+		; only one-handed weapons (type 3 and 4), same warning as when marking a two-handed weapon with J in the inventory
 		let iWT = GetWeaponType rEquip
 		if iWT != 3 && iWT != 4
-			PrintC "SimpleAkimbo: equipped weapon is not one-handed"
+			PrintC "SimpleAkimbo: %n is not a one-handed weapon" rEquip
+			MessageEx "%n is not a one-handed weapon" rEquip
+			return
+		endif
+		; Model of the left weapon: remembered weapon (M), otherwise vanilla 9mm
+		let rWeap = Player.AuxVarGetRef "*_SALeftW"
+		if rWeap == 0
+			PrintC "SimpleAkimbo: no left weapon set, press J on a weapon in the inventory"
+			MessageEx "No left weapon set, press J on a weapon in the inventory"
 			return
 		endif
 		let iWT = GetWeaponType rWeap

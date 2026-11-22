@@ -5,9 +5,21 @@ Begin Function {}
 	; (*_SATypePend) and only applied silently after the animation ends (SATypeBusyEnd).
 	ref rCurType
 	ref rLastType
+	ref rWeapNow
+	ref rWeapLast
 
 	let rCurType = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") 1
 	let rLastType = Player.AuxVarGetRef "*_SATypeLast"
+	let rWeapNow = Player.GetEquippedObject 5
+	let rWeapLast = Player.AuxVarGetRef "*_SATypeWeap"
+
+	; The right weapon itself changed: the ammo type changes with it. That is no type change on the same weapon,
+	; so no reload animation here (the equip animation comes from SAWeaponSwap / SAToggle).
+	if rWeapNow != rWeapLast
+		Player.AuxVarSetRef "*_SATypeWeap" rWeapNow
+		Player.AuxVarSetRef "*_SATypeLast" rCurType
+		return
+	endif
 
 	if rLastType == rCurType
 		return
@@ -21,7 +33,8 @@ Begin Function {}
 
 	PrintC "SA TypeWatch ammo type changed %i -> %i" rLastType rCurType
 	; During reload / type change animation: only swap the type silently, no second animation
-	if Player.AuxVarGetFlt "*_SATypeBusy" == 1 || Player.AuxVarGetFlt "*_SAReloading" == 1
+	; (also during the equip phase and while a weapon swap is running)
+	if Player.AuxVarGetFlt "*_SATypeBusy" == 1 || Player.AuxVarGetFlt "*_SAReloading" == 1 || Player.AuxVarGetFlt "*_SAEquipGuard" == 1 || Player.AuxVarGetFlt "*_SASwapBusy" == 1
 		Call (CompileScript "SimpleAkimbo\SATypeApply.txt") 0
 		return
 	endif

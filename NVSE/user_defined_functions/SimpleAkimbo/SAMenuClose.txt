@@ -11,9 +11,8 @@ Begin Function {int iMenuID}
 	; J in the inventory selected a different left weapon while Akimbo is running: off and on again
 	if Player.AuxVarGetFlt "*_SASwapPend" == 1
 		Player.AuxVarSetFlt "*_SASwapPend" 0
-		Player.AuxVarSetFlt "*_SASwapping" 1
-		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAToggle.txt") 0 0
-		Player.CallAfterSeconds 0.9 (CompileScript "SimpleAkimbo\SAToggle.txt") 0 0
+		; off after 0.3 s, on again 0.6 s later (SAWeaponSwap / SAWeaponSwapOn)
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAWeaponSwap.txt")
 	endif
 	Player.AuxVarErase "*_SAHintLast"
 End

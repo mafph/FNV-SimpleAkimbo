@@ -1,6 +1,8 @@
 Begin Function {}
-	; Main loop callback every 10 frames, GameMode: detects a change of the right weapon while Akimbo is running
-	; and then plays the equip animation SAEquipAnim. Without Akimbo the weapon is only remembered.
+	; Main loop callback every 10 frames, GameMode (registered in SAStart).
+	; Detects a change of the right weapon while Akimbo is running and hands over to SAWeaponSwap:
+	; other one-handed weapon = Akimbo briefly off and on again (with equip animation), otherwise Akimbo off.
+	; Without Akimbo the weapon is only remembered.
 	ref rNow
 	ref rLast
 
@@ -19,8 +21,14 @@ Begin Function {}
 		return
 	endif
 	if rNow == 0
+		; weapon unequipped: wait for the next one
 		return
 	endif
-	Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
-	Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
+	if Player.AuxVarGetFlt "*_SASwapBusy" == 1
+		return
+	endif
+	if GetActiveMenuMode != 0
+		return
+	endif
+	Call (CompileScript "SimpleAkimbo\SAWeaponSwap.txt")
 End

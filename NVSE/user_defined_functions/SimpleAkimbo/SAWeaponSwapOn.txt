@@ -1,0 +1,21 @@
+Begin Function {}
+	; Second half of SAWeaponSwap: switches Akimbo on again with the new right weapon.
+	; SAToggle (on) checks the new weapon itself (one-handed, left weapon set, second copy if both are the same)
+	; and prints the matching message if Akimbo cannot start.
+	Player.AuxVarSetFlt "*_SASwapBusy" 0
+
+	if Player.AuxVarGetFlt "*_SAkimbo" == 1
+		Player.AuxVarSetFlt "*_SASwapping" 0
+		return
+	endif
+	if GetActiveMenuMode != 0
+		; menu opened in the meantime: try again shortly, SAToggle must not run in a menu
+		Player.AuxVarSetFlt "*_SASwapBusy" 1
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAWeaponSwapOn.txt")
+		return
+	endif
+
+	Call (CompileScript "SimpleAkimbo\SAToggle.txt") 0
+	; SAToggle only resets this flag on success
+	Player.AuxVarSetFlt "*_SASwapping" 0
+End

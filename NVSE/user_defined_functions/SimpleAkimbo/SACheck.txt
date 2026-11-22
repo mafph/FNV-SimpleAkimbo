@@ -10,8 +10,8 @@ Begin Function {}
 	let fType = Player.AuxVarGetFlt "*_SAAnimType"
 	let iNow = Player.GetWeaponAnimType
 	if iNow != fType
-		PrintC "SimpleAkimbo: weapon type changed (%g -> %g), Akimbo off" fType iNow
-		let iForce = 0 - 1
-		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iForce
+		PrintC "SimpleAkimbo: weapon type changed (%g -> %g)" fType iNow
+		; SAWeaponSwap: other one-handed weapon = briefly off and on again, otherwise just off
+		Call (CompileScript "SimpleAkimbo\SAWeaponSwap.txt")
 	endif
 End

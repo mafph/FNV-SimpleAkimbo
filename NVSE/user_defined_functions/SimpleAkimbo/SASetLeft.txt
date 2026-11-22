@@ -32,6 +32,7 @@ Begin Function {int iKey}
 	let iWT = GetWeaponType rWeap
 	if iWT != 3 && iWT != 4
 		PrintC "SimpleAkimbo: %n is not a one-handed weapon" rWeap
+		MessageEx "%n is not a one-handed weapon" rWeap
 		return
 	endif
 
@@ -64,6 +65,10 @@ Begin Function {int iKey}
 		let iEWT = GetWeaponType rEquip
 		if iEWT == 3 || iEWT == 4
 			Player.AuxVarSetFlt "*_SAStartPend" 1
+		else
+			; two-handed weapon equipped: same warning as when marking a two-handed weapon
+			PrintC "SimpleAkimbo: %n is not a one-handed weapon" rEquip
+			MessageEx "%n is not a one-handed weapon" rEquip
 		endif
 	endif
 End

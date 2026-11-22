@@ -8,6 +8,7 @@ Begin Function {}
 	ref rEquipNow
 	int iPrio
 	float fEquipLen
+	float fGuard
 
 	let sEquip1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf"
 	let sEquip3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf"
@@ -31,6 +32,11 @@ Begin Function {}
 	Player.CallAfterSeconds fEquipLen (CompileScript "SimpleAkimbo\SAIdleHold.txt")
 	Player.CallAfterSeconds 2.5 (CompileScript "SimpleAkimbo\SAIdleHold.txt")
 	PrintC "SA Equip: anim started, hold in 0.4 / %g / 2.5 s" fEquipLen
+
+	; Equip phase: SATypeWatch must not replace the equip animation with a reload animation (ammo type changes with the weapon)
+	Player.AuxVarSetFlt "*_SAEquipGuard" 1
+	let fGuard = fEquipLen + 0.8
+	Player.CallAfterSeconds fGuard (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
 
 	let rEquipNow = Player.GetEquippedObject 5
 	Player.AuxVarSetRef "*_SAEquipLast" rEquipNow

@@ -2,6 +2,11 @@ Begin Function {}
 	PrintC "SimpleAkimbo: SAStart full mainloops"
 	Call (CompileScript "SimpleAkimbo\SAShellPurge.txt")
 
+	; Reset swap / equip flags (a timer that was pending at the last save no longer exists)
+	Player.AuxVarSetFlt "*_SASwapBusy" 0
+	Player.AuxVarSetFlt "*_SASwapping" 0
+	Player.AuxVarSetFlt "*_SAEquipGuard" 0
+
 	; Load MCM settings (if not already done by gr_SimpleAkimboMenu)
 	if Player.AuxVarGetFlt "*_SA_MCM" 0 == 0
 		Player.AuxVarSetFlt "*_SA_MCM" 36 0
@@ -56,7 +61,7 @@ Begin Function {}
 
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAHud.txt") 1 3 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SATypeWatch.txt") 1 20 1
-	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMenuHint.txt") 1 15 2
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAEquipWatch.txt") 1 10 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAShellClean.txt") 1 120 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMcmWatch.txt") 1 30 1
 

@@ -1,0 +1,4 @@
+Begin Function {}
+	; Ends the equip phase (*_SAEquipGuard), see SAEquipAnim. SATypeWatch does not start a reload animation until then.
+	Player.AuxVarSetFlt "*_SAEquipGuard" 0
+End
