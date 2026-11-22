@@ -1,8 +1,8 @@
 Begin Function {}
-	; Idle-Halt: nach dem Equip und nach jedem Nachladen die Endpose der Attack-kfs halten.
-	; Nur sie enthalten die richtige Haltung mit linker Hand. Nach dem ersten Schuss stimmt alles, weil die
+	; Idle hold: after equip and after every reload, hold the end pose of the attack kfs.
+	; Only they contain the correct left-hand pose. After the first shot everything is correct because the
 	; geklemmte Attack-Sequenz bleibt. SAReload entfernt sie vor dem Nachladen, deshalb hier neu anfordern.
-	; Startover 0: eine noch aktive Sequenz wird nicht neu gestartet.
+	; StartOver 0: a sequence that is still active is not restarted.
 	int iPrio
 
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1

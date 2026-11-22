@@ -1,5 +1,5 @@
 Begin Function {}
-	; Jam vorbei: linke Waffe wieder zeigen, Schiessen freigeben.
+	; Jam over: show the left weapon again, allow shooting.
 	Player.AuxVarSetFlt "*_SAJam" 0
 	Player.SetNifBlockFlag "Akimbo" 0 0 1
 	Player.SetNifBlockFlag "Akimbo" 0 0 2

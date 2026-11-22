@@ -1,4 +1,4 @@
 Begin Function {}
-	; absichtlich leer: Bolt-Open rechts wird nicht mehr erzwungen (Vanilla-Idle darf schließen).
-	; Auto-Reload wenn beide Magazine leer (siehe SAFire).
+	; intentionally empty: right bolt-open is no longer forced (vanilla idle may close it).
+	; Auto-reload when both magazines are empty (see SAFire).
 End

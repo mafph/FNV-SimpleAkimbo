@@ -1,5 +1,5 @@
 Begin Function {}
-	; Vorlauf Schritt 2: -2.71 → -1.36, dann Schritt 3 → 0
+	; Forward movement step 2: -2.71 → -1.36, then step 3 → 0
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

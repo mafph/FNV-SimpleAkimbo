@@ -1,5 +1,5 @@
 Begin Function {}
-	; Vorlauf Schritt 3: zu
+	; Forward movement step 3: closed
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

@@ -1,5 +1,5 @@
 Begin Function {int iHand}
-	; iHand: 0 = links, 1 = rechts
+	; iHand: 0 = left, 1 = right
 	string_var sKeyAmmo
 	string_var sNode
 	string_var sAnim1st
@@ -47,8 +47,8 @@ Begin Function {int iHand}
 	let fAmmo -= 1
 	Player.AuxVarSetFlt (sKeyAmmo) fAmmo
 
-	; Abzuziehen ist genau der in dieser Hand GELADENE Typ (einzelne Ammo, keine Liste).
-	; GetWeaponAmmo liefert oft eine FormList: RemoveItem darauf zieht von ALLEN Typen ab.
+	; What is subtracted is exactly the type LOADED in this hand (single ammo, not a list).
+	; GetWeaponAmmo often returns a FormList: RemoveItem on it subtracts from ALL types.
 	if iHand == 0
 		let rFireAmmo = Player.AuxVarGetRef "*_SALoadedTypeL"
 	else
@@ -62,14 +62,14 @@ Begin Function {int iHand}
 	endif
 
 	if iHand == 0
-		; HandSel hier NICHT setzen: ein Wechsel auf 0 bricht die laufende rechte Anim ab (SA_HandR)
+		; Do NOT set HandSel here: switching to 0 aborts the running right animation (SA_HandR)
 
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
 
-		; Feste Prioritaet: 5 normal, 6 letzter Schuss
+		; Fixed priority: 5 normal, 6 last shot
 		let iPrio = 5
 
 		if fAmmo == 0
@@ -95,7 +95,7 @@ Begin Function {int iHand}
 	else
 		Player.AuxVarSetFlt "*_SAHandSel" 1
 
-		; Rechts wie links per ActivateAnim mit festem Pfad: unabhaengig von waffenspezifischen Ordnern anderer Mods
+		; Right like left via ActivateAnim with a fixed path: independent of weapon-specific folders of other mods
 		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
 

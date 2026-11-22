@@ -1,10 +1,10 @@
 Begin Function {}
-	; Schlitten-Steuerung per Skript, Main-Loop-Callback jeden Frame (siehe SAStart).
-	; 1) Hold-Open: ist das Magazin einer Hand leer, wird der Schlitten dieser Hand offen gehalten.
-	;    Erst nach Ablauf der Schuss-Animation (*_SAHoldDR/DL), sonst wuerde die Animation abgewuergt.
-	;    Der Wert gilt fuer den Knoten selbst. Bei Waffen mit angepassten Knoten (SANodeFix) ist die Ruhelage 0.
-	; 2) Links schliesst der Schlitten nach einem Schuss nicht immer ganz (ActivateAnim): nach Ablauf
-	;    der Animation (*_SASlideTL) wird er einmal auf die Ruhelage gesetzt.
+	; Slide control via script, main loop callback every frame (see SAStart).
+	; 1) Hold-open: if the magazine of one hand is empty, the slide of that hand is held open.
+	;    Only after the shot animation has finished (*_SAHoldDR/DL), otherwise the animation would be cut off.
+	;    The value applies to the node itself. For weapons with adjusted nodes (SANodeFix) the rest position is 0.
+	; 2) On the left, the slide does not always close fully after a shot (ActivateAnim): after
+	;    the animation (*_SASlideTL) has finished, it is set to the rest position once.
 	float fDt
 	float fOpen
 	float fAmmoR

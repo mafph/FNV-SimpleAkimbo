@@ -1,10 +1,10 @@
 Begin Function {int iWithAnim}
-	; Typwechsel anwenden. iWithAnim 1 = mit Akimbo-Reload-Animation (SAReload), 0 = still (nur Daten).
-	; Magazine, deren geladener Typ nicht mehr zum Zieltyp passt, werden auf 0 gesetzt
-	; (die Patronen zaehlen wieder zum Vorrat) und danach neu gefuellt.
-	; Links folgt rechts (siehe SAAmmoType), daher wird links bei Bedarf mit nachgeladen.
-	; Bei offenem Menue bricht SAReload ab (keine Animation): dann werden nur die Daten
-	; getauscht und die Animation ueber *_SATypePendAnim nachgeholt, sobald das Menue zu ist.
+	; Apply ammo type change. iWithAnim 1 = with Akimbo reload animation (SAReload), 0 = silent (data only).
+	; Magazines whose loaded type no longer matches the target type are set to 0
+	; (the rounds count toward the reserve again) and are then refilled.
+	; Left follows right (see SAAmmoType), so left is reloaded as well if needed.
+	; If a menu is open, SAReload aborts (no animation): then only the data is
+	; swapped and the animation is played via *_SATypePendAnim once the menu is closed.
 	ref rAmmoNowR
 	ref rAmmoNowL
 	ref rAmmoLoadR
@@ -40,7 +40,7 @@ Begin Function {int iWithAnim}
 		endif
 	endif
 
-	; Laeuft gerade ein Reload, wird der Typ nur still getauscht (keine weitere Animation)
+	; If a reload is currently running, the type is only swapped silently (no additional animation)
 	if Player.AuxVarGetFlt "*_SAReloading" == 1
 		let iWithAnim = 0
 	endif
@@ -54,7 +54,7 @@ Begin Function {int iWithAnim}
 		Player.AuxVarSetRef "*_SALoadedTypeL" rNull
 	endif
 
-	; Still (gewuenscht oder Menue offen): nur Daten neu fuellen
+	; Silent (requested or menu open): only refill the data
 	if iWithAnim == 0 || GetActiveMenuMode != 0
 		if iHandRChanged == 1
 			Call (CompileScript "SimpleAkimbo\SAReloadHand.txt") 1
@@ -64,7 +64,7 @@ Begin Function {int iWithAnim}
 		endif
 		Call (CompileScript "SimpleAkimbo\SAHud.txt")
 		if iWithAnim == 1
-			PrintC "SimpleAkimbo: Typwechsel bei offenem Menue, Animation folgt nach Menue-Ende"
+			PrintC "SimpleAkimbo: Type change while menu open, animation follows after menu closes"
 			Player.AuxVarSetFlt "*_SATypePendAnim" 1
 			let fWasBusy = Player.AuxVarGetFlt "*_SATypeBusy"
 			Player.AuxVarSetFlt "*_SATypeBusy" 1
@@ -77,15 +77,15 @@ Begin Function {int iWithAnim}
 		return
 	endif
 
-	; Immer die Akimbo-Animation (Key 19: beide Haende, Animation ReloadL).
-	; SALoaded vorher auf 0: so zeigt es danach, ob SAReload wirklich geladen hat.
+	; Always play the Akimbo animation (key 19: both hands, animation ReloadL).
+	; SALoaded is set to 0 beforehand, so afterwards it shows whether SAReload actually loaded.
 	Player.AuxVarSetFlt "*_SALoaded" 0
 	Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
 	let fLoadedNow = Player.AuxVarGetFlt "*_SALoaded"
 	if fLoadedNow <= 0
-		; SAReload ist vorzeitig ausgestiegen (Reload laeuft, Jam, Menue ...) oder es gab keinen Bestand.
-		; Magazine wurden oben auf 0 gesetzt, deshalb hier still nachfuellen.
-		PrintC "SimpleAkimbo: Typwechsel, SAReload hat nichts geladen, fuelle still"
+		; SAReload exited early (reload running, jam, menu ...) or there was no stock.
+		; Magazines were set to 0 above, so refill silently here.
+		PrintC "SimpleAkimbo: Type change, SAReload loaded nothing, refilling silently"
 		if iHandRChanged == 1
 			Call (CompileScript "SimpleAkimbo\SAReloadHand.txt") 1
 		endif
@@ -96,8 +96,8 @@ Begin Function {int iWithAnim}
 		return
 	endif
 
-	; Busy-Flag nur fuer das Polling in SATypeBusyEnd (eine Kette, kein Blockieren).
-	; Neuer Wechsel waehrend der Animation: Zaehler zuruecksetzen, Kette laeuft weiter.
+	; Busy flag only for the polling in SATypeBusyEnd (one chain, no blocking).
+	; New change during the animation: reset the counter, the chain keeps running.
 	let fWasBusy = Player.AuxVarGetFlt "*_SATypeBusy"
 	Player.AuxVarSetFlt "*_SATypeBusy" 1
 	Player.AuxVarSetFlt "*_SATypeWait" 0

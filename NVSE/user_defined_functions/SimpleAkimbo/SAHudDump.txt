@@ -1,7 +1,7 @@
 Begin Function {}
-	; Hilfsfunktion zur Fehlersuche: gibt Text von justify_right_text:0 bis :7 im HUD (ActionPoints) in der Konsole aus.
-	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAHudDump.txt")
-	; Einmal mit Akimbo aus und einmal mit Akimbo an ausfuehren und vergleichen. Aendert nichts.
+	; Debug helper: prints the text of justify_right_text:0 to :7 in the HUD (ActionPoints) to the console.
+	; Call from console:  Call (CompileScript "SimpleAkimbo\SAHudDump.txt")
+	; Run once with Akimbo off and once with Akimbo on and compare. Changes nothing.
 	string_var sPath
 	string_var sText
 	int iTile

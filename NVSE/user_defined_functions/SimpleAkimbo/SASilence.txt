@@ -1,7 +1,7 @@
 Begin Function {int iHand, int iApply}
-	; Schalldaempfer-Sound. iApply 1 = vor dem Schuss: ist ein Silence- oder Suppressor-Mod aktiv,
-	; werden die Attack-Sounds 0 bis 2 der Waffe voruebergehend durch die Mod-Sounds 9 bis 11 ersetzt.
-	; iApply 0 = nach dem Schuss: Original-Sounds zurueck.
+	; Suppressor sound. iApply 1 = before the shot: if a silencer or suppressor mod is active,
+	; the weapon's attack sounds 0 to 2 are temporarily replaced by the mod sounds 9 to 11.
+	; iApply 0 = after the shot: restore original sounds.
 	ref rWeapon
 	ref rSndOrig
 	ref rSndMod
@@ -34,7 +34,7 @@ Begin Function {int iHand, int iApply}
 		return
 	endif
 
-	; Tausch noch aktiv (verzoegerte Wiederherstellung steht aus): nichts doppelt sichern
+	; swap still active (delayed restore pending): do not back up anything twice
 	let rWeapon = Player.AuxVarGetRef "*_SASndW"
 	if rWeapon != 0
 		return
@@ -96,7 +96,7 @@ Begin Function {int iHand, int iApply}
 			if rSndMod != 0
 				SetWeaponSound rWeapon iSndType rSndMod
 			else
-				; kein Mod-Sound hinterlegt (z. B. Distant): Sound ganz abschalten
+				; no mod sound stored (e.g. Distant): mute the sound entirely
 				SetWeaponSound rWeapon iSndType
 			endif
 			let iDidSwap = 1

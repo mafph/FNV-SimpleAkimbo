@@ -1,5 +1,5 @@
 Begin Function {}
-	; Ruhelage der Schlitten-Knoten nach SANodeFix merken (nur Knoten, die es wirklich gibt)
+	; Remember the rest position of the slide nodes after SANodeFix (only nodes that really exist)
 	array_var aR
 	Player.AuxVarSetFlt "*_SARestSet" 0
 	let aR = Player.GetNifBlockTranslation "##nmBar" 0 1

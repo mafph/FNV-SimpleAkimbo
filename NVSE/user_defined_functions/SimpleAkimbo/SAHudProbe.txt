@@ -1,6 +1,6 @@
 Begin Function {int iKey}
-	; Taste H: gibt die Texte der Kinder-Tiles justify_right_text:0..9 aus,
-	; damit man das Ammo-Label findet (z.B. "12/90").
+	; Key H: prints the texts of the child tiles justify_right_text:0..9,
+	; so the ammo label can be found (e.g. "12/90").
 	int i
 	string_var sPath
 	string_var sText
@@ -14,5 +14,5 @@ Begin Function {int iKey}
 		PrintC "SimpleAkimbo HUD Tile %g = [%z]" i sText
 		let i += 1
 	loop
-	PrintC "SimpleAkimbo: Tile N mit Munition gefunden? Siehe LIES_MICH Punkt 2d"
+	PrintC "SimpleAkimbo: tile N with ammo found? See README item 2d"
 End

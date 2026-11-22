@@ -1,5 +1,5 @@
 Begin Function {}
-	; Loescht sofort alle registrierten Huelsen, unabhaengig vom Alter. Aufruf beim Start und beim Einschalten.
+	; Immediately deletes all registered shell casings, regardless of age. Called on start and when turning on.
 	ref rShell
 	string_var sKey
 	string_var sTimeKey

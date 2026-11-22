@@ -1,5 +1,5 @@
 Begin Function {int iKey}
-	; iKey: 0 = still beide (Toggle), 19 = R beide / Auto, 44 = links, 45 = rechts
+	; iKey: 0 = both silent (toggle), 19 = R both / auto, 44 = left, 45 = right
 	float fLoaded
 	float fCurL
 	float fCurR
@@ -11,16 +11,16 @@ Begin Function {int iKey}
 	int iPrio
 
 	if GetActiveMenuMode != 0
-		PrintC "SimpleAkimbo: SAReload abgebrochen (Menue offen)"
+		PrintC "SimpleAkimbo: SAReload aborted (menu open)"
 		return
 	endif
 	Call (CompileScript "SimpleAkimbo\SACheck.txt")
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
-		PrintC "SimpleAkimbo: SAReload abgebrochen (Akimbo aus)"
+		PrintC "SimpleAkimbo: SAReload aborted (Akimbo off)"
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SAJam" == 1
-		PrintC "SimpleAkimbo: SAReload abgebrochen (Jam)"
+		PrintC "SimpleAkimbo: SAReload aborted (jam)"
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SAReloading" == 1
@@ -76,8 +76,8 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SALastR" 0
 	Player.AuxVarSetFlt "*_SASlide3rdSeq" (Player.AuxVarGetFlt "*_SASlide3rdSeq" + 1)
 
-	; Timer-Sperre
-	; Sperrdauer = Laenge der Reload-kf (Full 5.05 s, Partial 4.42 s); per *_SAReloadLen ueberschreibbar
+	; Timer lock
+	; Lock duration = length of the reload kf (full 5.05 s, partial 4.42 s); overridable via *_SAReloadLen
 	let fDur = Player.AuxVarGetFlt "*_SAReloadLen"
 	if fDur <= 0
 		if fPartial == 1
@@ -94,8 +94,8 @@ Begin Function {int iKey}
 	let fPOVInit = IsPC1stPerson
 	Player.AuxVarSetFlt "*_SAReloadPOV" fPOVInit
 
-	; Reload per ActivateAnim mit festem Pfad (unabhaengig von waffenspezifischen Ordnern anderer Mods).
-	; Das Deaktivieren am Ende passiert in SAReloadEnd.
+	; Reload via ActivateAnim with a fixed path (independent of weapon-specific folders of other mods).
+	; Deactivation at the end happens in SAReloadEnd.
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0

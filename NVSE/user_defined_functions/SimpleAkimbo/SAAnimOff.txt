@@ -1,6 +1,6 @@
 Begin Function {}
-	; Entfernt alle festen Sequenzen von Akimbo Aufruf im Aus-Zweig von SAToggle, nachdem *_SAkimbo = 0 gesetzt ist.
-	; Sonst bleiben geklemmte Sequenzen aktiv und ueberdecken die normalen Waffenanimationen.
+	; Removes all fixed sequences of the Akimbo call in the off branch of SAToggle, after *_SAkimbo = 0 is set.
+	; Otherwise clamped sequences stay active and override the normal weapon animations.
 	Call (CompileScript "SimpleAkimbo\SALoco.txt") 1
 	Player.AuxVarSetFlt "*_SALocoState" 0
 

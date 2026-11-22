@@ -1,7 +1,7 @@
 Begin Function {}
-	; Berechnet pro Hand das Schussintervall fuer Dauerfeuer. 0 = Waffe ist nicht automatisch.
-	; Aufruf beim Einschalten von Akimbo.
-	; UNVERIFIZIERT: GetWeaponFireRate als Schuesse pro Sekunde.
+	; Calculates the shot interval for automatic fire per hand. 0 = weapon is not automatic.
+	; Called when Akimbo is turned on.
+	; UNVERIFIED: GetWeaponFireRate as shots per second.
 	ref rWeaponForm
 	string_var sIntKey
 	float fRateVal
@@ -41,11 +41,11 @@ Begin Function {}
 		PrintC "SA Auto hand %g weapon %i automatic %g interval %g" iHandNum rWeaponForm iAutoFlag fIntervalVal
 		let iHandNum += 1
 	loop
-	; rechte Waffe merken: SAHeldDown ruft SAAutoInit neu auf, sobald sie abweicht
+	; remember the right weapon: SAHeldDown calls SAAutoInit again as soon as it changes
 	let rRightW = Player.GetEquippedObject 5
 	Player.AuxVarSetRef "*_SAAutoRefR" rRightW
-	; Modus B (LMB abwechselnd): nur Dauerfeuer, wenn beide Waffen automatisch sind. Da die Haende abwechseln,
-	; ist das Intervall zwischen zwei Schuessen halb so lang, damit jede Waffe ihre volle Feuerrate hat.
+	; Mode B (LMB alternating): automatic fire only if both weapons are automatic. Since the hands alternate,
+	; the interval between two shots is half as long so each weapon gets its full fire rate.
 	let fIntLeft = Player.AuxVarGetFlt "*_SAAutoInt0"
 	let fIntRight = Player.AuxVarGetFlt "*_SAAutoInt1"
 	let fIntBoth = 0

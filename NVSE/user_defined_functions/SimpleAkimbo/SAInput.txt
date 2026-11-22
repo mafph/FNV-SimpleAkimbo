@@ -9,14 +9,14 @@ Begin Function {int iKey}
 	endif
 	let fMode = Player.AuxVarGetFlt "*_SAMode"
 	if fMode == 0
-		; Modus A: LMB links, RMB rechts
+		; Mode A: LMB left, RMB right
 		if iKey == 256
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") 0
 		elseif iKey == 257
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") 1
 		endif
 	else
-		; Modus B: nur LMB, Hand wechselt pro Schuss, RMB bleibt Engine-ADS
+		; Mode B: only LMB, hand alternates per shot, RMB stays engine ADS
 		if iKey == 256
 			let fHand = Player.AuxVarGetFlt "*_SAHand"
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") (fHand)

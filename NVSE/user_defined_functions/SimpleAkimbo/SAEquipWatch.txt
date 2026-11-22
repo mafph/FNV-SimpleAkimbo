@@ -1,6 +1,6 @@
 Begin Function {}
-	; Main-Loop-Callback alle 10 Frames, GameMode: erkennt den Wechsel der rechten Waffe bei laufendem Akimbo
-	; und spielt dann die Equip-Animation SAEquipAnim. Ohne Akimbo wird die Waffe nur gemerkt.
+	; Main loop callback every 10 frames, GameMode: detects a change of the right weapon while Akimbo is running
+	; and then plays the equip animation SAEquipAnim. Without Akimbo the weapon is only remembered.
 	ref rNow
 	ref rLast
 

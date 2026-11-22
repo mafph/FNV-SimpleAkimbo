@@ -1,10 +1,10 @@
 Begin Function {int iForceOff}
-	; Locomotion 1p fest per ActivateAnim, Prioritaet 3 ueber dem Equip-Halt, unter Schuss und Reload.
-	; Main-Loop-Callback alle 6 Frames, GameMode. iForceOff = 1: nur die laufende Sequenz entfernen SAAnimOff.
-	; Zustand: 0 = Stand, 1 bis 4 = vor, zurueck, links, rechts gehen, 5 bis 8 = dasselbe als fast laufen.
-	; Richtung aus den Tasten W 17, S 31, A 30, D 32, Laufen = linke Shift 42 gehalten nicht beim Schleichen. Standardbelegung.
-	; Sneak: das Pack hat keine eigenen Sneak-Dateien fuer Locomotion, Schleichen nutzt die Geh-Dateien.
-	; 3p: das Pack enthaelt keine Locomotion-Dateien nur mtidle, daher nur 1p.
+	; Locomotion 1p fixed via ActivateAnim, priority 3 above the equip hold, below shot and reload.
+	; Main loop callback every 6 frames, GameMode. iForceOff = 1: only remove the running sequence via SAAnimOff.
+	; State: 0 = standing, 1 to 4 = walk forward, back, left, right, 5 to 8 = the same as running.
+	; Direction from keys W 17, S 31, A 30, D 32, running = left Shift 42 held, not while sneaking. Default binding.
+	; Sneak: the pack has no own sneak files for locomotion, sneaking uses the walk files.
+	; 3p: the pack contains no locomotion files, only mtidle, therefore 1p only.
 	string_var sBase
 	string_var sName
 	string_var sPath
@@ -17,7 +17,7 @@ Begin Function {int iForceOff}
 	int iFastSel
 	int iLocoPrio
 
-	; Prioritaet = Equip-Prioritaet plus 1, damit Locomotion immer ueber dem Equip-Halt liegt
+	; Priority = equip priority plus 1, so locomotion always lies above the equip hold
 	let iLocoPrio = Player.AuxVarGetFlt "*_SAEquipPrio"
 	if iLocoPrio <= 0
 		let iLocoPrio = 2

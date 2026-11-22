@@ -1,5 +1,5 @@
 Begin Function {}
-	; Laeuft als Callback nur im Menue-Modus (siehe SAStart). Zeigt einen Hinweis mit dem Namen, wenn im Inventar eine Akimbo-Waffe markiert ist.
+	; Runs as a callback only in menu mode (see SAStart). Shows a hint with the name when an Akimbo weapon is selected in the inventory.
 	ref rItem
 	ref rBase
 	ref rLast
@@ -24,7 +24,5 @@ Begin Function {}
 	let rEquip = Player.GetEquippedObject 5
 	if rLeft != 0 && rBase == rLeft
 		MessageEx "Akimbo left: %n" rBase
-	elseif Player.AuxVarGetFlt "*_SAkimbo" == 1 && rBase == rEquip
-		MessageEx "Akimbo right: %n" rBase
 	endif
 End

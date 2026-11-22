@@ -1,7 +1,7 @@
 Begin Function {int iHand}
-	; Revolver: Hammer spannen/fallen und Trommel pro Schuss weiterdrehen (per Skript, ohne kf).
-	; Knoten: 357 = ##357Hammer/##357Cylinder, 44er = ##mnsHammer/##swmCylinder; links mit Suffix 1.
-	; Werte per Konsole aenderbar: player.AuxVarSetFlt "*_SARevCylY" 60  usw. (Grad)
+	; Revolver: cock/release the hammer and rotate the cylinder per shot (via script, no kf).
+	; Nodes: 357 = ##357Hammer/##357Cylinder, 44 = ##mnsHammer/##swmCylinder; left with suffix 1.
+	; Values can be changed via console: player.AuxVarSetFlt "*_SARevCylY" 60  etc. (degrees)
 	string_var sS
 	float fHX
 	float fHY

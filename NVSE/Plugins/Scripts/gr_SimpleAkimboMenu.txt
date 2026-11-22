@@ -1,0 +1,38 @@
+; SimpleAkimbo MCM Extender load script (runs on game restart)
+; Loads settings from the INI into Temporary-Public AuxVars and updates the keybinds.
+
+; Defaults + clamp
+; key 0 = ToggleKey (default 36 = J)
+; key 1 = ModeKey   (default 49 = N)
+; key 2 = Mode      (0 = A, 1 = B)
+; key 3 = Debug     (0/1)
+
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iToggleKey" "SimpleAkimbo.ini" 36) 1 255)) 0
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iModeKey" "SimpleAkimbo.ini" 49) 1 255)) 1
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iMode" "SimpleAkimbo.ini" 0) 0 1)) 2
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iDebug" "SimpleAkimbo.ini" 0) 0 1)) 3
+
+; Also mirror mode and debug into the existing runtime vars
+Player.AuxVarSetFlt "*_SAMode" (Player.AuxVarGetFlt "*_SA_MCM" 2)
+Player.AuxVarSetFlt "*_SADebug" (Player.AuxVarGetFlt "*_SA_MCM" 3)
+
+; Close cache
+CloseFileSO "SimpleAkimbo.ini" 1
+
+; Re-register keybinds (old handlers are overwritten / supplemented; reload once if the key changes)
+int iToggle
+int iModeKey
+let iToggle = Player.AuxVarGetFlt "*_SA_MCM" 0
+let iModeKey = Player.AuxVarGetFlt "*_SA_MCM" 1
+
+; Remove old fixed keys (if still present)
+SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 0 36
+SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 0 49
+
+; Register new keys
+SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 1 iToggle
+SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 iModeKey
+
+if Player.AuxVarGetFlt "*_SADebug" == 1
+	PrintC "SimpleAkimbo MCM: ToggleKey=%g ModeKey=%g Mode=%g Debug=%g" iToggle iModeKey (Player.AuxVarGetFlt "*_SAMode") (Player.AuxVarGetFlt "*_SADebug")
+endif

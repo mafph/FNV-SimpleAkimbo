@@ -1,8 +1,8 @@
 Begin Function {}
-	; Equip-Animation fest per ActivateAnim 1p und 3p. Dient zugleich als Idle-Ueberschreibung:
-	; die Sequenz bleibt CLAMP aktiv und haelt die letzte Pose, bis SAAnimOff sie entfernt.
-	; Prioritaet 2: unter Locomotion 3, Schuss 5 und Reload 6. Per *_SAEquipPrio aenderbar.
-	; Aufruf: beim Einschalten SAToggle und beim Wechsel der rechten Waffe SAEquipWatch.
+	; Equip animation fixed via ActivateAnim 1p and 3p. Also serves as an idle override:
+	; the sequence stays CLAMP active and holds the last pose until SAAnimOff removes it.
+	; Priority 2: below locomotion 3, shot 5 and reload 6. Changeable via *_SAEquipPrio.
+	; Called: SAToggle when turning on, and SAEquipWatch when the right weapon changes.
 	string_var sEquip1st
 	string_var sEquip3rd
 	ref rEquipNow
@@ -21,12 +21,12 @@ Begin Function {}
 	Player.ActivateAnim (sEquip1st) 1 iPrio 1 1.0 0.0 ""
 	Player.ActivateAnim (sEquip3rd) 0 iPrio 1 1.0 0.0 ""
 
-	; Nach der Equip-Zeit wechselt SAIdleHold auf die Endpose der Attack-kfs. Laenge per *_SAEquipLen, Default 1.2 s.
+	; After the equip time, SAIdleHold switches to the end pose of the attack kfs. Length via *_SAEquipLen, default 1.2 s.
 	let fEquipLen = Player.AuxVarGetFlt "*_SAEquipLen"
 	if fEquipLen <= 0
 		let fEquipLen = 1.2
 	endif
-	; Zusaetzlich frueh und spaet, falls die Engine die Sequenzen nach dem Equip noch einmal entfernt.
+	; Additionally early and late, in case the engine removes the sequences again after the equip.
 	Player.CallAfterSeconds 0.4 (CompileScript "SimpleAkimbo\SAIdleHold.txt")
 	Player.CallAfterSeconds fEquipLen (CompileScript "SimpleAkimbo\SAIdleHold.txt")
 	Player.CallAfterSeconds 2.5 (CompileScript "SimpleAkimbo\SAIdleHold.txt")

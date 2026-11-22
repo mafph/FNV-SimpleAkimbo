@@ -1,7 +1,7 @@
 Begin Function {}
-	; HUD-Munitionslabel: "links geladen/Vorrat   rechts geladen/Vorrat", z.B. 12/99  8/45.
-	; Laeuft als Main-Loop-Callback (alle 2 Frames, nur GameMode), siehe SAStart.
-	; Vorrat pro Hand aus dem Munitionstyp der Hand (SAAmmoType), nicht aus dem Waffenstandard.
+	; HUD ammo label: "left loaded/reserve   right loaded/reserve", e.g. 12/99  8/45.
+	; Runs as a main loop callback (every 2 frames, GameMode only), see SAStart.
+	; Reserve per hand from the hand's ammo type (SAAmmoType), not from the weapon default.
 	ref rAmmoL
 	ref rAmmoR
 	float fTile
@@ -24,7 +24,7 @@ Begin Function {}
 	let rAmmoR = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") 1
 	let iStockL = Player.GetItemCount rAmmoL
 	let iStockR = Player.GetItemCount rAmmoR
-	; Vorrat = Bestand minus geladene Schuss. Gleicher Typ: beide Magazine abziehen.
+	; Reserve = stock minus loaded rounds. Same type: subtract both magazines.
 	if rAmmoL == rAmmoR
 		let iStockL = iStockL - fMagL - fMagR
 		let iStockR = iStockL

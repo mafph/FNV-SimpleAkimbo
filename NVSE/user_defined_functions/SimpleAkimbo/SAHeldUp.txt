@@ -1,5 +1,5 @@
 Begin Function {int iKey}
-	; Maustaste losgelassen. Sind beide Tasten oben, wird das Dauerfeuer abgemeldet.
+	; Mouse button released. If both buttons are up, automatic fire is unregistered.
 	float fHeld256
 	float fHeld257
 

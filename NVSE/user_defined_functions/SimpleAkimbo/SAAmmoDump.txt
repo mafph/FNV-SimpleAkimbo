@@ -1,7 +1,7 @@
 Begin Function {}
-	; Hilfsfunktion zur Fehlersuche: zeigt Munitionsnamen und das HUD-Tile 6. Aendert nichts.
-	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAAmmoDump.txt")
-	; Mit verschiedener Munition aufrufen (FMJ, AP, JHP), jeweils nach dem Wechsel im Pip-Boy und mit geladener Waffe.
+	; Debug helper: shows ammo names and HUD tile 6. Changes nothing.
+	; Call from console:  Call (CompileScript "SimpleAkimbo\SAAmmoDump.txt")
+	; Call with different ammo (FMJ, AP, JHP), each time after switching in the Pip-Boy and with a loaded weapon.
 	ref rWeap
 	ref rCur
 	ref rDef

@@ -1,5 +1,5 @@
 Begin Function {}
-	; Schritt 2+3 des Rücklaufs (nur wenn Sequenz noch aktuell)
+	; Steps 2+3 of the return movement (only if the sequence is still current)
 	float fSeq
 
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1

@@ -1,8 +1,8 @@
 Begin Function {int iHand}
-	; Huelse selbst erzeugen. iHand: 0 = links, 1 = rechts.
-	; UNVERIFIZIERT: PlaceAtMe Caps001 als Havok-Traeger, SetModelPath auf der Referenz.
-	; Kein Impuls, ApplyHavokImpulse gibt es in FNV nicht.
-	; Aufraeumen nach 4 Sekunden per CallAfterSeconds und SAShellDel. SAShellClean raeumt Reste nach Laden ab. 60 Slots pro Hand als Notbremse.
+	; Create the shell casing itself. iHand: 0 = left, 1 = right.
+	; UNVERIFIED: PlaceAtMe Caps001 as Havok carrier, SetModelPath on the reference.
+	; No impulse, ApplyHavokImpulse does not exist in FNV.
+	; Cleanup after 4 seconds via CallAfterSeconds and SAShellDel. SAShellClean removes leftovers after loading. 60 slots per hand as an emergency brake.
 	ref rWeap
 	ref rShell
 	ref rPrev
@@ -23,7 +23,7 @@ Begin Function {int iHand}
 	float fPosZ
 	float fOld
 
-	; Sicherheitsnetz: alte Huelsen auch ohne laufende Main-Loop (z.B. nach Autosave-Load) wegraeumen
+	; Safety net: remove old shell casings even without a running main loop (e.g. after an autosave load)
 	Call (CompileScript "SimpleAkimbo\SAShellClean.txt")
 
 	let rWeap = Player.GetEquippedObject 5
@@ -59,7 +59,7 @@ Begin Function {int iHand}
 		endif
 	endif
 
-	; Traeger: CounterfeitCaps (00157381, FalloutNV.esm), Rueckfall Caps001
+	; Carrier: CounterfeitCaps (00157381, FalloutNV.esm), fallback Caps001
 	let rBase = GetFormFromMod "FalloutNV.esm" "157381"
 	if (IsReference rBase) == 0 && rBase == 0
 		let rBase = Caps001

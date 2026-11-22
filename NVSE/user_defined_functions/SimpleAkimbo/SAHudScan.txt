@@ -1,15 +1,15 @@
 Begin Function {}
-	; Hilfsfunktion zur Fehlersuche: sucht im HUDMainMenu alle Tiles mit nicht leerem Text und gibt Pfad und Text in der Konsole aus.
-	; Ziel: herausfinden, in welchem Tile der Munitionstyp steht. Aendert nichts.
-	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAHudScan.txt")
-	; Mit Akimbo aus und einer bekannten Waffe ausgeruestet aufrufen, dann den Munitionsnamen in der Ausgabe suchen.
+	; Debug helper: searches the HUDMainMenu for all tiles with non-empty text and prints path and text to the console.
+	; Goal: find out in which tile the ammo type is shown. Changes nothing.
+	; Call from console:  Call (CompileScript "SimpleAkimbo\SAHudScan.txt")
+	; Call with Akimbo off and a known weapon equipped, then search the output for the ammo name.
 	string_var sPath
 	string_var sText
 	int iA
 	int iB
 	int iLen
 
-	; Ebene 1: HUDMainMenu\*:A\string
+	; Level 1: HUDMainMenu\*:A\string
 	let iA = 0
 	while iA < 40
 		let sPath = sv_Construct "HUDMainMenu\*:%g\string" iA
@@ -21,7 +21,7 @@ Begin Function {}
 		let iA += 1
 	loop
 
-	; Ebene 2: HUDMainMenu\*:A\*:B\string
+	; Level 2: HUDMainMenu\*:A\*:B\string
 	let iA = 0
 	while iA < 40
 		let iB = 0
@@ -37,7 +37,7 @@ Begin Function {}
 		let iA += 1
 	loop
 
-	; Ebene 3: HUDMainMenu\*:A\*:B\*:C\string, nur bis 15 je Ebene
+	; Level 3: HUDMainMenu\*:A\*:B\*:C\string, up to 15 per level only
 	let iA = 0
 	while iA < 40
 		let iB = 0

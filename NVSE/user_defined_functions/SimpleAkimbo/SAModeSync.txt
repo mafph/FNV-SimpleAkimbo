@@ -1,0 +1,14 @@
+Begin Function {float fValue}
+	; Called by the MCM when the fire mode is changed.
+	; fValue is the new value (0 or 1).
+	Player.AuxVarSetFlt "*_SAMode" fValue
+	Player.AuxVarSetFlt "*_SA_MCM" fValue 2
+	Call (CompileScript "SimpleAkimbo\SAControls.txt")
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		if fValue == 0
+			PrintC "SimpleAkimbo MCM: Mode set to A"
+		else
+			PrintC "SimpleAkimbo MCM: Mode set to B"
+		endif
+	endif
+End

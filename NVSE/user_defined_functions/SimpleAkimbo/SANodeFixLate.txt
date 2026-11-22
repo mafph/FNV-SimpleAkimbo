@@ -1,6 +1,6 @@
 Begin Function {}
-	; Zweiter NodeFix kurz nach dem Einschalten: direkt nach AttachModel sind die Knoten oft noch nicht bereit
-	; (Magazin/Schlitten sitzen dann bis zum ersten Nachladen falsch). Ohne Argument, weil CallAfterSeconds Args unzuverlaessig uebergibt.
+	; Second NodeFix shortly after turning on: right after AttachModel the nodes are often not ready yet
+	; (magazine/slide are then misplaced until the first reload). No argument, because CallAfterSeconds passes arguments unreliably.
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

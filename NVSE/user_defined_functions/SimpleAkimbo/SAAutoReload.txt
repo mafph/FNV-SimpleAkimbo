@@ -1,4 +1,4 @@
 Begin Function {}
-	; Von SAFire per CallAfterSeconds ohne Argument. Explizit beide Magazine + Animation.
+	; Called from SAFire via CallAfterSeconds without argument. Explicitly both magazines + animation.
 	Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
 End

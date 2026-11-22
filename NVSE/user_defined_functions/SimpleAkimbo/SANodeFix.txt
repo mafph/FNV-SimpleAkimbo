@@ -1,11 +1,11 @@
 Begin Function {int iHand}
-	; Passt die Knoten einer Waffen-NIF an die Animationen an (die kfs sind fuer die 9mm gebaut: ##nmBar, ##nmHammer, ##nmClip).
-	; iHand 1 = rechte Waffe (vor dem Anhaengen der linken aufrufen, damit die Namen eindeutig sind),
-	;       0 = linke Waffe (Name mit oder ohne Suffix 1 durch "*1*", Ziel: ##nm-Name + "1").
-	; 1) Knoten umbenennen. Nicht gefunden = Waffe hat schon das ##nm-Schema oder ist schon angepasst, dann passiert nichts.
-	; 2) Die kf-Keys sind absolute Positionen (Ruhelage der 9mm, siehe fR*). Hat der Knoten eine andere Ruhelage,
-	;    springt er beim Animieren dorthin. Ausgleich: Knoten auf die 9mm-Ruhelage setzen und die Differenz auf die
-	;    Geometrie (Kind ":0") legen. Die Ruhestellung bleibt damit unveraendert.
+	; Adjusts the nodes of a weapon NIF to the animations (the kfs are built for the 9mm: ##nmBar, ##nmHammer, ##nmClip).
+	; iHand 1 = right weapon (call before attaching the left one so the names are unique),
+	;       0 = left weapon (name with or without suffix 1 via "*1*", target: ##nm name + "1").
+	; 1) Rename nodes. Not found = weapon already uses the ##nm scheme or is already adjusted, then nothing happens.
+	; 2) The kf keys are absolute positions (rest position of the 9mm, see fR*). If the node has a different rest position,
+	;    it jumps there when animated. Compensation: set the node to the 9mm rest position and apply the difference to the
+	;    geometry (child ":0"). The rest pose thus remains unchanged.
 	string_var sOld
 	string_var sNew
 	string_var sOldL
@@ -67,7 +67,7 @@ Begin Function {int iHand}
 				endif
 			endif
 
-			; SMG-Schema: Magazin heisst ##SMGClip statt ##Clip
+			; SMG scheme: magazine is called ##SMGClip instead of ##Clip
 			if iOK == 0 && iIdx == 2
 				let sOld = "##SMGClip"
 				if iHand == 1
@@ -99,7 +99,7 @@ Begin Function {int iHand}
 						else
 							let sChild = sOld + "1:0"
 						endif
-						; rechts nur der erste Kandidat, links alle drei
+						; right only the first candidate, left all three
 						if iHand == 0 || iTry == 0
 							let aChild = Player.GetNifBlockTranslation (sChild) 0 iModel
 							let iSize = ar_Size aChild
@@ -112,7 +112,7 @@ Begin Function {int iHand}
 									Player.SetNifBlockTranslation (sChild) fCX fCY fCZ iModel
 									Player.SetNifBlockTranslation (sNodeNew) fRX fRY fRZ iModel
 								endif
-								; rechtes Kind umbenennen, damit der Name fuer die linke Waffe eindeutig bleibt
+								; rename the right child so the name stays unique for the left weapon
 								if iHand == 1
 									let sChildNew = sOld + ":R"
 									Player.RenameNifBlock (sChild) (sChildNew) iModel

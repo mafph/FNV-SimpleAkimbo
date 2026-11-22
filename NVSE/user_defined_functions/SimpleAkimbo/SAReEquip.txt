@@ -1,6 +1,6 @@
 Begin Function {}
-	; Legt nach dem Ausschalten von Akimbo die Waffe neu an (setzt den Muendungsfeuer-Bezug zurueck). Siehe SAToggle.
-	; Versucht es bis zu 10 Mal im Abstand von 0,2 s und prueft jeweils, ob die Waffe wirklich ausgeruestet ist.
+	; Re-equips the weapon after Akimbo is turned off (resets the muzzle flash reference). See SAToggle.
+	; Tries up to 10 times at 0.2 s intervals and checks each time whether the weapon is really equipped.
 	ref rWeapon
 	ref rEquipped
 	int iTries

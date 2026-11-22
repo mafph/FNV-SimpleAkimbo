@@ -1,5 +1,5 @@
 Begin Function {ref rTarget, int iHand, int iSlot}
-	; Wird per CallAfterSeconds aufgerufen. Loescht die Huelse und gibt den Slot frei.
+	; Called via CallAfterSeconds. Deletes the shell casing and frees the slot.
 	ref rStored
 	string_var sKey
 	string_var sTimeKey

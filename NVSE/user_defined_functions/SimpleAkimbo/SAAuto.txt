@@ -1,7 +1,7 @@
 Begin Function {}
-	; Dauerfeuer. Laeuft nur, solange LMB oder RMB gehalten wird: SAHeldDown meldet den Callback an, SAHeldUp, SAMenuOpen und SAToggle (aus) melden ihn ab.
-	; Im Ruhezustand kostet das Dauerfeuer damit keine Frame-Zeit. Der erste Schuss kommt vom Tastendruck (SAInput).
-	; Modus A: LMB links, RMB rechts, je ein Timer. Modus B: LMB, Hand wechselt pro Schuss, ein Timer.
+	; Automatic fire. Only runs while LMB or RMB is held: SAHeldDown registers the callback, SAHeldUp, SAMenuOpen and SAToggle (off) unregister it.
+	; At rest, automatic fire therefore costs no frame time. The first shot comes from the key press (SAInput).
+	; Mode A: LMB left, RMB right, one timer each. Mode B: LMB, hand alternates per shot, one timer.
 	string_var sIntKey
 	string_var sTimerKey
 	string_var sHeldKey
@@ -20,7 +20,7 @@ Begin Function {}
 	endif
 	let fJamVal = Player.AuxVarGetFlt "*_SAJam"
 	if fJamVal == 1
-		; Jam: Timer neu starten, nach der Freigabe schiesst es erst nach einer kurzen Pause weiter
+		; Jam: restart the timer, after release it only continues firing after a short pause
 		Player.AuxVarSetFlt "*_SAAutoT0" 0.2
 		Player.AuxVarSetFlt "*_SAAutoT1" 0.2
 		return

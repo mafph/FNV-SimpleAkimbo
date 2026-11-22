@@ -1,5 +1,5 @@
 Begin Function {}
-	; Nach letztem Linksschuss: Schlitten offen (X = -4.07), 1st + 3rd
+	; After the last left shot: slide open (X = -4.07), 1st + 3rd
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

@@ -1,5 +1,5 @@
 Begin Function {}
-	; Phase 0 = Ruecklauf (5 Schritte), Phase 1 = Vorlauf (5 Schritte)
+	; Phase 0 = return movement (5 steps), Phase 1 = forward movement (5 steps)
 	float fSeq
 	float fStep
 	float fPhase
@@ -18,7 +18,7 @@ Begin Function {}
 	let fPhase = Player.AuxVarGetFlt "*_SASlide3rdPhase"
 
 	if fPhase == 0
-		; Ruecklauf: Schritt 1..5 → X = -0.814 * step
+		; Return movement: step 1..5 → X = -0.814 * step
 		let fStep += 1
 		let fX = 0 - (0.814 * fStep)
 		if fX < 0 - 4.07
@@ -34,7 +34,7 @@ Begin Function {}
 			Player.CallAfterSeconds 0.0134 (CompileScript "SimpleAkimbo\SALeftSlide3rdStep.txt")
 		endif
 	else
-		; Vorlauf: von -4.07 Richtung 0 in 5 Schritten
+		; Forward movement: from -4.07 toward 0 in 5 steps
 		let fStep += 1
 		let fX = 0 - 4.07 + (0.814 * fStep)
 		if fX > 0

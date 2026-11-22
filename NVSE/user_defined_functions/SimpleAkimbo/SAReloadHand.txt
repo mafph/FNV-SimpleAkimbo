@@ -1,8 +1,8 @@
 Begin Function {int iHand}
-	; Magazin einer Hand fuellen. Das Inventar bleibt unveraendert, die Patronen im Magazin
-	; zaehlen weiter zum Bestand. Verbraucht wird erst beim Schuss in SAFire.
-	; Typwechsel: Das geladene Magazin einer Hand wird verworfen (zaehlt wieder zum Vorrat),
-	; wenn der geladene Typ (*_SALoadedTypeL/R) nicht mehr dem Zieltyp entspricht.
+	; Fill a hand's magazine. The inventory stays unchanged, the rounds in the magazine
+	; still count toward the stock. They are only consumed when firing in SAFire.
+	; Type change: the loaded magazine of a hand is discarded (counts toward the reserve again),
+	; if the loaded type (*_SALoadedTypeL/R) no longer matches the target type.
 	ref rWeap
 	ref rAmmo
 	ref rOtherAmmo
@@ -41,7 +41,7 @@ Begin Function {int iHand}
 	let iCur = Player.AuxVarGetFlt (sKey)
 	let iOtherCur = Player.AuxVarGetFlt (sOtherKey)
 
-	; Typwechsel: altes Magazin zurueck in den Vorrat
+	; Type change: old magazine back into the reserve
 	let rLoadedType = Player.AuxVarGetRef (sTypeKey)
 	if iCur > 0 && rLoadedType != 0 && rLoadedType != rAmmo
 		PrintC "SimpleAkimbo: ammo type changed on hand %g, returned %g" iHand iCur

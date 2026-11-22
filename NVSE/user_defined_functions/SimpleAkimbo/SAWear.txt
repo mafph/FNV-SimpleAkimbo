@@ -1,9 +1,9 @@
 Begin Function {int iHand, int iShot}
-	; Zustand pro Hand. iShot 1 = Abnutzung fuer einen Schuss anwenden, 0 = nur initialisieren.
-		; Abnutzung = fWeaponConditionRate mal Munitions-Trait 3. Perk-Modifikator (Entry Point 28) vorerst entfernt.
-	; Zustand wird in absoluten HP gefuehrt, Prozentwert in *_SACondL/R fuer SAJam.
-	; Links nur virtuell, rechts zusaetzlich per SetWeaponHealthPerc auf die echte Waffe.
-		; UNVERIFIZIERT: GetBaseHealth als Maximum, GetEquippedCurrentHealth, GetAmmoTraitNumeric.
+	; Condition per hand. iShot 1 = apply wear for one shot, 0 = only initialize.
+		; Wear = fWeaponConditionRate times ammo trait 3. Perk modifier (entry point 28) removed for now.
+	; Condition is tracked in absolute HP, percentage value in *_SACondL/R for SAJam.
+	; Left only virtual, right additionally applied to the real weapon via SetWeaponHealthPerc.
+		; UNVERIFIED: GetBaseHealth as maximum, GetEquippedCurrentHealth, GetAmmoTraitNumeric.
 	ref rWeap
 	ref rAmmo
 	string_var sHealthKey
@@ -60,7 +60,7 @@ Begin Function {int iHand, int iShot}
 		let rAmmo = GetWeaponAmmo rWeap
 		let fRate = GetNumericGameSetting "fWeaponConditionRate"
 		if fRate <= 0
-			; Spielwert existiert nicht, Vanilla-Wert 0.2 HP pro Schuss
+			; game value does not exist, vanilla value 0.2 HP per shot
 			let fRate = 0.2
 		endif
 		let fTrait = GetAmmoTraitNumeric rAmmo 3

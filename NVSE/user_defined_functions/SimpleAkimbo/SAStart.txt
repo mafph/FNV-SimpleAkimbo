@@ -1,25 +1,65 @@
 Begin Function {}
 	PrintC "SimpleAkimbo: SAStart full mainloops"
 	Call (CompileScript "SimpleAkimbo\SAShellPurge.txt")
-	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 1 36
+
+	; Load MCM settings (if not already done by gr_SimpleAkimboMenu)
+	if Player.AuxVarGetFlt "*_SA_MCM" 0 == 0
+		Player.AuxVarSetFlt "*_SA_MCM" 36 0
+		Player.AuxVarSetFlt "*_SA_MCM" 49 1
+		Player.AuxVarSetFlt "*_SA_MCM" 0 2
+		Player.AuxVarSetFlt "*_SA_MCM" 0 3
+	endif
+	; Mirror mode and debug
+	if Player.AuxVarGetFlt "*_SAMode" == 0 && Player.AuxVarGetFlt "*_SA_MCM" 2 != 0
+		Player.AuxVarSetFlt "*_SAMode" (Player.AuxVarGetFlt "*_SA_MCM" 2)
+	endif
+	Player.AuxVarSetFlt "*_SADebug" (Player.AuxVarGetFlt "*_SA_MCM" 3)
+
+	int iToggle
+	int iModeKey
+	let iToggle = Player.AuxVarGetFlt "*_SA_MCM" 0
+	if iToggle < 1 || iToggle > 255
+		let iToggle = 36
+	endif
+	let iModeKey = Player.AuxVarGetFlt "*_SA_MCM" 1
+	if iModeKey < 1 || iModeKey > 255
+		let iModeKey = 49
+	endif
+
+	; Toggle key (also Set-Left in the inventory)
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 1 iToggle
+
+	; Mouse buttons for fire / hold
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAInput.txt") 1 256
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAInput.txt") 1 257
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAHeldDown.txt") 1 256
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAHeldDown.txt") 1 257
 	SetOnKeyUpEventHandler (CompileScript "SimpleAkimbo\SAHeldUp.txt") 1 256
 	SetOnKeyUpEventHandler (CompileScript "SimpleAkimbo\SAHeldUp.txt") 1 257
+
+	; Mode toggle key (via SATestKey)
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 iModeKey
+
+	; Optional test keys (debug / development) – can be removed later
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 37
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 38
-	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 49
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 24
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 25
+
+	; Reload keys
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 19
-	SetOnMenuOpenEventHandler (CompileScript "SimpleAkimbo\SAMenuOpen.txt") 1
-	SetOnMenuCloseEventHandler (CompileScript "SimpleAkimbo\SAMenuClose.txt") 1
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 44
 	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 45
+
+	SetOnMenuOpenEventHandler (CompileScript "SimpleAkimbo\SAMenuOpen.txt") 1
+	SetOnMenuCloseEventHandler (CompileScript "SimpleAkimbo\SAMenuClose.txt") 1
+
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAHud.txt") 1 3 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SATypeWatch.txt") 1 20 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMenuHint.txt") 1 15 2
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAShellClean.txt") 1 120 1
+
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SimpleAkimbo: ToggleKey=%g ModeKey=%g Mode=%g" iToggle iModeKey (Player.AuxVarGetFlt "*_SAMode")
+	endif
 End

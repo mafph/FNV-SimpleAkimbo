@@ -1,9 +1,9 @@
 Begin Function {int iHand, int iReload}
-	; Jam-Wurf. iReload 0 = beim Schuss, 1 = nach dem Nachladen.
-	; Chance aus den Spielwerten fWeaponConditionJam1 bis 10 bzw. fWeaponConditionReloadJam1 bis 10,
-	; damit Aenderungen durch Mods gelten. Je ein Wert pro 10 Prozent Zustand.
-		; Nach dem Nachladen: nur Flag *_SAJamPend setzen, SAFire liest es vor dem ersten Schuss und ruft SAJamRun.
-	; Beim Schuss: sofort SAJamRun. Bei Jam: linke Waffe verstecken (1 = 3rd Person, 2 = 1st Person), Jam-Animation der rechten Waffe per ForceWeaponJamAnim, nach fJamSeconds frei.
+	; Jam roll. iReload 0 = on shot, 1 = after reload.
+	; Chance from the game values fWeaponConditionJam1 to 10 or fWeaponConditionReloadJam1 to 10,
+	; so that changes made by mods apply. One value per 10 percent condition.
+		; After reload: only set flag *_SAJamPend, SAFire reads it before the first shot and calls SAJamRun.
+	; On shot: SAJamRun immediately. On jam: hide the left weapon (1 = 3rd person, 2 = 1st person), jam animation of the right weapon via ForceWeaponJamAnim, released after fJamSeconds.
 	string_var sKey
 	string_var sName
 	float fPct

@@ -1,8 +1,8 @@
 Begin Function {}
-	; Reload-Sperre und Reload-Animation ActivateAnim, siehe SAReload: endet nach der Zeit *_SAReloadDur
-	; oder sofort, wenn Akimbo ausgeschaltet wird. Beim Ende werden die Reload-Sequenzen deaktiviert,
-	; sonst bleiben sie geklemmt und ueberdecken Idle und Schuesse.
-	; Kein Neustart der Animation beim Sichtwechsel: 1p und 3p laufen von Anfang an parallel.
+	; Reload lock and reload animation ActivateAnim, see SAReload: ends after the time *_SAReloadDur
+	; or immediately when Akimbo is turned off. At the end the reload sequences are deactivated,
+	; otherwise they stay clamped and override idle and shots.
+	; No restart of the animation when switching view: 1p and 3p run in parallel from the start.
 	float fWait
 	float fDur
 	int iDone

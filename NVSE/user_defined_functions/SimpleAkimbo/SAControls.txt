@@ -1,9 +1,9 @@
 Begin Function {}
-	; Engine-Angriff (Control 4) sperren, solange Akimbo an ist.
-	; Modus A: zusaetzlich Block/Aim (6) sperren, weil RMB die rechte Waffe feuert.
-	; Im Menue werden die Controls NIE gesperrt (sonst gehen Klicks im Menue nicht). Ist beim Aufruf noch
-	; ein Menue offen (z.B. Close-Event eines Pip-Boy-Tabs oder Teilmenues im Container), wird nach 0,2 s
-	; erneut geprueft, bis das Menue wirklich zu ist.
+	; Block the engine attack (control 4) while Akimbo is on.
+	; Mode A: additionally block Block/Aim (6), because RMB fires the right weapon.
+	; Controls are NEVER blocked in menus (otherwise clicks in the menu would not work). If a menu is still open at call time
+	; (e.g. close event of a Pip-Boy tab or a submenu in the container), it is checked again after 0.2 s
+	; until the menu is really closed.
 	float fOn
 	float fMode
 	let fOn = Player.AuxVarGetFlt "*_SAkimbo"

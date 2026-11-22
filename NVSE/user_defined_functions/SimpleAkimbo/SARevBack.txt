@@ -1,5 +1,5 @@
 Begin Function {}
-	; Hammer zurueck (negierte Spann-Rotation) fuer die Hand, die zuletzt geschossen hat
+	; Hammer back (negated cocking rotation) for the hand that fired last
 	string_var sS
 	float fHX
 	float fHY

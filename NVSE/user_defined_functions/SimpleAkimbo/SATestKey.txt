@@ -1,30 +1,45 @@
 Begin Function {int iKey}
 	float fMode
+	int iModeKey
 	if GetActiveMenuMode != 0
 		return
 	endif
+
+	; Test keys (debug / development)
 	if iKey == 37
 		Call (CompileScript "SimpleAkimbo\SAFire.txt") 0
+		return
 	elseif iKey == 38
 		Call (CompileScript "SimpleAkimbo\SAFire.txt") 1
+		return
 	elseif iKey == 24
-		; Test O: rechts per PlayGroup, links parallel per ActivateAnim. Pfad relativ zu Meshes, bei Bedarf anpassen.
-		; ActivateAnim Argumente: Pfad, 1. Person, Prioritaet, StartOver, Gewicht, EaseIn, TimeSync.
+		; Test O: rechts per PlayGroup, links parallel per ActivateAnim
 		Player.AuxVarSetFlt "*_SAHandSel" 1
 		Player.PlayGroup AttackRight 1
 		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 1 50 1 1.0 0.0 ""
 		PrintC "SimpleAkimbo: test O, AttackRight via PlayGroup, AttackLeft via ActivateAnim"
+		return
 	elseif iKey == 25
-		; Test P: nur AttackLeft
+		; Test P: AttackLeft only
 		Player.PlayGroup AttackLeft 1
 		PrintC "SimpleAkimbo: test P, AttackLeft only"
-	elseif iKey == 49
+		return
+	endif
+
+	; Mode toggle (any key registered via the handler)
+	let iModeKey = Player.AuxVarGetFlt "*_SA_MCM" 1
+	if iModeKey < 1
+		let iModeKey = 49
+	endif
+	if iKey == iModeKey
 		let fMode = Player.AuxVarGetFlt "*_SAMode"
 		if fMode == 0
 			Player.AuxVarSetFlt "*_SAMode" 1
+			Player.AuxVarSetFlt "*_SA_MCM" 1 2
 			PrintC "SimpleAkimbo: mode B (LMB fires alternately, RMB = ADS)"
 		else
 			Player.AuxVarSetFlt "*_SAMode" 0
+			Player.AuxVarSetFlt "*_SA_MCM" 0 2
 			PrintC "SimpleAkimbo: mode A (LMB left, RMB right)"
 		endif
 		Call (CompileScript "SimpleAkimbo\SAControls.txt")

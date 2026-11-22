@@ -1,5 +1,5 @@
 Begin Function {string_var sNode}
-	; Linke Hand: gemerkte Waffe (M), sonst ausgeruestete Waffe als Rueckfall.
+	; Left hand: remembered weapon (M), otherwise the equipped weapon as fallback.
 	ref rWeap
 	let rWeap = Player.AuxVarGetRef "*_SALeftW"
 	if rWeap == 0

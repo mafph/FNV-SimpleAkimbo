@@ -1,6 +1,6 @@
 Begin Function {int iKey}
-	; Maustaste gehalten: Zustand merken (Gegenstueck SAHeldUp) und, wenn die Hand automatisch ist, das Dauerfeuer (SAAuto) anmelden.
-	; Prueft hier auch, ob sich die rechte Waffe seit der letzten Intervallberechnung geaendert hat (kein Frame-Vergleich noetig).
+	; Mouse button held: remember the state (counterpart SAHeldUp) and, if the hand is automatic, register automatic fire (SAAuto).
+	; Also checks here whether the right weapon has changed since the last interval calculation (no frame comparison needed).
 	ref rEquip
 	ref rLast
 	float fMode
@@ -37,14 +37,14 @@ Begin Function {int iKey}
 		let fInt = Player.AuxVarGetFlt "*_SAAutoIntB"
 	endif
 	if fInt > 0
-		; erster Dauerfeuerschuss kommt nach Intervall plus 0,1 s, ein kurzer Klick gibt einen Schuss
+		; first automatic shot comes after the interval plus 0.1 s, a short click gives one shot
 		let fIdle = fInt + 0.1
 		if iKey == 257
 			Player.AuxVarSetFlt "*_SAAutoT1" fIdle
 		else
 			Player.AuxVarSetFlt "*_SAAutoT0" fIdle
 		endif
-		; erst abmelden, dann anmelden: nie doppelt registriert
+		; unregister first, then register: never registered twice
 		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
 		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 1 1 1
 	endif

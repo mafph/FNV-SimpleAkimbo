@@ -1,0 +1,58 @@
+{
+	"modName": "SimpleAkimbo",
+	"displayName": "$SA_ModName",
+	"description": "$SA_Desc",
+	"saveFile": "SimpleAkimbo.ini",
+	"minMCMVersion": 1.30,
+	"minModVersion": 1.00,
+	"requirements": [
+		{ "type": "file", "file": "NVSE/plugins/scripts/gr_SimpleAkimboMenu.txt" }
+	],
+	"submenus": {
+		"0": {
+			"listTitle": "$SA_Settings",
+			"pageTitle": "$SA_SettingsPage",
+			"columns": 1,
+			"enable": 1,
+			"active": 1,
+			"options": {
+				"1": {
+					"title": "$SA_InfoHeader",
+					"enable": 1,
+					"type": 0,
+					"mouse": "$SA_InfoText"
+				},
+				"2": {
+					"title": "$SA_ToggleKey",
+					"enable": 1,
+					"type": 3,
+					"mouse": "$SA_ToggleKeyTip",
+					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 0, "default": 36, "configINI": "General:iToggleKey" }]
+				},
+				"3": {
+					"title": "$SA_ModeKey",
+					"enable": 1,
+					"type": 3,
+					"mouse": "$SA_ModeKeyTip",
+					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 1, "default": 49, "configINI": "General:iModeKey" }]
+				},
+				"4": {
+					"title": "$SA_Mode",
+					"enable": 1,
+					"type": 1,
+					"mouse": "$SA_ModeTip",
+					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 2, "default": 0, "configINI": "General:iMode" }],
+					"strings": [ "$SA_ModeA", "$SA_ModeB" ],
+					"call": { "type": "file", "value": "SimpleAkimbo/SAModeSync.txt" }
+				},
+				"5": {
+					"title": "$SA_Debug",
+					"enable": 1,
+					"type": 4,
+					"mouse": "$SA_DebugTip",
+					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 3, "default": 0, "configINI": "General:iDebug" }]
+				}
+			}
+		}
+	}
+}

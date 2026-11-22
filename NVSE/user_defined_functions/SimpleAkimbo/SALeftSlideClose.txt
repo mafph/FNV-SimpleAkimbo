@@ -1,5 +1,5 @@
 Begin Function {}
-	; Nach normalem Linksschuss: 1st-Person-Schlitten auf Ruhelage
+	; After a normal left shot: 1st-person slide back to rest position
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

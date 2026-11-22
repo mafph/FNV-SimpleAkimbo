@@ -1,5 +1,5 @@
 Begin Function {}
-	; Rechter Schlitten auf Ruhelage (beide Modelle)
+	; Right slide back to rest position (both models)
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif

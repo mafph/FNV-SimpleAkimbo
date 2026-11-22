@@ -1,11 +1,11 @@
 Begin Function {int iHand}
-	; Munitionstyp einer Hand. 0 = links, 1 = rechts. Gibt immer einen einzelnen Ammo-Typ zurueck.
-	; GetWeaponAmmo liefert bei vielen Waffen eine Munitionsliste (FormList, z.B. AmmoList10mm).
-	; GetItemCount auf eine Liste zaehlt alle Typen zusammen, deshalb wird die Liste hier aufgeloest.
-	; Rechts: gewaehlter Typ der Engine (GetPlayerCurrentAmmo).
-	; Links: *_SAAmmoTypeL nur, wenn explizit gewaehlt (*_SAAmmoLSel = 1) und passend zur linken Waffe.
-	;        Sonst folgt links dem rechten Typ, falls er zur linken Waffe passt, sonst erster Typ mit Bestand.
-	;        Nichts wird automatisch gespeichert, damit links nicht an einem alten Typ haengen bleibt.
+	; Ammo type of a hand. 0 = left, 1 = right. Always returns a single ammo type.
+	; GetWeaponAmmo returns an ammo list (FormList, e.g. AmmoList10mm) for many weapons.
+	; GetItemCount on a list counts all types together, so the list is resolved here.
+	; Right: type selected by the engine (GetPlayerCurrentAmmo).
+	; Left: *_SAAmmoTypeL only if explicitly chosen (*_SAAmmoLSel = 1) and matching the left weapon.
+	;        Otherwise left follows the right type if it matches the left weapon, otherwise the first type with stock.
+	;        Nothing is saved automatically, so the left side does not stick to an old type.
 	ref rAmmoType
 	ref rBase
 	ref rTypeWeap
@@ -27,7 +27,7 @@ Begin Function {int iHand}
 		return
 	endif
 
-	; Links
+	; Left
 	let rTypeWeap = Player.AuxVarGetRef "*_SALeftW"
 	if rTypeWeap == 0
 		let rTypeWeap = Player.GetEquippedObject 5
@@ -35,7 +35,7 @@ Begin Function {int iHand}
 	let rBase = GetWeaponAmmo rTypeWeap
 	let rAmmoType = 0
 
-	; 1) explizite Auswahl links
+	; 1) explicit selection on the left
 	if Player.AuxVarGetFlt "*_SAAmmoLSel" == 1
 		let rEntry = Player.AuxVarGetRef "*_SAAmmoTypeL"
 		if rEntry != 0
@@ -49,7 +49,7 @@ Begin Function {int iHand}
 		endif
 	endif
 
-	; 2) rechten Typ uebernehmen, wenn er zur linken Waffe passt
+	; 2) take the right type if it matches the left weapon
 	if rAmmoType == 0
 		let rRight = GetPlayerCurrentAmmo
 		if rRight != 0
@@ -63,7 +63,7 @@ Begin Function {int iHand}
 		endif
 	endif
 
-	; 3) erster Typ der Liste mit Bestand
+	; 3) first type in the list with stock
 	if rAmmoType == 0
 		if GetType rBase == 85
 			let iSize = ListGetCount rBase

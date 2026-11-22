@@ -1,6 +1,6 @@
 Begin Function {}
-	; Loest Akimbo auf, wenn sich der Waffen-Animationstyp seit dem Einschalten geaendert hat
-	; (z.B. Wechsel auf Gewehr). Typ wird beim Einschalten gemerkt, keine feste Zahl noetig.
+	; Ends Akimbo if the weapon animation type has changed since it was turned on
+	; (e.g. switch to a rifle). The type is stored when turned on, no fixed number needed.
 	float fType
 	int iNow
 	int iForce

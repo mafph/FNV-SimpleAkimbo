@@ -1,10 +1,10 @@
 Begin Function {}
-	; Pollt alle 0,05 s und loest die Typwechsel-Sperre.
-	; IsAnimPlaying ReloadL bleibt in der Praxis dauerhaft 1, taugt also nicht als Ende-Signal.
-	; Ende daher zeitbasiert: spaetestens nach Laenge + 0,3 s (Laenge aus *_SAReloadLen, sonst 2,5 s).
-	; Frueher beenden nur, wenn die Animation gesehen wurde und danach wieder 0 liefert.
-	; Wurde der Wechsel bei offenem Menue gemacht (*_SATypePendAnim), wird erst gewartet,
-	; bis das Menue zu ist, dann ReloadL gespielt und die Zeit ab da gezaehlt.
+	; Polls every 0.05 s and releases the type change lock.
+	; In practice IsAnimPlaying ReloadL stays permanently 1, so it is not usable as an end signal.
+	; End is therefore time-based: at the latest after length + 0.3 s (length from *_SAReloadLen, otherwise 2.5 s).
+	; End earlier only if the animation was seen and afterwards returns 0 again.
+	; If the change was made while a menu was open (*_SATypePendAnim), wait first
+	; until the menu is closed, then play ReloadL and count the time from there.
 	float fWait
 	float fBusy
 	float fLen
@@ -28,7 +28,7 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SAPartial" 0
 		Player.AuxVarSetFlt "*_SATypeWait" 0
 		Player.AuxVarSetFlt "*_SATypeSeen" 0
-		; Reload-Animation per ActivateAnim (Full) inkl. Sperre; Ende und Deaktivieren in SAReloadEnd
+		; Reload animation via ActivateAnim (full) incl. lock; end and deactivation in SAReloadEnd
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
@@ -42,7 +42,7 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SAReloadWait" 0
 		Player.AuxVarSetFlt "*_SAReloadDur" 5.1
 		Player.CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
-		PrintC "SimpleAkimbo: Menue zu, Reload-Animation gestartet"
+		PrintC "SimpleAkimbo: Menu closed, reload animation started"
 	endif
 
 	let fWait = Player.AuxVarGetFlt "*_SATypeWait"

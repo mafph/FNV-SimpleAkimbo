@@ -1,5 +1,5 @@
 Begin Function {string_var sName, float fX, float fY, float fZ}
-	; Dreht den Knoten sName (1p und 3p) relativ zur aktuellen Rotation. Fehlende Knoten werden uebersprungen.
+	; Rotates node sName (1p and 3p) relative to the current rotation. Missing nodes are skipped.
 	array_var aR
 	int iM
 	let iM = 1
