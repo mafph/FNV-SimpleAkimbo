@@ -1,0 +1,32 @@
+Begin Function {int iKey}
+	float fMode
+	if GetActiveMenuMode != 0
+		return
+	endif
+	if iKey == 37
+		Call (CompileScript "SimpleAkimbo\SAFire.txt") 0
+	elseif iKey == 38
+		Call (CompileScript "SimpleAkimbo\SAFire.txt") 1
+	elseif iKey == 24
+		; Test O: rechts per PlayGroup, links parallel per ActivateAnim. Pfad relativ zu Meshes, bei Bedarf anpassen.
+		; ActivateAnim Argumente: Pfad, 1. Person, Prioritaet, StartOver, Gewicht, EaseIn, TimeSync.
+		Player.AuxVarSetFlt "*_SAHandSel" 1
+		Player.PlayGroup AttackRight 1
+		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 1 50 1 1.0 0.0 ""
+		PrintC "SimpleAkimbo: test O, AttackRight via PlayGroup, AttackLeft via ActivateAnim"
+	elseif iKey == 25
+		; Test P: nur AttackLeft
+		Player.PlayGroup AttackLeft 1
+		PrintC "SimpleAkimbo: test P, AttackLeft only"
+	elseif iKey == 49
+		let fMode = Player.AuxVarGetFlt "*_SAMode"
+		if fMode == 0
+			Player.AuxVarSetFlt "*_SAMode" 1
+			PrintC "SimpleAkimbo: mode B (LMB fires alternately, RMB = ADS)"
+		else
+			Player.AuxVarSetFlt "*_SAMode" 0
+			PrintC "SimpleAkimbo: mode A (LMB left, RMB right)"
+		endif
+		Call (CompileScript "SimpleAkimbo\SAControls.txt")
+	endif
+End

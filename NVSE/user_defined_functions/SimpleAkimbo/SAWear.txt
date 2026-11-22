@@ -1,0 +1,87 @@
+Begin Function {int iHand, int iShot}
+	; Zustand pro Hand. iShot 1 = Abnutzung fuer einen Schuss anwenden, 0 = nur initialisieren.
+		; Abnutzung = fWeaponConditionRate mal Munitions-Trait 3. Perk-Modifikator (Entry Point 28) vorerst entfernt.
+	; Zustand wird in absoluten HP gefuehrt, Prozentwert in *_SACondL/R fuer SAJam.
+	; Links nur virtuell, rechts zusaetzlich per SetWeaponHealthPerc auf die echte Waffe.
+		; UNVERIFIZIERT: GetBaseHealth als Maximum, GetEquippedCurrentHealth, GetAmmoTraitNumeric.
+	ref rWeap
+	ref rAmmo
+	string_var sHealthKey
+	string_var sMaxKey
+	string_var sCondKey
+	float fHealth
+	float fMaxHealth
+	float fPercent
+	float fDecay
+	float fRate
+	float fTrait
+
+	if iHand == 0
+		let sHealthKey = "*_SAHPL"
+		let sMaxKey = "*_SAMaxL"
+		let sCondKey = "*_SACondL"
+		let rWeap = Player.AuxVarGetRef "*_SALeftW"
+		if rWeap == 0
+			let rWeap = Player.GetEquippedObject 5
+		endif
+	else
+		let sHealthKey = "*_SAHPR"
+		let sMaxKey = "*_SAMaxR"
+		let sCondKey = "*_SACondR"
+		let rWeap = Player.GetEquippedObject 5
+	endif
+
+	let fHealth = Player.AuxVarGetFlt (sHealthKey)
+	let fMaxHealth = Player.AuxVarGetFlt (sMaxKey)
+
+	if fHealth == 0
+		if iHand == 0
+			let fHealth = Player.AuxVarGetFlt "*_SALeftHP"
+			let fMaxHealth = Player.AuxVarGetFlt "*_SALeftMax"
+		else
+			let fHealth = Player.GetEquippedCurrentHealth 5
+			let fMaxHealth = 0
+		endif
+		if fMaxHealth <= 0
+			let fMaxHealth = Player.GetBaseHealth rWeap
+		endif
+		if fMaxHealth <= 0
+			let fMaxHealth = 100
+		endif
+		if fHealth <= 0
+			let fHealth = fMaxHealth
+		endif
+		if fHealth > fMaxHealth
+			let fMaxHealth = fHealth
+		endif
+	endif
+
+	if iShot == 1
+		let rAmmo = GetWeaponAmmo rWeap
+		let fRate = GetNumericGameSetting "fWeaponConditionRate"
+		if fRate <= 0
+			; Spielwert existiert nicht, Vanilla-Wert 0.2 HP pro Schuss
+			let fRate = 0.2
+		endif
+		let fTrait = GetAmmoTraitNumeric rAmmo 3
+		if fTrait <= 0
+			let fTrait = 1
+		endif
+		let fDecay = fRate * fTrait
+		PrintC "SA Wear Hand %g Rate %g Trait %g Decay %g HP %g Max %g" iHand fRate fTrait fDecay fHealth fMaxHealth
+		let fHealth = fHealth - fDecay
+		if fHealth < 0.01
+			let fHealth = 0.01
+		endif
+	endif
+
+	let fPercent = fHealth / fMaxHealth * 100
+	Player.AuxVarSetFlt (sHealthKey) fHealth
+	Player.AuxVarSetFlt (sMaxKey) fMaxHealth
+	Player.AuxVarSetFlt (sCondKey) fPercent
+
+	if iHand == 1 && iShot == 1
+		PrintC "SA Wear setting right to %g percent" fPercent
+		Player.SetWeaponHealthPerc fPercent
+	endif
+End

@@ -1,0 +1,123 @@
+Begin Function {int iHand}
+	; iHand: 0 = links, 1 = rechts
+	string_var sKeyAmmo
+	string_var sNode
+	string_var sAnim1st
+	string_var sAnim3rd
+	float fAmmo
+	float fAmmoL
+	float fAmmoR
+	ref rFireWeapon
+	ref rFireAmmo
+	int iPrio
+
+	Call (CompileScript "SimpleAkimbo\SACheck.txt")
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAJam" == 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAReloading" == 1
+		return
+	endif
+
+	if iHand == 0
+		let sKeyAmmo = "*_SAAmmoL"
+		let sNode = "ProjectileNode1"
+	else
+		let sKeyAmmo = "*_SAAmmoR"
+		let sNode = "ProjectileNode"
+	endif
+
+	let fAmmo = Player.AuxVarGetFlt (sKeyAmmo)
+	if fAmmo <= 0
+		let fAmmoL = Player.AuxVarGetFlt "*_SAAmmoL"
+		let fAmmoR = Player.AuxVarGetFlt "*_SAAmmoR"
+		if fAmmoL <= 0 && fAmmoR <= 0
+			Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
+		else
+			PrintC "SimpleAkimbo: magazine empty, press R to reload"
+		endif
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAJamPend" == 1
+		Call (CompileScript "SimpleAkimbo\SAJamRun.txt")
+		return
+	endif
+	let fAmmo -= 1
+	Player.AuxVarSetFlt (sKeyAmmo) fAmmo
+
+	if iHand == 0
+		let rFireWeapon = Player.AuxVarGetRef "*_SALeftW"
+		if rFireWeapon == 0
+			let rFireWeapon = Player.GetEquippedObject 5
+		endif
+	else
+		let rFireWeapon = Player.GetEquippedObject 5
+	endif
+	let rFireAmmo = GetWeaponAmmo rFireWeapon
+	if rFireAmmo != 0
+		Player.RemoveItem rFireAmmo 1 1
+	endif
+
+	if iHand == 0
+		Player.AuxVarSetFlt "*_SAHandSel" 0
+
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
+
+		let iPrio = Player.AuxVarGetFlt "*_SALPrio"
+		if iPrio < 50
+			let iPrio = 50
+		endif
+		let iPrio += 1
+
+		if fAmmo == 0
+			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf"
+			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf"
+			let iPrio += 1
+		else
+			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf"
+			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf"
+		endif
+
+		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
+		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
+		Player.AuxVarSetFlt "*_SALPrio" iPrio
+
+		Call (CompileScript "SimpleAkimbo\SALeftSlide3rd.txt") fAmmo
+
+		if fAmmo == 0
+			Player.CallAfterSeconds 0.85 (CompileScript "SimpleAkimbo\SALeftHoldOpen.txt")
+		else
+			Player.CallAfterSeconds 0.85 (CompileScript "SimpleAkimbo\SALeftSlideClose.txt")
+		endif
+	else
+		Player.AuxVarSetFlt "*_SAHandSel" 1
+		Player.PlayGroup AttackRight 1
+	endif
+
+	Call (CompileScript "SimpleAkimbo\SASilence.txt") iHand 1
+	if iHand == 0
+		Call (CompileScript "SimpleAkimbo\SAShotL.txt") (sNode)
+	else
+		Call (CompileScript "SimpleAkimbo\SAShot.txt") (sNode)
+	endif
+	Player.CallAfterSeconds 0.5 (CompileScript "SimpleAkimbo\SASilence.txt") 0 0 0
+
+	Call (CompileScript "SimpleAkimbo\SAShell.txt") iHand
+	Call (CompileScript "SimpleAkimbo\SAHud.txt")
+	Call (CompileScript "SimpleAkimbo\SAWear.txt") iHand 1
+	Call (CompileScript "SimpleAkimbo\SAJam.txt") iHand 0
+
+	let fAmmoL = Player.AuxVarGetFlt "*_SAAmmoL"
+	let fAmmoR = Player.AuxVarGetFlt "*_SAAmmoR"
+	if fAmmoL <= 0 && fAmmoR <= 0
+		Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SAAutoReload.txt")
+	endif
+
+	PrintC "SimpleAkimbo: shot hand=%g remaining=%g" iHand fAmmo
+End

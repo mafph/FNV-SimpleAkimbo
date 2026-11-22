@@ -1,0 +1,103 @@
+Begin Function {int iHand, int iApply}
+	; Schalldaempfer-Sound. iApply 1 = vor dem Schuss: ist ein Silence- oder Suppressor-Mod aktiv,
+	; werden die Attack-Sounds 0 bis 2 der Waffe voruebergehend durch die Mod-Sounds 9 bis 11 ersetzt.
+	; iApply 0 = nach dem Schuss: Original-Sounds zurueck.
+	ref rWeapon
+	ref rSndOrig
+	ref rSndMod
+	string_var sSndKey
+	int iModFlags
+	int iSlotNum
+	int iBitVal
+	int iBitHit
+	int iEffect
+	int iSilenced
+	int iSndType
+	int iSndModId
+	int iDidSwap
+
+	if iApply == 0
+		let rWeapon = Player.AuxVarGetRef "*_SASndW"
+		if rWeapon == 0
+			return
+		endif
+		let iSndType = 0
+		while iSndType < 3
+			let sSndKey = sv_Construct "*_SASndO%g" iSndType
+			let rSndOrig = Player.AuxVarGetRef (sSndKey)
+			if rSndOrig != 0
+				SetWeaponSound rWeapon iSndType rSndOrig
+			endif
+			let iSndType += 1
+		loop
+		Player.AuxVarErase "*_SASndW"
+		return
+	endif
+
+	; Tausch noch aktiv (verzoegerte Wiederherstellung steht aus): nichts doppelt sichern
+	let rWeapon = Player.AuxVarGetRef "*_SASndW"
+	if rWeapon != 0
+		return
+	endif
+
+	if iHand == 0
+		let rWeapon = Player.AuxVarGetRef "*_SALeftW"
+		if rWeapon == 0
+			let rWeapon = Player.GetEquippedObject 5
+		endif
+		let iModFlags = Player.AuxVarGetFlt "*_SALeftMods"
+	else
+		let rWeapon = Player.GetEquippedObject 5
+		let iModFlags = Player.GetEquippedWeaponModFlags
+	endif
+	PrintC "SA Silence hand %g weapon %i mods %g" iHand rWeapon iModFlags
+	if rWeapon == 0
+		return
+	endif
+	if iModFlags == 0
+		return
+	endif
+
+	let iSilenced = 0
+	let iSlotNum = 1
+	let iBitVal = 1
+	while iSlotNum <= 3
+		let iBitHit = iModFlags & iBitVal
+		if iBitHit != 0
+			let iEffect = GetWeaponItemModEffect iSlotNum rWeapon
+			if iEffect == 11 || iEffect == 16
+				let iSilenced = 1
+			endif
+		endif
+		let iSlotNum += 1
+		let iBitVal = iBitVal * 2
+	loop
+	PrintC "SA Silence silenced %g" iSilenced
+	if iSilenced == 0
+		return
+	endif
+
+	let iDidSwap = 0
+	let iSndType = 0
+	while iSndType < 3
+		let iSndModId = iSndType + 9
+		let rSndMod = GetWeaponSound rWeapon iSndModId
+		let rSndOrig = GetWeaponSound rWeapon iSndType
+		PrintC "SA Silence sound %g: original %i, mod %i" iSndType rSndOrig rSndMod
+		if rSndOrig != 0
+			let sSndKey = sv_Construct "*_SASndO%g" iSndType
+			Player.AuxVarSetRef (sSndKey) rSndOrig
+			if rSndMod != 0
+				SetWeaponSound rWeapon iSndType rSndMod
+			else
+				; kein Mod-Sound hinterlegt (z. B. Distant): Sound ganz abschalten
+				SetWeaponSound rWeapon iSndType
+			endif
+			let iDidSwap = 1
+		endif
+		let iSndType += 1
+	loop
+	if iDidSwap == 1
+		Player.AuxVarSetRef "*_SASndW" rWeapon
+	endif
+End

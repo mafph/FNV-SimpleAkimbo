@@ -1,0 +1,16 @@
+Begin Function {}
+	; Engine-Angriff (Control 4) sperren, solange Akimbo an ist.
+	; Modus A: zusaetzlich Block/Aim (6) sperren, weil RMB die rechte Waffe feuert.
+	float fOn
+	float fMode
+	let fOn = Player.AuxVarGetFlt "*_SAkimbo"
+	let fMode = Player.AuxVarGetFlt "*_SAMode"
+	EnableControl 4
+	EnableControl 6
+	if fOn == 1
+		DisableControl 4
+		if fMode == 0
+			DisableControl 6
+		endif
+	endif
+End

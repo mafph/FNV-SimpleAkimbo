@@ -1,0 +1,3 @@
+Begin Function {}
+	Player.AuxVarSetFlt "*_SAReloading" 0
+End

@@ -1,0 +1,70 @@
+Begin Function {int iHand}
+	; Magazin einer Hand fuellen. Das Inventar bleibt unveraendert, die Patronen im Magazin
+	; zaehlen weiter zum Bestand. Verbraucht wird erst beim Schuss in SAFire.
+	; Typwechsel: Das geladene Magazin einer Hand wird verworfen (zaehlt wieder zum Vorrat),
+	; wenn der geladene Typ (*_SALoadedTypeL/R) nicht mehr dem Zieltyp entspricht.
+	ref rWeap
+	ref rAmmo
+	ref rOtherAmmo
+	ref rLoadedType
+	string_var sKey
+	string_var sOtherKey
+	string_var sTypeKey
+	int iMag
+	int iCur
+	int iOtherCur
+	int iNeed
+	int iHave
+	int iOtherHand
+	float fSum
+
+	if iHand == 0
+		let sKey = "*_SAAmmoL"
+		let sOtherKey = "*_SAAmmoR"
+		let sTypeKey = "*_SALoadedTypeL"
+		let iOtherHand = 1
+		let rWeap = Player.AuxVarGetRef "*_SALeftW"
+		if rWeap == 0
+			let rWeap = Player.GetEquippedObject 5
+		endif
+	else
+		let sKey = "*_SAAmmoR"
+		let sOtherKey = "*_SAAmmoL"
+		let sTypeKey = "*_SALoadedTypeR"
+		let iOtherHand = 0
+		let rWeap = Player.GetEquippedObject 5
+	endif
+
+	let rAmmo = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") iHand
+	let rOtherAmmo = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") iOtherHand
+	let iMag = GetWeaponClipRounds rWeap
+	let iCur = Player.AuxVarGetFlt (sKey)
+	let iOtherCur = Player.AuxVarGetFlt (sOtherKey)
+
+	; Typwechsel: altes Magazin zurueck in den Vorrat
+	let rLoadedType = Player.AuxVarGetRef (sTypeKey)
+	if iCur > 0 && rLoadedType != 0 && rLoadedType != rAmmo
+		PrintC "SimpleAkimbo: ammo type changed on hand %g, returned %g" iHand iCur
+		Player.AuxVarSetFlt (sKey) 0
+		let iCur = 0
+	endif
+
+	let iHave = Player.GetItemCount rAmmo - iCur
+	if rOtherAmmo == rAmmo
+		let iHave = iHave - iOtherCur
+	endif
+	let iNeed = iMag - iCur
+	if iHave < iNeed
+		let iNeed = iHave
+	endif
+	if iNeed < 0
+		let iNeed = 0
+	endif
+	PrintC "SimpleAkimbo: hand %g mag %g, available %g, loaded %g" iHand iMag iHave iNeed
+	if iNeed > 0
+		Player.AuxVarSetFlt (sKey) (iCur + iNeed)
+		Player.AuxVarSetRef (sTypeKey) rAmmo
+		let fSum = Player.AuxVarGetFlt "*_SALoaded"
+		Player.AuxVarSetFlt "*_SALoaded" (fSum + iNeed)
+	endif
+End

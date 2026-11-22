@@ -1,0 +1,15 @@
+Begin Function {}
+	; Schritt 2+3 des Rücklaufs (nur wenn Sequenz noch aktuell)
+	float fSeq
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let fSeq = Player.AuxVarGetFlt "*_SASlide3rdCloseSeq"
+	if Player.AuxVarGetFlt "*_SASlide3rdSeq" != fSeq
+		return
+	endif
+
+	Player.SetNifBlockTranslation "##nmBar1" -2.71 0 0 1
+	Player.CallAfterSeconds 0.011 (CompileScript "SimpleAkimbo\SALeftSlide3rdOpen2.txt")
+End

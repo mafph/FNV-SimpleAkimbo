@@ -1,0 +1,11 @@
+Begin Function {}
+	; Nach letztem Linksschuss: Schlitten offen (X = -4.07), 1st + 3rd
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAAmmoL" > 0
+		return
+	endif
+	Player.SetNifBlockTranslation "##nmBar1" -4.07 0 0 1
+	Player.SetNifBlockTranslation "##nmBar1" -4.07 0 0 2
+End

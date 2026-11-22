@@ -1,0 +1,85 @@
+Begin Function {int iHand}
+	; Munitionstyp einer Hand. 0 = links, 1 = rechts. Gibt immer einen einzelnen Ammo-Typ zurueck.
+	; GetWeaponAmmo liefert bei vielen Waffen eine Munitionsliste (FormList, z.B. AmmoList10mm).
+	; GetItemCount auf eine Liste zaehlt alle Typen zusammen, deshalb wird die Liste hier aufgeloest.
+	; Rechts: gewaehlter Typ der Engine (GetPlayerCurrentAmmo).
+	; Links: *_SAAmmoTypeL nur, wenn explizit gewaehlt (*_SAAmmoLSel = 1) und passend zur linken Waffe.
+	;        Sonst folgt links dem rechten Typ, falls er zur linken Waffe passt, sonst erster Typ mit Bestand.
+	;        Nichts wird automatisch gespeichert, damit links nicht an einem alten Typ haengen bleibt.
+	ref rAmmoType
+	ref rBase
+	ref rTypeWeap
+	ref rEntry
+	ref rRight
+	int iIdx
+	int iSize
+
+	if iHand == 1
+		let rAmmoType = GetPlayerCurrentAmmo
+		if rAmmoType == 0
+			let rTypeWeap = Player.GetEquippedObject 5
+			let rAmmoType = GetWeaponAmmo rTypeWeap
+			if GetType rAmmoType == 85
+				let rAmmoType = ListGetNthForm rAmmoType 0
+			endif
+		endif
+		SetFunctionValue rAmmoType
+		return
+	endif
+
+	; Links
+	let rTypeWeap = Player.AuxVarGetRef "*_SALeftW"
+	if rTypeWeap == 0
+		let rTypeWeap = Player.GetEquippedObject 5
+	endif
+	let rBase = GetWeaponAmmo rTypeWeap
+	let rAmmoType = 0
+
+	; 1) explizite Auswahl links
+	if Player.AuxVarGetFlt "*_SAAmmoLSel" == 1
+		let rEntry = Player.AuxVarGetRef "*_SAAmmoTypeL"
+		if rEntry != 0
+			if GetType rBase == 85
+				if (ListGetFormIndex rBase rEntry) >= 0
+					let rAmmoType = rEntry
+				endif
+			elseif rEntry == rBase
+				let rAmmoType = rEntry
+			endif
+		endif
+	endif
+
+	; 2) rechten Typ uebernehmen, wenn er zur linken Waffe passt
+	if rAmmoType == 0
+		let rRight = GetPlayerCurrentAmmo
+		if rRight != 0
+			if GetType rBase == 85
+				if (ListGetFormIndex rBase rRight) >= 0
+					let rAmmoType = rRight
+				endif
+			elseif rRight == rBase
+				let rAmmoType = rRight
+			endif
+		endif
+	endif
+
+	; 3) erster Typ der Liste mit Bestand
+	if rAmmoType == 0
+		if GetType rBase == 85
+			let iSize = ListGetCount rBase
+			let rAmmoType = ListGetNthForm rBase 0
+			let iIdx = 0
+			while iIdx < iSize
+				let rEntry = ListGetNthForm rBase iIdx
+				if Player.GetItemCount rEntry > 0
+					let rAmmoType = rEntry
+					break
+				endif
+				let iIdx += 1
+			loop
+		else
+			let rAmmoType = rBase
+		endif
+	endif
+	SetFunctionValue rAmmoType
+End

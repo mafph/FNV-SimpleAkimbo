@@ -1,0 +1,51 @@
+Begin Function {int iKey}
+	; Maustaste gehalten: Zustand merken (Gegenstueck SAHeldUp) und, wenn die Hand automatisch ist, das Dauerfeuer (SAAuto) anmelden.
+	; Prueft hier auch, ob sich die rechte Waffe seit der letzten Intervallberechnung geaendert hat (kein Frame-Vergleich noetig).
+	ref rEquip
+	ref rLast
+	float fMode
+	float fInt
+	float fIdle
+
+	if iKey == 256
+		Player.AuxVarSetFlt "*_SAHeld256" 1
+	else
+		Player.AuxVarSetFlt "*_SAHeld257" 1
+	endif
+	if GetActiveMenuMode != 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+
+	let rEquip = Player.GetEquippedObject 5
+	let rLast = Player.AuxVarGetRef "*_SAAutoRefR"
+	if rEquip != rLast
+		Call (CompileScript "SimpleAkimbo\SAAutoInit.txt")
+	endif
+
+	let fMode = Player.AuxVarGetFlt "*_SAMode"
+	let fInt = 0
+	if fMode == 0
+		if iKey == 257
+			let fInt = Player.AuxVarGetFlt "*_SAAutoInt1"
+		else
+			let fInt = Player.AuxVarGetFlt "*_SAAutoInt0"
+		endif
+	elseif iKey == 256
+		let fInt = Player.AuxVarGetFlt "*_SAAutoIntB"
+	endif
+	if fInt > 0
+		; erster Dauerfeuerschuss kommt nach Intervall plus 0,1 s, ein kurzer Klick gibt einen Schuss
+		let fIdle = fInt + 0.1
+		if iKey == 257
+			Player.AuxVarSetFlt "*_SAAutoT1" fIdle
+		else
+			Player.AuxVarSetFlt "*_SAAutoT0" fIdle
+		endif
+		; erst abmelden, dann anmelden: nie doppelt registriert
+		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
+		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 1 1 1
+	endif
+End

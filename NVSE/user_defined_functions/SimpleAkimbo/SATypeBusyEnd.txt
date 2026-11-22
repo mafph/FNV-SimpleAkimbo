@@ -1,0 +1,66 @@
+Begin Function {}
+	; Pollt alle 0,05 s und loest die Typwechsel-Sperre.
+	; IsAnimPlaying ReloadL bleibt in der Praxis dauerhaft 1, taugt also nicht als Ende-Signal.
+	; Ende daher zeitbasiert: spaetestens nach Laenge + 0,3 s (Laenge aus *_SAReloadLen, sonst 2,5 s).
+	; Frueher beenden nur, wenn die Animation gesehen wurde und danach wieder 0 liefert.
+	; Wurde der Wechsel bei offenem Menue gemacht (*_SATypePendAnim), wird erst gewartet,
+	; bis das Menue zu ist, dann ReloadL gespielt und die Zeit ab da gezaehlt.
+	float fWait
+	float fBusy
+	float fLen
+	float fSeen
+	int iPlaying
+
+	let fBusy = Player.AuxVarGetFlt "*_SATypeBusy"
+	if fBusy != 1
+		return
+	endif
+
+	if Player.AuxVarGetFlt "*_SATypePendAnim" == 1
+		if GetActiveMenuMode != 0
+			CallAfterSeconds 0.1 (CompileScript "SimpleAkimbo\SATypeBusyEnd.txt")
+			return
+		endif
+		Player.AuxVarSetFlt "*_SATypePendAnim" 0
+		Player.AuxVarSetFlt "*_SAPartial" 0
+		Player.AuxVarSetFlt "*_SATypeWait" 0
+		Player.AuxVarSetFlt "*_SATypeSeen" 0
+		Player.PlayGroup ReloadL 1
+		PrintC "SimpleAkimbo: Menue zu, ReloadL gestartet"
+	endif
+
+	let fWait = Player.AuxVarGetFlt "*_SATypeWait"
+	let fWait = fWait + 0.05
+	Player.AuxVarSetFlt "*_SATypeWait" fWait
+
+	let fLen = Player.AuxVarGetFlt "*_SAReloadLen"
+	if fLen <= 0
+		let fLen = 2.5
+	endif
+
+	let iPlaying = Player.IsAnimPlaying ReloadL
+	if iPlaying == 1
+		Player.AuxVarSetFlt "*_SATypeSeen" 1
+	endif
+	let fSeen = Player.AuxVarGetFlt "*_SATypeSeen"
+
+	PrintC "SimpleAkimbo: busy wait %g playing %g seen %g" fWait iPlaying fSeen
+
+	; in den ersten 0,6 s ReloadL erzwingen, falls die Engine ihre eigene Animation spielt
+	if iPlaying == 0
+		if fWait <= 0.6
+			Player.PlayGroup ReloadL 1
+		endif
+	endif
+
+	if fWait < fLen + 0.3
+		if fWait < 0.8 || fSeen == 0 || iPlaying == 1
+			CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SATypeBusyEnd.txt")
+			return
+		endif
+	endif
+
+	Player.AuxVarSetFlt "*_SATypeBusy" 0
+	Player.AuxVarSetFlt "*_SATypeWait" 0
+	Player.AuxVarSetFlt "*_SATypeSeen" 0
+End

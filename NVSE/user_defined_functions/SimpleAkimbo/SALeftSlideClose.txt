@@ -1,0 +1,10 @@
+Begin Function {}
+	; Nach normalem Linksschuss: 1st-Person-Schlitten auf Ruhelage
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAAmmoL" <= 0
+		return
+	endif
+	Player.SetNifBlockTranslation "##nmBar1" 0 0 0 2
+End

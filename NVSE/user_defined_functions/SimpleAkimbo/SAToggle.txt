@@ -1,0 +1,151 @@
+Begin Function {int iKey}
+	string_var sPath
+	string_var sTarget
+	ref rWeap
+	float fState
+	int iOK
+	int iLen
+	ref rAmmo
+	ref rEquip
+	int iCount
+	int iMenu
+	int iMods
+	int iWT
+	string_var sHudPath
+	string_var sHudOrig
+
+	if iKey != -1
+		let iMenu = GetActiveMenuMode
+		if iMenu != 0
+			; J im Inventar merkt die markierte Waffe, in anderen Menues passiert nichts
+			if iMenu == 1002
+				Call (CompileScript "SimpleAkimbo\SASetLeft.txt") 0
+			endif
+			return
+		endif
+	endif
+
+	let fState = Player.AuxVarGetFlt "*_SAkimbo"
+
+	if fState == 0
+		; Modell der linken Waffe: gemerkte Waffe (M), sonst Vanilla-9mm
+		let rWeap = Player.AuxVarGetRef "*_SALeftW"
+		if rWeap == 0
+			PrintC "SimpleAkimbo: no left weapon set, press J on a weapon in the inventory"
+			return
+		endif
+		; Ausgeruestete Waffe darf nicht die eigene linke Waffe sein, ausser es gibt ein zweites Exemplar
+		let rEquip = Player.GetEquippedObject 5
+		if rEquip == 0
+			PrintC "SimpleAkimbo: no weapon equipped"
+			return
+		endif
+		; nur einhaendige Waffen (Typ 3 und 4)
+		let iWT = GetWeaponType rEquip
+		if iWT != 3 && iWT != 4
+			PrintC "SimpleAkimbo: equipped weapon is not one-handed"
+			return
+		endif
+		let iWT = GetWeaponType rWeap
+		if iWT != 3 && iWT != 4
+			PrintC "SimpleAkimbo: left weapon is not one-handed"
+			return
+		endif
+		if rWeap == rEquip
+			let iCount = Player.GetItemCount rWeap
+			if iCount < 2
+				PrintC "SimpleAkimbo: left weapon is the equipped one, a second copy is required"
+				return
+			endif
+		endif
+		; Originaltext der Munitionszeile steht in Tile 2 (Tile 1 beschreiben wir, dort stand beim Lesen "WEAPON", Tile 3 ist "AP")
+		let sHudPath = "HUDMainMenu\ActionPoints\justify_right_text:2\string"
+		let sHudOrig = GetUIString (sHudPath)
+		Player.AuxVarSetStr "*_SAHudOrig" (sHudOrig)
+		Call (CompileScript "SimpleAkimbo\SAShellPurge.txt")
+		let sPath = ""
+		if rWeap != 0
+			; Modell mit den Mods des markierten Exemplars (Bitmaske 0 bis 7), sonst Basismodell
+			let iMods = Player.AuxVarGetFlt "*_SALeftMods"
+			let sPath = GetWeaponModel rWeap iMods
+			let iLen = sv_Length sPath
+			if iLen == 0 && iMods != 0
+				let sPath = GetWeaponModel rWeap 0
+			endif
+		endif
+		let iLen = sv_Length sPath
+		if iLen == 0
+			let sPath = "weapons\1handpistol\9mm.nif"
+		endif
+		PrintC "SimpleAkimbo: left model = %z" sPath
+		Player.AuxVarSetStr "*_SAModel" (sPath)
+
+		let sTarget = "Akimbo|*1*" + sPath
+		; Knotennamen der rechten Waffe an das Animationsschema anpassen (vor dem Anhaengen der linken)
+		Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 1
+		let iOK = InsertNode Player 3 "Weapon|Akimbo"
+		if iOK == 0
+			PrintC "SimpleAkimbo: InsertNode failed"
+			return
+		endif
+		let iOK = AttachModel Player 3 (sTarget)
+		if iOK == 0
+			PrintC "SimpleAkimbo: AttachModel failed"
+			InsertNode Player 2 "Weapon|Akimbo"
+			return
+		endif
+		; Knotennamen der linken Waffe
+		Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 0
+		Player.AuxVarSetFlt "*_SAkimbo" 1
+		Player.AuxVarSetFlt "*_SALPrio" 50
+		Player.AuxVarSetFlt "*_SALastR" 0
+		Player.AuxVarSetFlt "*_SASlideTL" 0
+		Player.AuxVarSetFlt "*_SAAnimType" (Player.GetWeaponAnimType)
+		Call (CompileScript "SimpleAkimbo\SAControls.txt")
+		Player.AuxVarSetFlt "*_SAAmmoL" 0
+		Player.AuxVarSetFlt "*_SAAmmoR" 0
+		Player.AuxVarSetFlt "*_SACondR" 0
+		Player.AuxVarSetFlt "*_SAHPR" 0
+		Player.AuxVarSetFlt "*_SAJam" 0
+		Player.AuxVarSetFlt "*_SAJamPend" 0
+		Player.AuxVarSetFlt "*_SAAutoSeen" 0
+		Call (CompileScript "SimpleAkimbo\SAAutoInit.txt")
+		Call (CompileScript "SimpleAkimbo\SAReload.txt") 0
+		PrintC "SimpleAkimbo: ON"
+	else
+		let sPath = Player.AuxVarGetStr "*_SAModel"
+		let sTarget = "Akimbo|*1*" + sPath
+		PrintC "SimpleAkimbo: removing %z" sTarget
+		Player.AuxVarSetFlt "*_SAkimbo" 0
+		Player.AuxVarSetFlt "*_SALPrio" 50
+		Player.AuxVarSetFlt "*_SALastR" 0
+		Player.AuxVarSetFlt "*_SASlideTL" 0
+		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
+		Call (CompileScript "SimpleAkimbo\SAControls.txt")
+		AttachModel Player 2 (sTarget)
+		InsertNode Player 2 "Weapon|Akimbo"
+		Player.AuxVarSetFlt "*_SAJam" 0
+		Player.AuxVarSetFlt "*_SAJamPend" 0
+		let sHudPath = "HUDMainMenu\ActionPoints\justify_right_text:1\string"
+		let sHudOrig = Player.AuxVarGetStr "*_SAHudOrig"
+		SetUIString (sHudPath) (sHudOrig)
+		let rWeap = Player.GetEquippedObject 5
+		if rWeap != 0
+			let rAmmo = GetWeaponAmmo rWeap
+			if rAmmo != 0
+				Player.AddItem rAmmo 1 1
+				Player.RemoveItem rAmmo 1 1
+			endif
+		endif
+		PrintC "SimpleAkimbo: OFF"
+	endif
+
+	Player.RefreshAnimData
+	; Equip-Animation beim Ein- und Ausschalten. Beim Tausch der linken Waffe nur einmal, beim Einschalten.
+	if fState == 0
+		Player.PlayGroup Equip 1
+		Player.AuxVarSetFlt "*_SASwapping" 0
+	elseif Player.AuxVarGetFlt "*_SASwapping" != 1
+		Player.PlayGroup Equip 1
+	endif
+End

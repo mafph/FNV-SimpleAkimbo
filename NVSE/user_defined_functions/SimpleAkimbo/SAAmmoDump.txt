@@ -1,0 +1,25 @@
+Begin Function {}
+	; Hilfsfunktion zur Fehlersuche: zeigt Munitionsnamen und das HUD-Tile 6. Aendert nichts.
+	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAAmmoDump.txt")
+	; Mit verschiedener Munition aufrufen (FMJ, AP, JHP), jeweils nach dem Wechsel im Pip-Boy und mit geladener Waffe.
+	ref rWeap
+	ref rCur
+	ref rDef
+	ref rLeftW
+	ref rLeftAmmo
+	string_var sTile
+
+	let rWeap = Player.GetEquippedObject 5
+	let rCur = GetPlayerCurrentAmmo
+	let rDef = GetWeaponAmmo rWeap
+	let rLeftW = Player.AuxVarGetRef "*_SALeftW"
+	let sTile = GetUIString "HUDMainMenu\*:6\string"
+	PrintC "SA AmmoDump weapon %n" rWeap
+	PrintC "SA AmmoDump current ammo (GetPlayerCurrentAmmo) %n id %i" rCur rCur
+	PrintC "SA AmmoDump default ammo (GetWeaponAmmo) %n id %i" rDef rDef
+	if rLeftW != 0
+		let rLeftAmmo = GetWeaponAmmo rLeftW
+		PrintC "SA AmmoDump left weapon %n default ammo %n id %i" rLeftW rLeftAmmo rLeftAmmo
+	endif
+	PrintC "SA AmmoDump HUD tile 6 = %z" sTile
+End

@@ -1,0 +1,46 @@
+Begin Function {}
+	; Sicherheitsnetz: loescht Huelsen, die laenger als 15 Sekunden registriert sind, z.B. nach dem Laden eines Spielstands. Zeit ueber GameDaysPassed und TimeScale.
+	; Laeuft als Main-Loop-Callback, siehe SAStart.
+	ref rShell
+	string_var sKey
+	string_var sTimeKey
+	int iHand
+	int iSlot
+	int iAlive
+	float fStamp
+	float fLife
+
+	; nur arbeiten, wenn Huelsen registriert sind (Flag setzt SAShell, loescht SAShellPurge und dieser Durchlauf)
+	if Player.AuxVarGetFlt "*_SAShellActive" != 1
+		return
+	endif
+	let iAlive = 0
+	let fLife = 15 * TimeScale / 86400
+
+	let iHand = 0
+	while iHand < 2
+		let iSlot = 0
+		while iSlot < 60
+			let sTimeKey = sv_Construct "*_SAShellT%g_%g" iHand iSlot
+			let fStamp = Player.AuxVarGetFlt (sTimeKey)
+			if fStamp != 0
+				if GameDaysPassed - fStamp > fLife
+					let sKey = sv_Construct "*_SAShell%g_%g" iHand iSlot
+					let rShell = Player.AuxVarGetRef (sKey)
+					if IsReference rShell
+						rShell.Disable
+						rShell.MarkForDelete
+					endif
+					Player.AuxVarSetFlt (sTimeKey) 0
+				else
+					let iAlive += 1
+				endif
+			endif
+			let iSlot += 1
+		loop
+		let iHand += 1
+	loop
+	if iAlive == 0
+		Player.AuxVarSetFlt "*_SAShellActive" 0
+	endif
+End

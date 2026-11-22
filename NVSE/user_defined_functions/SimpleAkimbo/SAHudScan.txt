@@ -1,0 +1,56 @@
+Begin Function {}
+	; Hilfsfunktion zur Fehlersuche: sucht im HUDMainMenu alle Tiles mit nicht leerem Text und gibt Pfad und Text in der Konsole aus.
+	; Ziel: herausfinden, in welchem Tile der Munitionstyp steht. Aendert nichts.
+	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAHudScan.txt")
+	; Mit Akimbo aus und einer bekannten Waffe ausgeruestet aufrufen, dann den Munitionsnamen in der Ausgabe suchen.
+	string_var sPath
+	string_var sText
+	int iA
+	int iB
+	int iLen
+
+	; Ebene 1: HUDMainMenu\*:A\string
+	let iA = 0
+	while iA < 40
+		let sPath = sv_Construct "HUDMainMenu\*:%g\string" iA
+		let sText = GetUIString (sPath)
+		let iLen = sv_Length sText
+		if iLen > 0
+			PrintC "SA HudScan %z = %z" sPath sText
+		endif
+		let iA += 1
+	loop
+
+	; Ebene 2: HUDMainMenu\*:A\*:B\string
+	let iA = 0
+	while iA < 40
+		let iB = 0
+		while iB < 25
+			let sPath = sv_Construct "HUDMainMenu\*:%g\*:%g\string" iA iB
+			let sText = GetUIString (sPath)
+			let iLen = sv_Length sText
+			if iLen > 0
+				PrintC "SA HudScan %z = %z" sPath sText
+			endif
+			let iB += 1
+		loop
+		let iA += 1
+	loop
+
+	; Ebene 3: HUDMainMenu\*:A\*:B\*:C\string, nur bis 15 je Ebene
+	let iA = 0
+	while iA < 40
+		let iB = 0
+		while iB < 15
+			let sPath = sv_Construct "HUDMainMenu\*:%g\*:%g\*:0\string" iA iB
+			let sText = GetUIString (sPath)
+			let iLen = sv_Length sText
+			if iLen > 0
+				PrintC "SA HudScan %z = %z" sPath sText
+			endif
+			let iB += 1
+		loop
+		let iA += 1
+	loop
+	PrintC "SA HudScan done"
+End

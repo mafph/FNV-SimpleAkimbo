@@ -1,0 +1,26 @@
+Begin Function {}
+	PrintC "SimpleAkimbo: registering handlers"
+	Call (CompileScript "SimpleAkimbo\SAShellPurge.txt")
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 1 36
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAInput.txt") 1 256
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAInput.txt") 1 257
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAHeldDown.txt") 1 256
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAHeldDown.txt") 1 257
+	SetOnKeyUpEventHandler (CompileScript "SimpleAkimbo\SAHeldUp.txt") 1 256
+	SetOnKeyUpEventHandler (CompileScript "SimpleAkimbo\SAHeldUp.txt") 1 257
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 37
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 38
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 49
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 24
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 25
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 19
+	SetOnMenuOpenEventHandler (CompileScript "SimpleAkimbo\SAMenuOpen.txt") 1
+	SetOnMenuCloseEventHandler (CompileScript "SimpleAkimbo\SAMenuClose.txt") 1
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 44
+	SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAReload.txt") 1 45
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAHud.txt") 1 2 1
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SATypeWatch.txt") 1 2 1
+	; SAAuto wird nicht mehr hier angemeldet, sondern nur waehrend eine Maustaste gehalten wird (SAHeldDown, SAHeldUp)
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMenuHint.txt") 1 15 2
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAShellClean.txt") 1 120 1
+End

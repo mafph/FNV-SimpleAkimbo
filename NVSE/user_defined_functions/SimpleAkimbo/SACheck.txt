@@ -1,0 +1,17 @@
+Begin Function {}
+	; Loest Akimbo auf, wenn sich der Waffen-Animationstyp seit dem Einschalten geaendert hat
+	; (z.B. Wechsel auf Gewehr). Typ wird beim Einschalten gemerkt, keine feste Zahl noetig.
+	float fType
+	int iNow
+	int iForce
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let fType = Player.AuxVarGetFlt "*_SAAnimType"
+	let iNow = Player.GetWeaponAnimType
+	if iNow != fType
+		PrintC "SimpleAkimbo: weapon type changed (%g -> %g), Akimbo off" fType iNow
+		let iForce = 0 - 1
+		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iForce
+	endif
+End

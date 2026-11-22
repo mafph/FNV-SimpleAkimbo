@@ -1,0 +1,4 @@
+Begin Function {string_var sNode}
+	; Rechte Hand: exakt der zuvor funktionierende Aufruf.
+	Player.FireWeaponEx (Player.GetEquippedObject 5) (sNode)
+End

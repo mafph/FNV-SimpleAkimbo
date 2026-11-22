@@ -1,0 +1,116 @@
+Begin Function {int iHand}
+	; Passt die Knoten einer Waffen-NIF an die Animationen an (die kfs sind fuer die 9mm gebaut: ##nmBar, ##nmHammer, ##nmClip).
+	; iHand 1 = rechte Waffe (vor dem Anhaengen der linken aufrufen, damit die Namen eindeutig sind),
+	;       0 = linke Waffe (Name mit oder ohne Suffix 1 durch "*1*", Ziel: ##nm-Name + "1").
+	; 1) Knoten umbenennen. Nicht gefunden = Waffe hat schon das ##nm-Schema oder ist schon angepasst, dann passiert nichts.
+	; 2) Die kf-Keys sind absolute Positionen (Ruhelage der 9mm, siehe fR*). Hat der Knoten eine andere Ruhelage,
+	;    springt er beim Animieren dorthin. Ausgleich: Knoten auf die 9mm-Ruhelage setzen und die Differenz auf die
+	;    Geometrie (Kind ":0") legen. Die Ruhestellung bleibt damit unveraendert.
+	string_var sOld
+	string_var sNew
+	string_var sOldL
+	string_var sNodeNew
+	string_var sChild
+	string_var sChildNew
+	array_var aNode
+	array_var aChild
+	float fRX
+	float fRY
+	float fRZ
+	float fDX
+	float fDY
+	float fDZ
+	float fCX
+	float fCY
+	float fCZ
+	int iIdx
+	int iModel
+	int iOK
+	int iSize
+	int iTry
+	int iFound
+
+	let iModel = 1
+	while iModel <= 2
+		let iIdx = 0
+		while iIdx < 3
+			if iIdx == 0
+				let sOld = "##Slide"
+				let sNew = "##nmBar"
+				let fRX = 0
+				let fRY = 0
+				let fRZ = 0
+			elseif iIdx == 1
+				let sOld = "##Hammer"
+				let sNew = "##nmHammer"
+				let fRX = 0 - 2.129
+				let fRY = 3.547
+				let fRZ = 0
+			else
+				let sOld = "##Clip"
+				let sNew = "##nmClip"
+				let fRX = 0
+				let fRY = 0
+				let fRZ = 0
+			endif
+
+			let iOK = 0
+			if iHand == 1
+				let sNodeNew = sNew
+				let iOK = Player.RenameNifBlock (sOld) (sNodeNew) iModel
+			else
+				let sNodeNew = sNew + "1"
+				let sOldL = sOld + "1"
+				let iOK = Player.RenameNifBlock (sOldL) (sNodeNew) iModel
+				if iOK == 0
+					let iOK = Player.RenameNifBlock (sOld) (sNodeNew) iModel
+				endif
+			endif
+
+			if iOK == 1
+				let aNode = Player.GetNifBlockTranslation (sNodeNew) 0 iModel
+				let iSize = ar_Size aNode
+				if iSize == 3
+					let fDX = aNode[0] - fRX
+					let fDY = aNode[1] - fRY
+					let fDZ = aNode[2] - fRZ
+
+					let iTry = 0
+					let iFound = 0
+					while iTry < 3 && iFound == 0
+						if iTry == 0
+							let sChild = sOld + ":0"
+						elseif iTry == 1
+							let sChild = sOld + ":01"
+						else
+							let sChild = sOld + "1:0"
+						endif
+						; rechts nur der erste Kandidat, links alle drei
+						if iHand == 0 || iTry == 0
+							let aChild = Player.GetNifBlockTranslation (sChild) 0 iModel
+							let iSize = ar_Size aChild
+							if iSize == 3
+								let iFound = 1
+								if fDX != 0 || fDY != 0 || fDZ != 0
+									let fCX = aChild[0] + fDX
+									let fCY = aChild[1] + fDY
+									let fCZ = aChild[2] + fDZ
+									Player.SetNifBlockTranslation (sChild) fCX fCY fCZ iModel
+									Player.SetNifBlockTranslation (sNodeNew) fRX fRY fRZ iModel
+								endif
+								; rechtes Kind umbenennen, damit der Name fuer die linke Waffe eindeutig bleibt
+								if iHand == 1
+									let sChildNew = sOld + ":R"
+									Player.RenameNifBlock (sChild) (sChildNew) iModel
+								endif
+							endif
+						endif
+						let iTry += 1
+					loop
+				endif
+			endif
+			let iIdx += 1
+		loop
+		let iModel += 1
+	loop
+End

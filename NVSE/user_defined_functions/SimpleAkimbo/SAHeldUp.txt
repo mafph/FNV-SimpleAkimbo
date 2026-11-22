@@ -1,0 +1,16 @@
+Begin Function {int iKey}
+	; Maustaste losgelassen. Sind beide Tasten oben, wird das Dauerfeuer abgemeldet.
+	float fHeld256
+	float fHeld257
+
+	if iKey == 256
+		Player.AuxVarSetFlt "*_SAHeld256" 0
+	else
+		Player.AuxVarSetFlt "*_SAHeld257" 0
+	endif
+	let fHeld256 = Player.AuxVarGetFlt "*_SAHeld256"
+	let fHeld257 = Player.AuxVarGetFlt "*_SAHeld257"
+	if fHeld256 == 0 && fHeld257 == 0
+		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
+	endif
+End

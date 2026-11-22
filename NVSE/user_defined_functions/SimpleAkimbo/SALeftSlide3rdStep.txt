@@ -1,0 +1,49 @@
+Begin Function {}
+	; Phase 0 = Ruecklauf (5 Schritte), Phase 1 = Vorlauf (5 Schritte)
+	float fSeq
+	float fStep
+	float fPhase
+	float fX
+	float fDt
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let fSeq = Player.AuxVarGetFlt "*_SASlide3rdCloseSeq"
+	if Player.AuxVarGetFlt "*_SASlide3rdSeq" != fSeq
+		return
+	endif
+
+	let fStep = Player.AuxVarGetFlt "*_SASlide3rdStep"
+	let fPhase = Player.AuxVarGetFlt "*_SASlide3rdPhase"
+
+	if fPhase == 0
+		; Ruecklauf: Schritt 1..5 → X = -0.814 * step
+		let fStep += 1
+		let fX = 0 - (0.814 * fStep)
+		if fX < 0 - 4.07
+			let fX = 0 - 4.07
+		endif
+		Player.SetNifBlockTranslation "##nmBar1" fX 0 0 1
+		Player.AuxVarSetFlt "*_SASlide3rdStep" fStep
+		if fStep < 5
+			Player.CallAfterSeconds 0.0066 (CompileScript "SimpleAkimbo\SALeftSlide3rdStep.txt")
+		else
+			Player.AuxVarSetFlt "*_SASlide3rdPhase" 1
+			Player.AuxVarSetFlt "*_SASlide3rdStep" 0
+			Player.CallAfterSeconds 0.0134 (CompileScript "SimpleAkimbo\SALeftSlide3rdStep.txt")
+		endif
+	else
+		; Vorlauf: von -4.07 Richtung 0 in 5 Schritten
+		let fStep += 1
+		let fX = 0 - 4.07 + (0.814 * fStep)
+		if fX > 0
+			let fX = 0
+		endif
+		Player.SetNifBlockTranslation "##nmBar1" fX 0 0 1
+		Player.AuxVarSetFlt "*_SASlide3rdStep" fStep
+		if fStep < 5
+			Player.CallAfterSeconds 0.0134 (CompileScript "SimpleAkimbo\SALeftSlide3rdStep.txt")
+		endif
+	endif
+End

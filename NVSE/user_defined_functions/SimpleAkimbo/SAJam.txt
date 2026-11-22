@@ -1,0 +1,53 @@
+Begin Function {int iHand, int iReload}
+	; Jam-Wurf. iReload 0 = beim Schuss, 1 = nach dem Nachladen.
+	; Chance aus den Spielwerten fWeaponConditionJam1 bis 10 bzw. fWeaponConditionReloadJam1 bis 10,
+	; damit Aenderungen durch Mods gelten. Je ein Wert pro 10 Prozent Zustand.
+		; Nach dem Nachladen: nur Flag *_SAJamPend setzen, SAFire liest es vor dem ersten Schuss und ruft SAJamRun.
+	; Beim Schuss: sofort SAJamRun. Bei Jam: linke Waffe verstecken (1 = 3rd Person, 2 = 1st Person), Jam-Animation der rechten Waffe per ForceWeaponJamAnim, nach fJamSeconds frei.
+	string_var sKey
+	string_var sName
+	float fPct
+	float fChance
+	int iBand
+	int iRoll
+
+	if Player.AuxVarGetFlt "*_SAJam" == 1
+		return
+	endif
+
+	Call (CompileScript "SimpleAkimbo\SAWear.txt") iHand 0
+
+	if iHand == 0
+		let sKey = "*_SACondL"
+	else
+		let sKey = "*_SACondR"
+	endif
+	let fPct = Player.AuxVarGetFlt (sKey)
+	let iBand = fPct / 10
+	let iBand = iBand + 1
+	if iBand > 10
+		let iBand = 10
+	endif
+	if iBand < 1
+		let iBand = 1
+	endif
+
+	if iReload == 1
+		let sName = sv_Construct "fWeaponConditionReloadJam%g" iBand
+	else
+		let sName = sv_Construct "fWeaponConditionJam%g" iBand
+	endif
+	let fChance = GetNumericGameSetting (sName)
+	let iRoll = GetRandomPercent
+	PrintC "SA Jam check hand %g, condition %g percent, band %g, chance %g, roll %g, after reload %g" iHand fPct iBand fChance iRoll iReload
+	if iRoll >= fChance * 100
+		return
+	endif
+
+	PrintC "SimpleAkimbo: jam rolled hand %g, condition %g, chance %g, after reload %g" iHand fPct fChance iReload
+	if iReload == 1
+		Player.AuxVarSetFlt "*_SAJamPend" 1
+	else
+		Call (CompileScript "SimpleAkimbo\SAJamRun.txt")
+	endif
+End

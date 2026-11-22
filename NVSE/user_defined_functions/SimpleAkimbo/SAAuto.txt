@@ -1,0 +1,69 @@
+Begin Function {}
+	; Dauerfeuer. Laeuft nur, solange LMB oder RMB gehalten wird: SAHeldDown meldet den Callback an, SAHeldUp, SAMenuOpen und SAToggle (aus) melden ihn ab.
+	; Im Ruhezustand kostet das Dauerfeuer damit keine Frame-Zeit. Der erste Schuss kommt vom Tastendruck (SAInput).
+	; Modus A: LMB links, RMB rechts, je ein Timer. Modus B: LMB, Hand wechselt pro Schuss, ein Timer.
+	string_var sIntKey
+	string_var sTimerKey
+	string_var sHeldKey
+	float fDeltaTime
+	float fInterval
+	float fTimer
+	float fModeVal
+	float fJamVal
+	float fHeldVal
+	int iPass
+	int iDoPass
+	int iKeyCode
+
+	if GetActiveMenuMode != 0
+		return
+	endif
+	let fJamVal = Player.AuxVarGetFlt "*_SAJam"
+	if fJamVal == 1
+		; Jam: Timer neu starten, nach der Freigabe schiesst es erst nach einer kurzen Pause weiter
+		Player.AuxVarSetFlt "*_SAAutoT0" 0.2
+		Player.AuxVarSetFlt "*_SAAutoT1" 0.2
+		return
+	endif
+	let fDeltaTime = GetSecondsPassed
+	let fModeVal = Player.AuxVarGetFlt "*_SAMode"
+	let iPass = 0
+	while iPass < 2
+		let iDoPass = 0
+		if iPass == 0
+			let iKeyCode = 256
+			let sHeldKey = "*_SAHeld256"
+			let sTimerKey = "*_SAAutoT0"
+			if fModeVal == 0
+				let sIntKey = "*_SAAutoInt0"
+			else
+				let sIntKey = "*_SAAutoIntB"
+			endif
+			let iDoPass = 1
+		elseif fModeVal == 0
+			let iKeyCode = 257
+			let sHeldKey = "*_SAHeld257"
+			let sTimerKey = "*_SAAutoT1"
+			let sIntKey = "*_SAAutoInt1"
+			let iDoPass = 1
+		endif
+
+		if iDoPass == 1
+			let fHeldVal = Player.AuxVarGetFlt (sHeldKey)
+			if fHeldVal == 1
+				let fInterval = Player.AuxVarGetFlt (sIntKey)
+				if fInterval > 0
+					let fTimer = Player.AuxVarGetFlt (sTimerKey)
+					let fTimer = fTimer - fDeltaTime
+					if fTimer <= 0
+						Player.AuxVarSetFlt (sTimerKey) fInterval
+						Call (CompileScript "SimpleAkimbo\SAInput.txt") iKeyCode
+					else
+						Player.AuxVarSetFlt (sTimerKey) fTimer
+					endif
+				endif
+			endif
+		endif
+		let iPass += 1
+	loop
+End

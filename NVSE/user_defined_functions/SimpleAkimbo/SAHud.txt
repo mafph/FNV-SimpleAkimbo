@@ -1,0 +1,45 @@
+Begin Function {}
+	; HUD-Munitionslabel: "links geladen/Vorrat   rechts geladen/Vorrat", z.B. 12/99  8/45.
+	; Laeuft als Main-Loop-Callback (alle 2 Frames, nur GameMode), siehe SAStart.
+	; Vorrat pro Hand aus dem Munitionstyp der Hand (SAAmmoType), nicht aus dem Waffenstandard.
+	ref rAmmoL
+	ref rAmmoR
+	float fTile
+	float fMagL
+	float fMagR
+	int iStockL
+	int iStockR
+	string_var sPath
+	string_var sText
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+
+	let fTile = 1
+	let fMagL = Player.AuxVarGetFlt "*_SAAmmoL"
+	let fMagR = Player.AuxVarGetFlt "*_SAAmmoR"
+
+	let rAmmoL = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") 0
+	let rAmmoR = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") 1
+	let iStockL = Player.GetItemCount rAmmoL
+	let iStockR = Player.GetItemCount rAmmoR
+	; Vorrat = Bestand minus geladene Schuss. Gleicher Typ: beide Magazine abziehen.
+	if rAmmoL == rAmmoR
+		let iStockL = iStockL - fMagL - fMagR
+		let iStockR = iStockL
+	else
+		let iStockL = iStockL - fMagL
+		let iStockR = iStockR - fMagR
+	endif
+	if iStockL < 0
+		let iStockL = 0
+	endif
+	if iStockR < 0
+		let iStockR = 0
+	endif
+
+	let sPath = sv_Construct "HUDMainMenu\ActionPoints\justify_right_text:%g\string" fTile
+	let sText = sv_Construct "%g|%g %g|%g" fMagL iStockL fMagR iStockR
+	SetUIString (sPath) (sText)
+End

@@ -1,0 +1,80 @@
+Begin Function {int iHand}
+	; Huelse selbst erzeugen. iHand: 0 = links, 1 = rechts.
+	; UNVERIFIZIERT: PlaceAtMe Caps001 als Havok-Traeger, SetModelPath auf der Referenz.
+	; Kein Impuls, ApplyHavokImpulse gibt es in FNV nicht.
+	; Aufraeumen nach 10 Sekunden per CallAfterSeconds und SAShellDel. SAShellClean raeumt Reste nach Laden ab. 60 Slots pro Hand als Notbremse.
+	ref rWeap
+	ref rShell
+	ref rPrev
+	string_var sModel
+	string_var sKey
+	string_var sTimeKey
+	string_var sIdx
+	int iLen
+	int iSlot
+	float fAng
+	float fSinus
+	float fCosinus
+	float fSide
+	float fSign
+	float fPosX
+	float fPosY
+	float fPosZ
+	float fOld
+
+	let rWeap = Player.GetEquippedObject 5
+	if iHand == 0
+		let sIdx = "*_SAShellIdxL"
+		let fSign = 0 - 1
+		let rWeap = Player.AuxVarGetRef "*_SALeftW"
+		if rWeap == 0
+			let rWeap = Player.GetEquippedObject 5
+		endif
+	else
+		let sIdx = "*_SAShellIdxR"
+		let fSign = 1
+	endif
+
+	let sModel = GetWeaponShellCasingModel rWeap
+	let iLen = sv_Length sModel
+	if iLen == 0
+		return
+	endif
+
+	let iSlot = Player.AuxVarGetFlt (sIdx)
+	let sKey = sv_Construct "*_SAShell%g_%g" iHand iSlot
+	let sTimeKey = sv_Construct "*_SAShellT%g_%g" iHand iSlot
+	Player.AuxVarSetFlt (sIdx) ((iSlot + 1) % 60)
+
+	let fOld = Player.AuxVarGetFlt (sTimeKey)
+	if fOld != 0
+		let rPrev = Player.AuxVarGetRef (sKey)
+		if IsReference rPrev
+			rPrev.Disable
+			rPrev.MarkForDelete
+		endif
+	endif
+
+	let rShell = Player.PlaceAtMe Caps001 1 0 0
+	if (IsReference rShell) == 0
+		PrintC "SimpleAkimbo: shell not created"
+		return
+	endif
+	rShell.SetModelPath (sModel)
+
+	let fAng = Player.GetAngle Z
+	let fSinus = sin fAng
+	let fCosinus = cos fAng
+	let fSide = fSign * 22
+	let fPosX = (Player.GetPos X) + fSinus * 30 + fCosinus * fSide
+	let fPosY = (Player.GetPos Y) + fCosinus * 30 - fSinus * fSide
+	let fPosZ = (Player.GetPos Z) + 105
+	rShell.SetPos X fPosX
+	rShell.SetPos Y fPosY
+	rShell.SetPos Z fPosZ
+
+	Player.AuxVarSetRef (sKey) rShell
+	Player.AuxVarSetFlt "*_SAShellActive" 1
+	Player.AuxVarSetFlt (sTimeKey) GameDaysPassed
+	Player.CallAfterSeconds 10 (CompileScript "SimpleAkimbo\SAShellDel.txt") 0 rShell iHand iSlot
+End

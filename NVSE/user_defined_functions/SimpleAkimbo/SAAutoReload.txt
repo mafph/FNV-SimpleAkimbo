@@ -1,0 +1,4 @@
+Begin Function {}
+	; Von SAFire per CallAfterSeconds ohne Argument. Explizit beide Magazine + Animation.
+	Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
+End

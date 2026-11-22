@@ -1,0 +1,61 @@
+Begin Function {}
+	; Schlitten-Steuerung per Skript, Main-Loop-Callback jeden Frame (siehe SAStart).
+	; 1) Hold-Open: ist das Magazin einer Hand leer, wird der Schlitten dieser Hand offen gehalten.
+	;    Erst nach Ablauf der Schuss-Animation (*_SAHoldDR/DL), sonst wuerde die Animation abgewuergt.
+	;    Der Wert gilt fuer den Knoten selbst. Bei Waffen mit angepassten Knoten (SANodeFix) ist die Ruhelage 0.
+	; 2) Links schliesst der Schlitten nach einem Schuss nicht immer ganz (ActivateAnim): nach Ablauf
+	;    der Animation (*_SASlideTL) wird er einmal auf die Ruhelage gesetzt.
+	float fDt
+	float fOpen
+	float fAmmoR
+	float fAmmoL
+	float fT
+	int iModel
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let fDt = GetSecondsPassed
+	let fOpen = 0 - 4.07
+	let fAmmoR = Player.AuxVarGetFlt "*_SAAmmoR"
+	let fAmmoL = Player.AuxVarGetFlt "*_SAAmmoL"
+
+	if fAmmoR <= 0
+		let fT = Player.AuxVarGetFlt "*_SAHoldDR"
+		if fT > 0
+			Player.AuxVarSetFlt "*_SAHoldDR" (fT - fDt)
+		else
+			let iModel = 1
+			while iModel <= 2
+				Player.SetNifBlockTranslation "##nmBar" fOpen 0 0 iModel
+				let iModel += 1
+			loop
+		endif
+	endif
+
+	if fAmmoL <= 0
+		let fT = Player.AuxVarGetFlt "*_SAHoldDL"
+		if fT > 0
+			Player.AuxVarSetFlt "*_SAHoldDL" (fT - fDt)
+		else
+			let iModel = 1
+			while iModel <= 2
+				Player.SetNifBlockTranslation "##nmBar1" fOpen 0 0 iModel
+				let iModel += 1
+			loop
+		endif
+	endif
+
+	let fT = Player.AuxVarGetFlt "*_SASlideTL"
+	if fT > 0
+		let fT = fT - fDt
+		Player.AuxVarSetFlt "*_SASlideTL" fT
+		if fT <= 0 && fAmmoL > 0
+			let iModel = 1
+			while iModel <= 2
+				Player.SetNifBlockTranslation "##nmBar1" 0 0 0 iModel
+				let iModel += 1
+			loop
+		endif
+	endif
+End

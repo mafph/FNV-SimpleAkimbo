@@ -1,0 +1,34 @@
+Begin Function {}
+	; Loescht sofort alle registrierten Huelsen, unabhaengig vom Alter. Aufruf beim Start und beim Einschalten.
+	ref rShell
+	string_var sKey
+	string_var sTimeKey
+	int iHand
+	int iSlot
+	int iCount
+	float fStamp
+
+	let iCount = 0
+	let iHand = 0
+	while iHand < 2
+		let iSlot = 0
+		while iSlot < 60
+			let sTimeKey = sv_Construct "*_SAShellT%g_%g" iHand iSlot
+			let fStamp = Player.AuxVarGetFlt (sTimeKey)
+			if fStamp != 0
+				let sKey = sv_Construct "*_SAShell%g_%g" iHand iSlot
+				let rShell = Player.AuxVarGetRef (sKey)
+				if IsReference rShell
+					rShell.Disable
+					rShell.MarkForDelete
+					let iCount += 1
+				endif
+				Player.AuxVarSetFlt (sTimeKey) 0
+			endif
+			let iSlot += 1
+		loop
+		let iHand += 1
+	loop
+	Player.AuxVarSetFlt "*_SAShellActive" 0
+	PrintC "SA Shell Purge: %g shells deleted" iCount
+End

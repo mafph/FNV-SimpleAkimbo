@@ -1,0 +1,11 @@
+Begin Function {}
+	; Rechter Schlitten auf Ruhelage (beide Modelle)
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAAmmoR" <= 0
+		return
+	endif
+	Player.SetNifBlockTranslation "##nmBar" 0 0 0 1
+	Player.SetNifBlockTranslation "##nmBar" 0 0 0 2
+End

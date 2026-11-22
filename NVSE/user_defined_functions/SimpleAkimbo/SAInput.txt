@@ -1,0 +1,26 @@
+Begin Function {int iKey}
+	float fMode
+	float fHand
+	if GetActiveMenuMode != 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let fMode = Player.AuxVarGetFlt "*_SAMode"
+	if fMode == 0
+		; Modus A: LMB links, RMB rechts
+		if iKey == 256
+			Call (CompileScript "SimpleAkimbo\SAFire.txt") 0
+		elseif iKey == 257
+			Call (CompileScript "SimpleAkimbo\SAFire.txt") 1
+		endif
+	else
+		; Modus B: nur LMB, Hand wechselt pro Schuss, RMB bleibt Engine-ADS
+		if iKey == 256
+			let fHand = Player.AuxVarGetFlt "*_SAHand"
+			Call (CompileScript "SimpleAkimbo\SAFire.txt") (fHand)
+			Player.AuxVarSetFlt "*_SAHand" (1 - fHand)
+		endif
+	endif
+End

@@ -1,0 +1,11 @@
+Begin Function {int iMenuID}
+	; Menue geoeffnet: Angriff/Aim freigeben, damit die Maus im Menue geht.
+	if Player.AuxVarGetFlt "*_SAkimbo" == 1
+		EnableControl 4
+		EnableControl 6
+	endif
+	; gehaltene Maustasten zuruecksetzen, ein Loslassen im Menue wird nicht sicher gemeldet
+	Player.AuxVarSetFlt "*_SAHeld256" 0
+	Player.AuxVarSetFlt "*_SAHeld257" 0
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
+End

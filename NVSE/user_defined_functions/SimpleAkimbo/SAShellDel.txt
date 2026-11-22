@@ -1,0 +1,29 @@
+Begin Function {ref rTarget, int iHand, int iSlot}
+	; Wird per CallAfterSeconds aufgerufen. Loescht die Huelse und gibt den Slot frei.
+	ref rStored
+	string_var sKey
+	string_var sTimeKey
+	float fStamp
+
+	let sKey = sv_Construct "*_SAShell%g_%g" iHand iSlot
+	let sTimeKey = sv_Construct "*_SAShellT%g_%g" iHand iSlot
+
+	let fStamp = Player.AuxVarGetFlt (sTimeKey)
+	if fStamp == 0
+		PrintC "SA Shell Del: slot %g_%g already free, nothing deleted" iHand iSlot
+		return
+	endif
+	let rStored = Player.AuxVarGetRef (sKey)
+	if rStored != rTarget
+		PrintC "SA Shell Del: slot %g_%g was reused, skipped" iHand iSlot
+		return
+	endif
+	if IsReference rTarget
+		rTarget.Disable
+		rTarget.MarkForDelete
+		PrintC "SA Shell Del: shell in slot %g_%g deleted" iHand iSlot
+	else
+		PrintC "SA Shell Del: reference in slot %g_%g invalid" iHand iSlot
+	endif
+	Player.AuxVarSetFlt (sTimeKey) 0
+End

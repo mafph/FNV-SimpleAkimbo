@@ -1,0 +1,18 @@
+Begin Function {float fAmmoAfter}
+	; 3p-Links-Schlitten @ 600 RPM (0.1 s).
+	; 5 Schritte Ruecklauf (0.033 s), 5 Schritte Vorlauf (0.067 s). X = 0 .. -4.07
+	float fSeq
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+
+	let fSeq = Player.AuxVarGetFlt "*_SASlide3rdSeq"
+	let fSeq += 1
+	Player.AuxVarSetFlt "*_SASlide3rdSeq" fSeq
+	Player.AuxVarSetFlt "*_SASlide3rdCloseSeq" fSeq
+	Player.AuxVarSetFlt "*_SASlide3rdStep" 0
+	Player.AuxVarSetFlt "*_SASlide3rdPhase" 0
+
+	Call (CompileScript "SimpleAkimbo\SALeftSlide3rdStep.txt")
+End

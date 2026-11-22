@@ -1,0 +1,19 @@
+Begin Function {int iMenuID}
+	; Menue geschlossen: ggf. Waffenwechsel pruefen, dann Sperre neu setzen.
+	Call (CompileScript "SimpleAkimbo\SACheck.txt")
+	Call (CompileScript "SimpleAkimbo\SAControls.txt")
+	Call (CompileScript "SimpleAkimbo\SAHud.txt")
+	; J im Inventar hat eine linke Waffe markiert, Akimbo kurz nach dem Schliessen starten
+	if Player.AuxVarGetFlt "*_SAStartPend" == 1
+		Player.AuxVarSetFlt "*_SAStartPend" 0
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAToggle.txt") 0 0
+		endif
+	; J im Inventar hat bei laufendem Akimbo eine andere linke Waffe markiert: aus und wieder an
+	if Player.AuxVarGetFlt "*_SASwapPend" == 1
+		Player.AuxVarSetFlt "*_SASwapPend" 0
+		Player.AuxVarSetFlt "*_SASwapping" 1
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAToggle.txt") 0 0
+		Player.CallAfterSeconds 0.9 (CompileScript "SimpleAkimbo\SAToggle.txt") 0 0
+	endif
+	Player.AuxVarErase "*_SAHintLast"
+End

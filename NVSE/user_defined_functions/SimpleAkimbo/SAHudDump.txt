@@ -1,0 +1,18 @@
+Begin Function {}
+	; Hilfsfunktion zur Fehlersuche: gibt Text von justify_right_text:0 bis :7 im HUD (ActionPoints) in der Konsole aus.
+	; Aufruf in der Konsole:  Call (CompileScript "SimpleAkimbo\SAHudDump.txt")
+	; Einmal mit Akimbo aus und einmal mit Akimbo an ausfuehren und vergleichen. Aendert nichts.
+	string_var sPath
+	string_var sText
+	int iTile
+	int iLen
+
+	let iTile = 0
+	while iTile < 8
+		let sPath = sv_Construct "HUDMainMenu\ActionPoints\justify_right_text:%g\string" iTile
+		let sText = GetUIString (sPath)
+		let iLen = sv_Length sText
+		PrintC "SA HudDump tile %g len %g text %z" iTile iLen sText
+		let iTile += 1
+	loop
+End

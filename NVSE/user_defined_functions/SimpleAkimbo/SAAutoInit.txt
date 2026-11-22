@@ -1,0 +1,60 @@
+Begin Function {}
+	; Berechnet pro Hand das Schussintervall fuer Dauerfeuer. 0 = Waffe ist nicht automatisch.
+	; Aufruf beim Einschalten von Akimbo.
+	; UNVERIFIZIERT: GetWeaponFireRate als Schuesse pro Sekunde.
+	ref rWeaponForm
+	string_var sIntKey
+	float fRateVal
+	float fIntervalVal
+	float fIntLeft
+	float fIntRight
+	float fIntBoth
+	ref rRightW
+	int iAutoFlag
+	int iHandNum
+
+	let iHandNum = 0
+	while iHandNum < 2
+		if iHandNum == 0
+			let rWeaponForm = Player.AuxVarGetRef "*_SALeftW"
+			if rWeaponForm == 0
+				let rWeaponForm = Player.GetEquippedObject 5
+			endif
+		else
+			let rWeaponForm = Player.GetEquippedObject 5
+		endif
+		let fIntervalVal = 0
+		if rWeaponForm != 0
+			let iAutoFlag = GetWeaponIsAutomatic rWeaponForm
+			if iAutoFlag == 1
+				let fRateVal = GetWeaponFireRate rWeaponForm
+				if fRateVal > 0
+					let fIntervalVal = 1 / fRateVal
+					if fIntervalVal < 0.08
+						let fIntervalVal = 0.08
+					endif
+				endif
+			endif
+		endif
+		let sIntKey = sv_Construct "*_SAAutoInt%g" iHandNum
+		Player.AuxVarSetFlt (sIntKey) fIntervalVal
+		PrintC "SA Auto hand %g weapon %i automatic %g interval %g" iHandNum rWeaponForm iAutoFlag fIntervalVal
+		let iHandNum += 1
+	loop
+	; rechte Waffe merken: SAHeldDown ruft SAAutoInit neu auf, sobald sie abweicht
+	let rRightW = Player.GetEquippedObject 5
+	Player.AuxVarSetRef "*_SAAutoRefR" rRightW
+	; Modus B (LMB abwechselnd): nur Dauerfeuer, wenn beide Waffen automatisch sind. Da die Haende abwechseln,
+	; ist das Intervall zwischen zwei Schuessen halb so lang, damit jede Waffe ihre volle Feuerrate hat.
+	let fIntLeft = Player.AuxVarGetFlt "*_SAAutoInt0"
+	let fIntRight = Player.AuxVarGetFlt "*_SAAutoInt1"
+	let fIntBoth = 0
+	if fIntLeft > 0 && fIntRight > 0
+		let fIntBoth = (fIntLeft + fIntRight) / 4
+		if fIntBoth < 0.04
+			let fIntBoth = 0.04
+		endif
+	endif
+	Player.AuxVarSetFlt "*_SAAutoIntB" fIntBoth
+	PrintC "SA Auto mode B interval %g" fIntBoth
+End

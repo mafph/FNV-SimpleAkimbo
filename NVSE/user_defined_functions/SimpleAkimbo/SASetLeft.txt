@@ -1,0 +1,73 @@
+Begin Function {int iKey}
+	; Wird von J im Inventar (Pip-Boy, Menue 1002) aufgerufen. Markierte einhaendige Waffe als linke Akimbo-Waffe merken, ohne sie auszuruesten.
+	; Akimbo aus und eine einhaendige Waffe ausgeruestet: Akimbo startet nach dem Schliessen des Menues.
+	; Akimbo an und andere Waffe markiert: nach dem Schliessen wird die linke Waffe getauscht.
+	; Die ausgeruestete Waffe darf nicht ihre eigene linke Waffe sein, ausser es gibt ein zweites Exemplar.
+	ref rWeap
+	ref rItem
+	ref rEquip
+	ref rOld
+	int iType
+	int iWT
+	int iEWT
+	int iCount
+	int iMods
+	float fAbs
+
+	if GetActiveMenuMode != 1002
+		return
+	endif
+
+	let rItem = GetSelectedItemRef
+	if (IsReference rItem) == 0
+		PrintC "SimpleAkimbo: nothing selected, press J on a weapon in the inventory"
+		return
+	endif
+	let rWeap = rItem.GetBaseObject
+	let iType = GetType rWeap
+	if iType != 40
+		MessageEx "Akimbo: selected item is not a weapon"
+		return
+	endif
+	let iWT = GetWeaponType rWeap
+	if iWT != 3 && iWT != 4
+		MessageEx "Akimbo: %n is not a one-handed weapon" rWeap
+		return
+	endif
+
+	let rEquip = Player.GetEquippedObject 5
+	if rWeap == rEquip
+		let iCount = Player.GetItemCount rWeap
+		if iCount < 2
+			MessageEx "Akimbo: the equipped weapon cannot be its own left weapon"
+			return
+		endif
+	endif
+
+	let iMods = rItem.GetWeaponRefModFlags
+	let rOld = Player.AuxVarGetRef "*_SALeftW"
+	if rOld == rWeap && Player.AuxVarGetFlt "*_SALeftMods" == iMods
+		MessageEx "Akimbo: %n is already the left weapon" rWeap
+		return
+	endif
+
+	let fAbs = rItem.GetItemRefCurrentHealth 0
+	; GetItemRefCurrentHealth 1 liefert keinen Prozentwert, Maximum daher aus GetBaseHealth (SAWear)
+	Player.AuxVarSetFlt "*_SALeftHP" fAbs
+	Player.AuxVarSetFlt "*_SALeftMax" 0
+	Player.AuxVarSetFlt "*_SAHPL" 0
+	Player.AuxVarSetFlt "*_SACondL" 0
+	Player.AuxVarSetRef "*_SALeftW" rWeap
+	Player.AuxVarSetFlt "*_SALeftMods" iMods
+	MessageEx "Akimbo left: %n" rWeap
+	PrintC "SimpleAkimbo: left weapon = %i" rWeap
+
+	if Player.AuxVarGetFlt "*_SAkimbo" == 1
+		Player.AuxVarSetFlt "*_SASwapPend" 1
+	elseif rEquip != 0
+		let iEWT = GetWeaponType rEquip
+		if iEWT == 3 || iEWT == 4
+			Player.AuxVarSetFlt "*_SAStartPend" 1
+		endif
+	endif
+End

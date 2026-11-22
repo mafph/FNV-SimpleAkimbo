@@ -1,0 +1,17 @@
+Begin Function {}
+	; Jam ausloesen: linke Waffe verstecken (1 = 3rd Person, 2 = 1st Person), Jam-Animation der rechten Waffe, nach Animationsdauer frei.
+	ref rWeapon
+	float fJamSeconds
+
+	Player.AuxVarSetFlt "*_SAJamPend" 0
+	Player.AuxVarSetFlt "*_SAJam" 1
+	Player.SetNifBlockFlag "Akimbo" 0 1 1
+	Player.SetNifBlockFlag "Akimbo" 0 1 2
+	Player.ForceWeaponJamAnim
+	let rWeapon = Player.GetEquippedObject 5
+	let fJamSeconds = Player.GetWeaponAnimJamTime rWeapon
+	if fJamSeconds <= 0
+		let fJamSeconds = 3
+	endif
+	Player.CallAfterSeconds fJamSeconds (CompileScript "SimpleAkimbo\SAJamEnd.txt") 0
+End

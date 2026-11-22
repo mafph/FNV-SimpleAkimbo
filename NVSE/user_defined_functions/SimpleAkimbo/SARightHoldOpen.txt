@@ -1,0 +1,4 @@
+Begin Function {}
+	; absichtlich leer: Bolt-Open rechts wird nicht mehr erzwungen (Vanilla-Idle darf schließen).
+	; Auto-Reload wenn beide Magazine leer (siehe SAFire).
+End

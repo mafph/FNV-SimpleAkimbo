@@ -1,0 +1,28 @@
+Begin Function {}
+	; Erkennt den Munitionswechsel rechts (Engine loest dabei selbst den Vanilla-Reload aus)
+	; und ersetzt ihn durch den Akimbo-Reload. Laeuft als Main-Loop-Callback (GameMode), siehe SAStart.
+	; Waehrend der Reload-Animation laeuft (*_SATypeBusy) wird ein weiterer Wechsel nur gemerkt
+	; (*_SATypePend) und erst nach Ende der Animation still angewendet (SATypeBusyEnd).
+	ref rCurType
+	ref rLastType
+
+	let rCurType = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") 1
+	let rLastType = Player.AuxVarGetRef "*_SATypeLast"
+
+	if rLastType == rCurType
+		return
+	endif
+	Player.AuxVarSetRef "*_SATypeLast" rCurType
+
+	; Akimbo aus oder erster Lauf: nur den Typ merken, nichts ausloesen
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1 || rLastType == 0
+		return
+	endif
+
+	PrintC "SA TypeWatch ammo type changed %i -> %i" rLastType rCurType
+	if Player.AuxVarGetFlt "*_SATypeBusy" == 1
+		Player.AuxVarSetFlt "*_SATypePend" 1
+		return
+	endif
+	Call (CompileScript "SimpleAkimbo\SATypeApply.txt") 1
+End
