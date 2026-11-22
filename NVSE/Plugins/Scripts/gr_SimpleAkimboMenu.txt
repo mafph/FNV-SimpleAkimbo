@@ -13,8 +13,8 @@ Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iToggl
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iModeKey" "SimpleAkimbo.ini" 49) 1 255)) 1
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iMode" "SimpleAkimbo.ini" 0) 0 1)) 2
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iDebug" "SimpleAkimbo.ini" 0) 0 1)) 3
-Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iStrMode" "SimpleAkimbo.ini" 0) 0 4)) 4
-Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iSkillMode" "SimpleAkimbo.ini" 0) 0 3)) 5
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iStrMode" "SimpleAkimbo.ini" 2) 0 4)) 4
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iSkillMode" "SimpleAkimbo.ini" 1) 0 3)) 5
 
 ; Also mirror mode and debug into the existing runtime vars
 Player.AuxVarSetFlt "*_SAMode" (Player.AuxVarGetFlt "*_SA_MCM" 2)

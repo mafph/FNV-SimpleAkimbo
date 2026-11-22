@@ -1,0 +1,28 @@
+Begin Function {}
+	; Runs as a callback only in menu mode (see SAStart). Shows a hint with the name when an Akimbo weapon is selected in the inventory.
+	ref rItem
+	ref rBase
+	ref rLast
+	ref rLeft
+	ref rEquip
+
+	if GetActiveMenuMode != 1002
+		return
+	endif
+	let rItem = GetSelectedItemRef
+	if (IsReference rItem) == 0
+		return
+	endif
+	let rBase = rItem.GetBaseObject
+	let rLast = Player.AuxVarGetRef "*_SAHintLast"
+	if rBase == rLast
+		return
+	endif
+	Player.AuxVarSetRef "*_SAHintLast" rBase
+
+	let rLeft = Player.AuxVarGetRef "*_SALeftW"
+	let rEquip = Player.GetEquippedObject 5
+	if rLeft != 0 && rBase == rLeft
+		MessageEx "Akimbo left: %n" rBase
+	endif
+End

@@ -13,6 +13,8 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SA_MCM" 49 1
 		Player.AuxVarSetFlt "*_SA_MCM" 0 2
 		Player.AuxVarSetFlt "*_SA_MCM" 0 3
+		Player.AuxVarSetFlt "*_SA_MCM" 2 4
+		Player.AuxVarSetFlt "*_SA_MCM" 1 5
 	endif
 	; Mirror mode and debug
 	if Player.AuxVarGetFlt "*_SAMode" == 0 && Player.AuxVarGetFlt "*_SA_MCM" 2 != 0

@@ -2,6 +2,10 @@ Begin Function {int iApply}
 	; Strength and skill requirement of the equipped (right) weapon while Akimbo is active.
 	; Strength modes (MCM key 4): 0 = +0 (free), 1 = highest of both, 2 = highest +1, 3 = highest +50 percent of left, 4 = highest +100 percent of left.
 	; Skill modes (MCM key 5): 0 = +0 (free), 1 = highest of both, 2 = highest +25, 3 = highest +100 percent of left.
+	; The two weapons can use different skills (Guns / Energy Weapons ...) and the player can be skilled differently in them.
+	; The engine only checks the right weapon against ITS skill. So the requirement of the left weapon is converted into the
+	; skill of the right weapon: left requirement + (player value in right skill - player value in left skill).
+	; The shortfall of the right weapon is then exactly the larger of the two real shortfalls.
 	; iApply 1 = apply, 0 = only restore the original values.
 	ref rOld
 	ref rLeft
@@ -11,7 +15,14 @@ Begin Function {int iApply}
 	int iLeft
 	int iBase
 	int iNew
+	int iSkR
+	int iSkL
+	int iValR
+	int iValL
+	int iLeftAdj
 
+	Player.AuxVarSetFlt "*_SAReqAvR" 0
+	Player.AuxVarSetFlt "*_SAReqAvL" 0
 	; Restore the weapons changed before
 	let rOld = Player.AuxVarGetRef "*_SAStrForm"
 	if rOld != 0
@@ -69,9 +80,23 @@ Begin Function {int iApply}
 	if iMode != 0
 		let iOrig = Player.GetReqSkill rEquip
 		let iLeft = Player.GetReqSkill rLeft
+		let iSkR = GetWeaponSkill rEquip
+		let iSkL = GetWeaponSkill rLeft
+		; same skill: left requirement unchanged. Different skills: convert into the skill of the right weapon.
+		let iLeftAdj = iLeft
+		if iSkR != iSkL && iSkR > 0 && iSkL > 0
+			let iValR = Player.GetAV iSkR
+			let iValL = Player.GetAV iSkL
+			let iLeftAdj = iLeft + iValR - iValL
+			; remember the skill values: SAMcmWatch recalculates when they change (chems, level up)
+			Player.AuxVarSetFlt "*_SAReqAvR" iSkR
+			Player.AuxVarSetFlt "*_SAReqAvL" iSkL
+			Player.AuxVarSetFlt "*_SAReqValR" iValR
+			Player.AuxVarSetFlt "*_SAReqValL" iValL
+		endif
 		let iBase = iOrig
-		if iLeft > iBase
-			let iBase = iLeft
+		if iLeftAdj > iBase
+			let iBase = iLeftAdj
 		endif
 		let iNew = iBase
 		if iMode == 2
@@ -79,11 +104,14 @@ Begin Function {int iApply}
 		elseif iMode == 3
 			let iNew = iBase + iLeft
 		endif
+		if iNew > 255
+			let iNew = 255
+		endif
 		Player.AuxVarSetFlt "*_SASkOrig" iOrig
 		Player.AuxVarSetRef "*_SASkForm" rEquip
 		Player.SetReqSkill iNew rEquip
 		if Player.AuxVarGetFlt "*_SADebug" == 1
-			PrintC "SimpleAkimbo: skill req %g -> %g (mode %g)" iOrig iNew iMode
+			PrintC "SimpleAkimbo: skill req %g -> %g (mode %g, right skill %g, left skill %g, left req %g converted %g)" iOrig iNew iMode iSkR iSkL iLeft iLeftAdj
 		endif
 	endif
 End

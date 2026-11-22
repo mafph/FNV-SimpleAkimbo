@@ -1,7 +1,0 @@
-Begin Function {}
-	if Player.AuxVarGetFlt "*_SASlide3rdSeq" != Player.AuxVarGetFlt "*_SASlide3rdCloseSeq"
-		return
-	endif
-	Player.SetNifBlockTranslation "##nmBar1" -4.07 0 0 1
-	Player.CallAfterSeconds 0.0134 (CompileScript "SimpleAkimbo\SALeftSlide3rdC1.txt")
-End

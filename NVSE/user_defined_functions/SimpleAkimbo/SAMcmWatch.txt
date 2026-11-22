@@ -9,6 +9,10 @@ Begin Function {}
 	float fSkSeen
 	float fDebug
 	int iOn
+	int iAvR
+	int iAvL
+	int iNowR
+	int iNowL
 
 	; Debug messages
 	let fDebug = Player.AuxVarGetFlt "*_SA_MCM" 3
@@ -39,5 +43,18 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SASkMode" fSkill
 		let iOn = Player.AuxVarGetFlt "*_SAkimbo"
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") iOn
+	endif
+
+	; Weapons with different skills: the converted skill requirement depends on the current skill values
+	if Player.AuxVarGetFlt "*_SAkimbo" == 1
+		let iAvR = Player.AuxVarGetFlt "*_SAReqAvR"
+		if iAvR > 0
+			let iAvL = Player.AuxVarGetFlt "*_SAReqAvL"
+			let iNowR = Player.GetAV iAvR
+			let iNowL = Player.GetAV iAvL
+			if iNowR != Player.AuxVarGetFlt "*_SAReqValR" || iNowL != Player.AuxVarGetFlt "*_SAReqValL"
+				Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
+			endif
+		endif
 	endif
 End

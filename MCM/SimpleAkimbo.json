@@ -103,7 +103,7 @@
 							"form": "PlayerRef",
 							"auxVar": "*_SA_MCM",
 							"key": 4,
-							"default": 0,
+							"default": 2,
 							"configINI": "General:iStrMode"
 						}
 					],
@@ -129,7 +129,7 @@
 							"form": "PlayerRef",
 							"auxVar": "*_SA_MCM",
 							"key": 5,
-							"default": 0,
+							"default": 1,
 							"configINI": "General:iSkillMode"
 						}
 					],
