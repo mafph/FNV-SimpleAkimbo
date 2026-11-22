@@ -1,5 +1,5 @@
 Begin Function {}
-	; Sicherheitsnetz: loescht Huelsen, die laenger als 15 Sekunden registriert sind, z.B. nach dem Laden eines Spielstands. Zeit ueber GameDaysPassed und TimeScale.
+	; Sicherheitsnetz: loescht Huelsen, die laenger als 6 Sekunden registriert sind, z.B. nach dem Laden eines Spielstands. Zeit ueber GameDaysPassed und TimeScale.
 	; Laeuft als Main-Loop-Callback, siehe SAStart.
 	ref rShell
 	string_var sKey
@@ -15,7 +15,7 @@ Begin Function {}
 		return
 	endif
 	let iAlive = 0
-	let fLife = 15 * TimeScale / 86400
+	let fLife = 6 * TimeScale / 86400
 
 	let iHand = 0
 	while iHand < 2

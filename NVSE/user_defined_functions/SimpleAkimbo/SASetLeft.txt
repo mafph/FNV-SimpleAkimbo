@@ -45,11 +45,7 @@ Begin Function {int iKey}
 	endif
 
 	let iMods = rItem.GetWeaponRefModFlags
-	let rOld = Player.AuxVarGetRef "*_SALeftW"
-	if rOld == rWeap && Player.AuxVarGetFlt "*_SALeftMods" == iMods
-		MessageEx "Akimbo: %n is already the left weapon" rWeap
-		return
-	endif
+	; Auch eine bereits gemerkte linke Waffe wird wie eine neue gesetzt (kein Abbruch mit Meldung)
 
 	let fAbs = rItem.GetItemRefCurrentHealth 0
 	; GetItemRefCurrentHealth 1 liefert keinen Prozentwert, Maximum daher aus GetBaseHealth (SAWear)

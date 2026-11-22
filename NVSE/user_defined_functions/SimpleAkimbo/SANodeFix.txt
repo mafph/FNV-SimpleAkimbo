@@ -67,6 +67,20 @@ Begin Function {int iHand}
 				endif
 			endif
 
+			; SMG-Schema: Magazin heisst ##SMGClip statt ##Clip
+			if iOK == 0 && iIdx == 2
+				let sOld = "##SMGClip"
+				if iHand == 1
+					let iOK = Player.RenameNifBlock (sOld) (sNodeNew) iModel
+				else
+					let sOldL = sOld + "1"
+					let iOK = Player.RenameNifBlock (sOldL) (sNodeNew) iModel
+					if iOK == 0
+						let iOK = Player.RenameNifBlock (sOld) (sNodeNew) iModel
+					endif
+				endif
+			endif
+
 			if iOK == 1
 				let aNode = Player.GetNifBlockTranslation (sNodeNew) 0 iModel
 				let iSize = ar_Size aNode

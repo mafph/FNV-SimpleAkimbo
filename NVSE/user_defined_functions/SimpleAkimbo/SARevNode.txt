@@ -1,0 +1,13 @@
+Begin Function {string_var sName, float fX, float fY, float fZ}
+	; Dreht den Knoten sName (1p und 3p) relativ zur aktuellen Rotation. Fehlende Knoten werden uebersprungen.
+	array_var aR
+	int iM
+	let iM = 1
+	while iM <= 2
+		let aR = Player.GetNifBlockRotation (sName) 0 iM
+		if eval (ar_Size aR) == 3
+			Player.SetNifBlockRotation (sName) (aR[0] + fX) (aR[1] + fY) (aR[2] + fZ) iM
+		endif
+		let iM += 1
+	loop
+End

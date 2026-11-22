@@ -1,0 +1,29 @@
+Begin Function {}
+	; Idle-Halt: nach dem Equip und nach jedem Nachladen die Endpose der Attack-kfs halten.
+	; Nur sie enthalten die richtige Haltung mit linker Hand. Nach dem ersten Schuss stimmt alles, weil die
+	; geklemmte Attack-Sequenz bleibt. SAReload entfernt sie vor dem Nachladen, deshalb hier neu anfordern.
+	; Startover 0: eine noch aktive Sequenz wird nicht neu gestartet.
+	int iPrio
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAReloading" == 1
+		PrintC "SA IdleHold: skipped, reload running"
+		return
+	endif
+
+	let iPrio = Player.AuxVarGetFlt "*_SAEquipPrio"
+	if iPrio <= 0
+		let iPrio = 2
+	endif
+
+	PrintC "SA IdleHold: applied prio %g" iPrio
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf" 0.0
+
+	Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 1 iPrio 0 1.0 0.0 ""
+	Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0 iPrio 0 1.0 0.0 ""
+	Player.ActivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 1 iPrio 0 1.0 0.0 ""
+	Player.ActivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0 iPrio 0 1.0 0.0 ""
+End

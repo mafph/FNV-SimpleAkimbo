@@ -2,10 +2,11 @@ Begin Function {int iHand}
 	; Huelse selbst erzeugen. iHand: 0 = links, 1 = rechts.
 	; UNVERIFIZIERT: PlaceAtMe Caps001 als Havok-Traeger, SetModelPath auf der Referenz.
 	; Kein Impuls, ApplyHavokImpulse gibt es in FNV nicht.
-	; Aufraeumen nach 10 Sekunden per CallAfterSeconds und SAShellDel. SAShellClean raeumt Reste nach Laden ab. 60 Slots pro Hand als Notbremse.
+	; Aufraeumen nach 4 Sekunden per CallAfterSeconds und SAShellDel. SAShellClean raeumt Reste nach Laden ab. 60 Slots pro Hand als Notbremse.
 	ref rWeap
 	ref rShell
 	ref rPrev
+	ref rBase
 	string_var sModel
 	string_var sKey
 	string_var sTimeKey
@@ -21,6 +22,9 @@ Begin Function {int iHand}
 	float fPosY
 	float fPosZ
 	float fOld
+
+	; Sicherheitsnetz: alte Huelsen auch ohne laufende Main-Loop (z.B. nach Autosave-Load) wegraeumen
+	Call (CompileScript "SimpleAkimbo\SAShellClean.txt")
 
 	let rWeap = Player.GetEquippedObject 5
 	if iHand == 0
@@ -55,7 +59,12 @@ Begin Function {int iHand}
 		endif
 	endif
 
-	let rShell = Player.PlaceAtMe Caps001 1 0 0
+	; Traeger: CounterfeitCaps (00157381, FalloutNV.esm), Rueckfall Caps001
+	let rBase = GetFormFromMod "FalloutNV.esm" "157381"
+	if (IsReference rBase) == 0 && rBase == 0
+		let rBase = Caps001
+	endif
+	let rShell = Player.PlaceAtMe rBase 1 0 0
 	if (IsReference rShell) == 0
 		PrintC "SimpleAkimbo: shell not created"
 		return
@@ -76,5 +85,5 @@ Begin Function {int iHand}
 	Player.AuxVarSetRef (sKey) rShell
 	Player.AuxVarSetFlt "*_SAShellActive" 1
 	Player.AuxVarSetFlt (sTimeKey) GameDaysPassed
-	Player.CallAfterSeconds 10 (CompileScript "SimpleAkimbo\SAShellDel.txt") 0 rShell iHand iSlot
+	Player.CallAfterSeconds 4 (CompileScript "SimpleAkimbo\SAShellDel.txt") 0 rShell iHand iSlot
 End

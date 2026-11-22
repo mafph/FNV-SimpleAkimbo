@@ -1,0 +1,25 @@
+Begin Function {}
+	; Main-Loop-Callback alle 10 Frames, GameMode: erkennt den Wechsel der rechten Waffe bei laufendem Akimbo
+	; und spielt dann die Equip-Animation SAEquipAnim. Ohne Akimbo wird die Waffe nur gemerkt.
+	ref rNow
+	ref rLast
+
+	let rNow = Player.GetEquippedObject 5
+	let rLast = Player.AuxVarGetRef "*_SAEquipLast"
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		Player.AuxVarSetRef "*_SAEquipLast" rNow
+		return
+	endif
+	if rNow == rLast
+		return
+	endif
+	if rLast == 0
+		Player.AuxVarSetRef "*_SAEquipLast" rNow
+		return
+	endif
+	if rNow == 0
+		return
+	endif
+	Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+End

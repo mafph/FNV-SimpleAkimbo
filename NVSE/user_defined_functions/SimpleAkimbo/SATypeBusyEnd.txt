@@ -10,6 +10,9 @@ Begin Function {}
 	float fLen
 	float fSeen
 	int iPlaying
+	string_var sAnim1st
+	string_var sAnim3rd
+	int iPrio
 
 	let fBusy = Player.AuxVarGetFlt "*_SATypeBusy"
 	if fBusy != 1
@@ -25,8 +28,21 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SAPartial" 0
 		Player.AuxVarSetFlt "*_SATypeWait" 0
 		Player.AuxVarSetFlt "*_SATypeSeen" 0
-		Player.PlayGroup ReloadL 1
-		PrintC "SimpleAkimbo: Menue zu, ReloadL gestartet"
+		; Reload-Animation per ActivateAnim (Full) inkl. Sperre; Ende und Deaktivieren in SAReloadEnd
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+		let sAnim1st = "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf"
+		let sAnim3rd = "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf"
+		let iPrio = 6
+		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
+		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
+		Player.AuxVarSetFlt "*_SAReloading" 1
+		Player.AuxVarSetFlt "*_SAReloadWait" 0
+		Player.AuxVarSetFlt "*_SAReloadDur" 5.1
+		Player.CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
+		PrintC "SimpleAkimbo: Menue zu, Reload-Animation gestartet"
 	endif
 
 	let fWait = Player.AuxVarGetFlt "*_SATypeWait"
@@ -45,13 +61,6 @@ Begin Function {}
 	let fSeen = Player.AuxVarGetFlt "*_SATypeSeen"
 
 	PrintC "SimpleAkimbo: busy wait %g playing %g seen %g" fWait iPlaying fSeen
-
-	; in den ersten 0,6 s ReloadL erzwingen, falls die Engine ihre eigene Animation spielt
-	if iPlaying == 0
-		if fWait <= 0.6
-			Player.PlayGroup ReloadL 1
-		endif
-	endif
 
 	if fWait < fLen + 0.3
 		if fWait < 0.8 || fSeen == 0 || iPlaying == 1

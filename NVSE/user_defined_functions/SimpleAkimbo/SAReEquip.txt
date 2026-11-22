@@ -1,0 +1,38 @@
+Begin Function {}
+	; Legt nach dem Ausschalten von Akimbo die Waffe neu an (setzt den Muendungsfeuer-Bezug zurueck). Siehe SAToggle.
+	; Versucht es bis zu 10 Mal im Abstand von 0,2 s und prueft jeweils, ob die Waffe wirklich ausgeruestet ist.
+	ref rWeapon
+	ref rEquipped
+	int iTries
+
+	let rWeapon = Player.AuxVarGetRef "*_SAReEquipW"
+	if rWeapon == 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAkimbo" == 1
+		Player.AuxVarErase "*_SAReEquipW"
+		Player.AuxVarSetFlt "*_SAReEquipTry" 0
+		return
+	endif
+
+	let rEquipped = Player.GetEquippedObject 5
+	if rEquipped == rWeapon
+		PrintC "SA ReEquip: weapon %i equipped again" rWeapon
+		Player.AuxVarErase "*_SAReEquipW"
+		Player.AuxVarSetFlt "*_SAReEquipTry" 0
+		return
+	endif
+
+	let iTries = Player.AuxVarGetFlt "*_SAReEquipTry"
+	if iTries >= 10
+		PrintC "SA ReEquip: giving up, weapon %i not equipped" rWeapon
+		Player.AuxVarErase "*_SAReEquipW"
+		Player.AuxVarSetFlt "*_SAReEquipTry" 0
+		return
+	endif
+	let iTries += 1
+	Player.AuxVarSetFlt "*_SAReEquipTry" iTries
+	PrintC "SA ReEquip: try %g weapon %i" iTries rWeapon
+	Player.EquipItem rWeapon 0 1
+	Player.CallAfterSeconds 0.2 (CompileScript "SimpleAkimbo\SAReEquip.txt")
+End

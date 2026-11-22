@@ -68,7 +68,9 @@ Begin Function {int iHand, int iShot}
 			let fTrait = 1
 		endif
 		let fDecay = fRate * fTrait
-		PrintC "SA Wear Hand %g Rate %g Trait %g Decay %g HP %g Max %g" iHand fRate fTrait fDecay fHealth fMaxHealth
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SA Wear Hand %g Rate %g Trait %g Decay %g HP %g Max %g" iHand fRate fTrait fDecay fHealth fMaxHealth
+		endif
 		let fHealth = fHealth - fDecay
 		if fHealth < 0.01
 			let fHealth = 0.01
@@ -81,7 +83,9 @@ Begin Function {int iHand, int iShot}
 	Player.AuxVarSetFlt (sCondKey) fPercent
 
 	if iHand == 1 && iShot == 1
-		PrintC "SA Wear setting right to %g percent" fPercent
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SA Wear setting right to %g percent" fPercent
+		endif
 		Player.SetWeaponHealthPerc fPercent
 	endif
 End

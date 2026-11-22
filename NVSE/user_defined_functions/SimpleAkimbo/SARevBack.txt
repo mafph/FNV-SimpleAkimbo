@@ -1,0 +1,23 @@
+Begin Function {}
+	; Hammer zurueck (negierte Spann-Rotation) fuer die Hand, die zuletzt geschossen hat
+	string_var sS
+	float fHX
+	float fHY
+	float fHZ
+	float fM
+	let fM = Player.AuxVarGetFlt "*_SARevHam"
+	if fM == 0 || Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	Player.AuxVarSetFlt "*_SARevHam" 0
+	let fHX = 0 - Player.AuxVarGetFlt "*_SARevHamX"
+	let fHY = 0 - Player.AuxVarGetFlt "*_SARevHamY"
+	let fHZ = 0 - Player.AuxVarGetFlt "*_SARevHamZ"
+	if fM == 1
+		let sS = "1"
+	else
+		let sS = ""
+	endif
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##357Hammer" + sS) fHX fHY fHZ
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##mnsHammer" + sS) fHX fHY fHZ
+End

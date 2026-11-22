@@ -7,6 +7,8 @@ Begin Function {string_var sNode}
 		Player.FireWeaponEx (Player.GetEquippedObject 5) (sNode)
 		return
 	endif
-	PrintC "SimpleAkimbo: left fires with form %i" rWeap
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SimpleAkimbo: left fires with form %i" rWeap
+	endif
 	Player.FireWeaponEx (rWeap) (sNode)
 End

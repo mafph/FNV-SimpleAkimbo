@@ -1,0 +1,41 @@
+Begin Function {int iHand}
+	; Revolver: Hammer spannen/fallen und Trommel pro Schuss weiterdrehen (per Skript, ohne kf).
+	; Knoten: 357 = ##357Hammer/##357Cylinder, 44er = ##mnsHammer/##swmCylinder; links mit Suffix 1.
+	; Werte per Konsole aenderbar: player.AuxVarSetFlt "*_SARevCylY" 60  usw. (Grad)
+	string_var sS
+	float fHX
+	float fHY
+	float fHZ
+	float fCX
+	float fCY
+	float fCZ
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SARevInit" != 2
+		Player.AuxVarSetFlt "*_SARevHamX" 0
+		Player.AuxVarSetFlt "*_SARevHamY" 0
+		Player.AuxVarSetFlt "*_SARevHamZ" 0
+		Player.AuxVarSetFlt "*_SARevCylX" -60
+		Player.AuxVarSetFlt "*_SARevCylY" 0
+		Player.AuxVarSetFlt "*_SARevCylZ" 0
+		Player.AuxVarSetFlt "*_SARevInit" 2
+	endif
+	let fHX = Player.AuxVarGetFlt "*_SARevHamX"
+	let fHY = Player.AuxVarGetFlt "*_SARevHamY"
+	let fHZ = Player.AuxVarGetFlt "*_SARevHamZ"
+	let fCX = Player.AuxVarGetFlt "*_SARevCylX"
+	let fCY = Player.AuxVarGetFlt "*_SARevCylY"
+	let fCZ = Player.AuxVarGetFlt "*_SARevCylZ"
+	if iHand == 0
+		let sS = "1"
+	else
+		let sS = ""
+	endif
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##357Cylinder" + sS) fCX fCY fCZ
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##swmCylinder" + sS) fCX fCY fCZ
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##357Hammer" + sS) fHX fHY fHZ
+	Call (CompileScript "SimpleAkimbo\SARevNode.txt") ("##mnsHammer" + sS) fHX fHY fHZ
+	Player.AuxVarSetFlt "*_SARevHam" (1 + iHand)
+	Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SARevBack.txt")
+End

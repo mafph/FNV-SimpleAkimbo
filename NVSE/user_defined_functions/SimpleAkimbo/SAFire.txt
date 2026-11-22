@@ -7,7 +7,6 @@ Begin Function {int iHand}
 	float fAmmo
 	float fAmmoL
 	float fAmmoR
-	ref rFireWeapon
 	ref rFireAmmo
 	int iPrio
 
@@ -48,37 +47,35 @@ Begin Function {int iHand}
 	let fAmmo -= 1
 	Player.AuxVarSetFlt (sKeyAmmo) fAmmo
 
+	; Abzuziehen ist genau der in dieser Hand GELADENE Typ (einzelne Ammo, keine Liste).
+	; GetWeaponAmmo liefert oft eine FormList: RemoveItem darauf zieht von ALLEN Typen ab.
 	if iHand == 0
-		let rFireWeapon = Player.AuxVarGetRef "*_SALeftW"
-		if rFireWeapon == 0
-			let rFireWeapon = Player.GetEquippedObject 5
-		endif
+		let rFireAmmo = Player.AuxVarGetRef "*_SALoadedTypeL"
 	else
-		let rFireWeapon = Player.GetEquippedObject 5
+		let rFireAmmo = Player.AuxVarGetRef "*_SALoadedTypeR"
 	endif
-	let rFireAmmo = GetWeaponAmmo rFireWeapon
+	if rFireAmmo == 0
+		let rFireAmmo = Call (CompileScript "SimpleAkimbo\SAAmmoType.txt") iHand
+	endif
 	if rFireAmmo != 0
 		Player.RemoveItem rFireAmmo 1 1
 	endif
 
 	if iHand == 0
-		Player.AuxVarSetFlt "*_SAHandSel" 0
+		; HandSel hier NICHT setzen: ein Wechsel auf 0 bricht die laufende rechte Anim ab (SA_HandR)
 
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
 
-		let iPrio = Player.AuxVarGetFlt "*_SALPrio"
-		if iPrio < 50
-			let iPrio = 50
-		endif
-		let iPrio += 1
+		; Feste Prioritaet: 5 normal, 6 letzter Schuss
+		let iPrio = 5
 
 		if fAmmo == 0
 			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf"
 			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf"
-			let iPrio += 1
+			let iPrio = 6
 		else
 			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf"
 			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf"
@@ -97,7 +94,16 @@ Begin Function {int iHand}
 		endif
 	else
 		Player.AuxVarSetFlt "*_SAHandSel" 1
-		Player.PlayGroup AttackRight 1
+
+		; Rechts wie links per ActivateAnim mit festem Pfad: unabhaengig von waffenspezifischen Ordnern anderer Mods
+		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+
+		let iPrio = 5
+		let sAnim1st = "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf"
+		let sAnim3rd = "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf"
+		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
+		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
 	endif
 
 	Call (CompileScript "SimpleAkimbo\SASilence.txt") iHand 1
@@ -108,6 +114,7 @@ Begin Function {int iHand}
 	endif
 	Player.CallAfterSeconds 0.5 (CompileScript "SimpleAkimbo\SASilence.txt") 0 0 0
 
+	Call (CompileScript "SimpleAkimbo\SARevolver.txt") iHand
 	Call (CompileScript "SimpleAkimbo\SAShell.txt") iHand
 	Call (CompileScript "SimpleAkimbo\SAHud.txt")
 	Call (CompileScript "SimpleAkimbo\SAWear.txt") iHand 1
@@ -119,5 +126,7 @@ Begin Function {int iHand}
 		Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SAAutoReload.txt")
 	endif
 
-	PrintC "SimpleAkimbo: shot hand=%g remaining=%g" iHand fAmmo
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SimpleAkimbo: shot hand=%g remaining=%g" iHand fAmmo
+	endif
 End

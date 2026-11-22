@@ -40,6 +40,11 @@ Begin Function {int iWithAnim}
 		endif
 	endif
 
+	; Laeuft gerade ein Reload, wird der Typ nur still getauscht (keine weitere Animation)
+	if Player.AuxVarGetFlt "*_SAReloading" == 1
+		let iWithAnim = 0
+	endif
+
 	if iHandRChanged == 1
 		Player.AuxVarSetFlt "*_SAAmmoR" 0
 		Player.AuxVarSetRef "*_SALoadedTypeR" rNull
@@ -78,7 +83,16 @@ Begin Function {int iWithAnim}
 	Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
 	let fLoadedNow = Player.AuxVarGetFlt "*_SALoaded"
 	if fLoadedNow <= 0
-		PrintC "SimpleAkimbo: Typwechsel ohne Animation (SAReload hat nichts geladen)"
+		; SAReload ist vorzeitig ausgestiegen (Reload laeuft, Jam, Menue ...) oder es gab keinen Bestand.
+		; Magazine wurden oben auf 0 gesetzt, deshalb hier still nachfuellen.
+		PrintC "SimpleAkimbo: Typwechsel, SAReload hat nichts geladen, fuelle still"
+		if iHandRChanged == 1
+			Call (CompileScript "SimpleAkimbo\SAReloadHand.txt") 1
+		endif
+		if iHandLChanged == 1
+			Call (CompileScript "SimpleAkimbo\SAReloadHand.txt") 0
+		endif
+		Call (CompileScript "SimpleAkimbo\SAHud.txt")
 		return
 	endif
 

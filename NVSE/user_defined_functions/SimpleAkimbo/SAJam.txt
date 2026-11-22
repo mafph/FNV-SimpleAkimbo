@@ -39,12 +39,16 @@ Begin Function {int iHand, int iReload}
 	endif
 	let fChance = GetNumericGameSetting (sName)
 	let iRoll = GetRandomPercent
-	PrintC "SA Jam check hand %g, condition %g percent, band %g, chance %g, roll %g, after reload %g" iHand fPct iBand fChance iRoll iReload
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SA Jam check hand %g, condition %g percent, band %g, chance %g, roll %g, after reload %g" iHand fPct iBand fChance iRoll iReload
+	endif
 	if iRoll >= fChance * 100
 		return
 	endif
 
-	PrintC "SimpleAkimbo: jam rolled hand %g, condition %g, chance %g, after reload %g" iHand fPct fChance iReload
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SimpleAkimbo: jam rolled hand %g, condition %g, chance %g, after reload %g" iHand fPct fChance iReload
+	endif
 	if iReload == 1
 		Player.AuxVarSetFlt "*_SAJamPend" 1
 	else

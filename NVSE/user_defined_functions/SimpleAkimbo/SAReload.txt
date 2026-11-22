@@ -4,7 +4,11 @@ Begin Function {int iKey}
 	float fCurL
 	float fCurR
 	float fPartial
-	float fLen
+	float fDur
+	float fPOVInit
+	string_var sAnim1st
+	string_var sAnim3rd
+	int iPrio
 
 	if GetActiveMenuMode != 0
 		PrintC "SimpleAkimbo: SAReload abgebrochen (Menue offen)"
@@ -58,11 +62,12 @@ Begin Function {int iKey}
 	Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 1
 	Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 0
 
-	; Linke Attack-CLAMP-Sequenzen aus der Pipeline
 	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
 	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
 
 	Player.SetNifBlockTranslation "##nmBar" 0 0 0 1
 	Player.SetNifBlockTranslation "##nmBar" 0 0 0 2
@@ -71,17 +76,41 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SALastR" 0
 	Player.AuxVarSetFlt "*_SASlide3rdSeq" (Player.AuxVarGetFlt "*_SASlide3rdSeq" + 1)
 
-	; Schießen unterbinden
-	Player.AuxVarSetFlt "*_SAReloading" 1
-	let fLen = Player.AuxVarGetFlt "*_SAReloadLen"
-	if fLen <= 0
-		let fLen = 2.5
+	; Timer-Sperre
+	; Sperrdauer = Laenge der Reload-kf (Full 5.05 s, Partial 4.42 s); per *_SAReloadLen ueberschreibbar
+	let fDur = Player.AuxVarGetFlt "*_SAReloadLen"
+	if fDur <= 0
+		if fPartial == 1
+			let fDur = 4.45
+		else
+			let fDur = 5.1
+		endif
 	endif
-	Player.CallAfterSeconds fLen (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
+	Player.AuxVarSetFlt "*_SAReloading" 1
+	Player.AuxVarSetFlt "*_SAReloadWait" 0
+	Player.AuxVarSetFlt "*_SAReloadSeen" 0
+	Player.AuxVarSetFlt "*_SAReloadSwitched" 0
+	Player.AuxVarSetFlt "*_SAReloadDur" fDur
+	let fPOVInit = IsPC1stPerson
+	Player.AuxVarSetFlt "*_SAReloadPOV" fPOVInit
 
-	; Animation: PlayGroup laesst kNVSE 1p/3p je nach Kamera aus SA_ReloadFull/Partial waehlen.
-	; Dual-ActivateAnim auf beide Sichten gleichzeitig hat ACCESS_VIOLATION ausgeloest (Crash-Log).
-	Player.PlayGroup ReloadL 1
+	; Reload per ActivateAnim mit festem Pfad (unabhaengig von waffenspezifischen Ordnern anderer Mods).
+	; Das Deaktivieren am Ende passiert in SAReloadEnd.
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+	if fPartial == 1
+		let sAnim1st = "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf"
+		let sAnim3rd = "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf"
+	else
+		let sAnim1st = "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf"
+		let sAnim3rd = "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf"
+	endif
+	let iPrio = 6
+	Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
+	Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
+	Player.CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
 
 	if iKey != 45
 		Call (CompileScript "SimpleAkimbo\SAJam.txt") 0 1

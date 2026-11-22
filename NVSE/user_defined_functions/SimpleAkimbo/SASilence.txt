@@ -50,7 +50,9 @@ Begin Function {int iHand, int iApply}
 		let rWeapon = Player.GetEquippedObject 5
 		let iModFlags = Player.GetEquippedWeaponModFlags
 	endif
-	PrintC "SA Silence hand %g weapon %i mods %g" iHand rWeapon iModFlags
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SA Silence hand %g weapon %i mods %g" iHand rWeapon iModFlags
+	endif
 	if rWeapon == 0
 		return
 	endif
@@ -72,7 +74,9 @@ Begin Function {int iHand, int iApply}
 		let iSlotNum += 1
 		let iBitVal = iBitVal * 2
 	loop
-	PrintC "SA Silence silenced %g" iSilenced
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SA Silence silenced %g" iSilenced
+	endif
 	if iSilenced == 0
 		return
 	endif
@@ -83,7 +87,9 @@ Begin Function {int iHand, int iApply}
 		let iSndModId = iSndType + 9
 		let rSndMod = GetWeaponSound rWeapon iSndModId
 		let rSndOrig = GetWeaponSound rWeapon iSndType
-		PrintC "SA Silence sound %g: original %i, mod %i" iSndType rSndOrig rSndMod
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SA Silence sound %g: original %i, mod %i" iSndType rSndOrig rSndMod
+		endif
 		if rSndOrig != 0
 			let sSndKey = sv_Construct "*_SASndO%g" iSndType
 			Player.AuxVarSetRef (sSndKey) rSndOrig

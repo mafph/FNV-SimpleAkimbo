@@ -1,3 +1,42 @@
 Begin Function {}
-	Player.AuxVarSetFlt "*_SAReloading" 0
+	; Reload-Sperre und Reload-Animation ActivateAnim, siehe SAReload: endet nach der Zeit *_SAReloadDur
+	; oder sofort, wenn Akimbo ausgeschaltet wird. Beim Ende werden die Reload-Sequenzen deaktiviert,
+	; sonst bleiben sie geklemmt und ueberdecken Idle und Schuesse.
+	; Kein Neustart der Animation beim Sichtwechsel: 1p und 3p laufen von Anfang an parallel.
+	float fWait
+	float fDur
+	int iDone
+
+	if Player.AuxVarGetFlt "*_SAReloading" != 1
+		return
+	endif
+
+	let iDone = 0
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		let iDone = 1
+	else
+		let fWait = Player.AuxVarGetFlt "*_SAReloadWait"
+		let fWait += 0.05
+		Player.AuxVarSetFlt "*_SAReloadWait" fWait
+		let fDur = Player.AuxVarGetFlt "*_SAReloadDur"
+		if fDur <= 0
+			let fDur = 5.1
+		endif
+		if fWait >= fDur
+			let iDone = 1
+		endif
+	endif
+
+	if iDone == 1
+		Player.AuxVarSetFlt "*_SAReloading" 0
+		Player.AuxVarSetFlt "*_SAReloadWait" 0
+		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+		Call (CompileScript "SimpleAkimbo\SAIdleHold.txt")
+		return
+	endif
+
+	Player.CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
 End

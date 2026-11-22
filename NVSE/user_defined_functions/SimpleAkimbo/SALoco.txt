@@ -1,0 +1,100 @@
+Begin Function {int iForceOff}
+	; Locomotion 1p fest per ActivateAnim, Prioritaet 3 ueber dem Equip-Halt, unter Schuss und Reload.
+	; Main-Loop-Callback alle 6 Frames, GameMode. iForceOff = 1: nur die laufende Sequenz entfernen SAAnimOff.
+	; Zustand: 0 = Stand, 1 bis 4 = vor, zurueck, links, rechts gehen, 5 bis 8 = dasselbe als fast laufen.
+	; Richtung aus den Tasten W 17, S 31, A 30, D 32, Laufen = linke Shift 42 gehalten nicht beim Schleichen. Standardbelegung.
+	; Sneak: das Pack hat keine eigenen Sneak-Dateien fuer Locomotion, Schleichen nutzt die Geh-Dateien.
+	; 3p: das Pack enthaelt keine Locomotion-Dateien nur mtidle, daher nur 1p.
+	string_var sBase
+	string_var sName
+	string_var sPath
+	int iDir
+	int iFast
+	int iState
+	int iOld
+	int iPass
+	int iSel
+	int iFastSel
+	int iLocoPrio
+
+	; Prioritaet = Equip-Prioritaet plus 1, damit Locomotion immer ueber dem Equip-Halt liegt
+	let iLocoPrio = Player.AuxVarGetFlt "*_SAEquipPrio"
+	if iLocoPrio <= 0
+		let iLocoPrio = 2
+	endif
+	let iLocoPrio += 1
+
+	let iOld = Player.AuxVarGetFlt "*_SALocoState"
+	let iState = 0
+
+	if iForceOff != 1
+		if Player.AuxVarGetFlt "*_SAkimbo" != 1
+			return
+		endif
+		if GetActiveMenuMode == 0
+			if Player.IsWeaponOut == 1
+				let iDir = 0
+				if IsKeyPressed 17
+					let iDir = 1
+				elseif IsKeyPressed 31
+					let iDir = 2
+				elseif IsKeyPressed 30
+					let iDir = 3
+				elseif IsKeyPressed 32
+					let iDir = 4
+				endif
+				if iDir > 0
+					let iFast = 0
+					if IsKeyPressed 42
+						if Player.IsSneaking == 0
+							let iFast = 1
+						endif
+					endif
+					let iState = iDir + 4 * iFast
+				endif
+			endif
+		endif
+	endif
+
+	if iState == iOld
+		return
+	endif
+
+	let sBase = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\Locomotion"
+	let iPass = 0
+	while iPass < 2
+		if iPass == 0
+			let iSel = iOld
+		else
+			let iSel = iState
+		endif
+		if iSel > 0
+			let iFastSel = 0
+			if iSel > 4
+				let iFastSel = 1
+				let iSel -= 4
+			endif
+			if iSel == 1
+				let sName = "forward"
+			elseif iSel == 2
+				let sName = "backward"
+			elseif iSel == 3
+				let sName = "left"
+			else
+				let sName = "right"
+			endif
+			if iFastSel == 1
+				let sName = "fast" + sName
+			endif
+			let sPath = sBase + "\1hp" + sName + ".kf"
+			if iPass == 0
+				Player.DeactivateAnim (sPath) 0.0
+			else
+				Player.ActivateAnim (sPath) 1 iLocoPrio 1 1.0 0.1 ""
+			endif
+		endif
+		let iPass += 1
+	loop
+
+	Player.AuxVarSetFlt "*_SALocoState" iState
+End

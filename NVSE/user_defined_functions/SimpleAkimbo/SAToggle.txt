@@ -96,6 +96,7 @@ Begin Function {int iKey}
 		endif
 		; Knotennamen der linken Waffe
 		Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 0
+		Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SASlideRestore.txt")
 		Player.AuxVarSetFlt "*_SAkimbo" 1
 		Player.AuxVarSetFlt "*_SALPrio" 50
 		Player.AuxVarSetFlt "*_SALastR" 0
@@ -138,14 +139,21 @@ Begin Function {int iKey}
 			endif
 		endif
 		PrintC "SimpleAkimbo: OFF"
+		; Muendungsfeuer haengt sonst am linken Knoten: Waffe kurz ab- und wieder anlegen (nicht beim Tausch der linken Waffe)
+		if Player.AuxVarGetFlt "*_SASwapping" != 1
+			let rWeap = Player.GetEquippedObject 5
+			if rWeap != 0
+				Player.AuxVarSetRef "*_SAReEquipW" rWeap
+				Player.UnequipItem rWeap 0 1
+				Player.CallAfterSeconds 0.2 (CompileScript "SimpleAkimbo\SAReEquip.txt")
+			endif
+		endif
 	endif
 
 	Player.RefreshAnimData
-	; Equip-Animation beim Ein- und Ausschalten. Beim Tausch der linken Waffe nur einmal, beim Einschalten.
+	; Equip-Animation beim Ein- und Ausschalten. Beim Ausschalten kommt sie vom Neu-Anlegen (SAReEquip).
 	if fState == 0
-		Player.PlayGroup Equip 1
+		Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
 		Player.AuxVarSetFlt "*_SASwapping" 0
-	elseif Player.AuxVarGetFlt "*_SASwapping" != 1
-		Player.PlayGroup Equip 1
 	endif
 End

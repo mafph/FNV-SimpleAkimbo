@@ -1,12 +1,22 @@
 Begin Function {}
 	; Engine-Angriff (Control 4) sperren, solange Akimbo an ist.
 	; Modus A: zusaetzlich Block/Aim (6) sperren, weil RMB die rechte Waffe feuert.
+	; Im Menue werden die Controls NIE gesperrt (sonst gehen Klicks im Menue nicht). Ist beim Aufruf noch
+	; ein Menue offen (z.B. Close-Event eines Pip-Boy-Tabs oder Teilmenues im Container), wird nach 0,2 s
+	; erneut geprueft, bis das Menue wirklich zu ist.
 	float fOn
 	float fMode
 	let fOn = Player.AuxVarGetFlt "*_SAkimbo"
 	let fMode = Player.AuxVarGetFlt "*_SAMode"
 	EnableControl 4
 	EnableControl 6
+	EnableControl 5
+	if GetActiveMenuMode != 0
+		if fOn == 1
+			Player.CallAfterSeconds 0.2 (CompileScript "SimpleAkimbo\SAControls.txt")
+		endif
+		return
+	endif
 	if fOn == 1
 		DisableControl 4
 		if fMode == 0

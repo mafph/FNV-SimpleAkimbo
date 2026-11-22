@@ -1,0 +1,30 @@
+Begin Function {}
+	; Ruhelage der Schlitten-Knoten nach SANodeFix merken (nur Knoten, die es wirklich gibt)
+	array_var aR
+	Player.AuxVarSetFlt "*_SARestSet" 0
+	let aR = Player.GetNifBlockTranslation "##nmBar" 0 1
+	if eval (ar_Size aR) == 3
+		Player.AuxVarSetFlt "*_SARestR1X" aR[0]
+		Player.AuxVarSetFlt "*_SARestR1Y" aR[1]
+		Player.AuxVarSetFlt "*_SARestR1Z" aR[2]
+	endif
+	let aR = Player.GetNifBlockTranslation "##nmBar" 0 2
+	if eval (ar_Size aR) == 3
+		Player.AuxVarSetFlt "*_SARestR2X" aR[0]
+		Player.AuxVarSetFlt "*_SARestR2Y" aR[1]
+		Player.AuxVarSetFlt "*_SARestR2Z" aR[2]
+	endif
+	let aR = Player.GetNifBlockTranslation "##nmBar1" 0 1
+	if eval (ar_Size aR) == 3
+		Player.AuxVarSetFlt "*_SARestL1X" aR[0]
+		Player.AuxVarSetFlt "*_SARestL1Y" aR[1]
+		Player.AuxVarSetFlt "*_SARestL1Z" aR[2]
+	endif
+	let aR = Player.GetNifBlockTranslation "##nmBar1" 0 2
+	if eval (ar_Size aR) == 3
+		Player.AuxVarSetFlt "*_SARestL2X" aR[0]
+		Player.AuxVarSetFlt "*_SARestL2Y" aR[1]
+		Player.AuxVarSetFlt "*_SARestL2Z" aR[2]
+	endif
+	Player.AuxVarSetFlt "*_SARestSet" 1
+End

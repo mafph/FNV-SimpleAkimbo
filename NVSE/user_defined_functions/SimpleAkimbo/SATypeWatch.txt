@@ -20,8 +20,9 @@ Begin Function {}
 	endif
 
 	PrintC "SA TypeWatch ammo type changed %i -> %i" rLastType rCurType
-	if Player.AuxVarGetFlt "*_SATypeBusy" == 1
-		Player.AuxVarSetFlt "*_SATypePend" 1
+	; Waehrend Reload / Typwechsel-Animation: Typ nur still tauschen, keine zweite Animation
+	if Player.AuxVarGetFlt "*_SATypeBusy" == 1 || Player.AuxVarGetFlt "*_SAReloading" == 1
+		Call (CompileScript "SimpleAkimbo\SATypeApply.txt") 0
 		return
 	endif
 	Call (CompileScript "SimpleAkimbo\SATypeApply.txt") 1

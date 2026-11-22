@@ -1,0 +1,17 @@
+Begin Function {}
+	; Entfernt alle festen Sequenzen von Akimbo Aufruf im Aus-Zweig von SAToggle, nachdem *_SAkimbo = 0 gesetzt ist.
+	; Sonst bleiben geklemmte Sequenzen aktiv und ueberdecken die normalen Waffenanimationen.
+	Call (CompileScript "SimpleAkimbo\SALoco.txt") 1
+	Player.AuxVarSetFlt "*_SALocoState" 0
+
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf" 0.0
+
+
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
+End

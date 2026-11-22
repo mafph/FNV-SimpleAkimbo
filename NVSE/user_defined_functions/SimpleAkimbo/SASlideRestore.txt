@@ -1,0 +1,9 @@
+Begin Function {}
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	Player.SetNifBlockTranslation "##nmBar" 0 0 0 1
+	Player.SetNifBlockTranslation "##nmBar" 0 0 0 2
+	Player.SetNifBlockTranslation "##nmBar1" 0 0 0 1
+	Player.SetNifBlockTranslation "##nmBar1" 0 0 0 2
+End
