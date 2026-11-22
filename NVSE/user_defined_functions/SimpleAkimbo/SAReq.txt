@@ -1,0 +1,89 @@
+Begin Function {int iApply}
+	; Strength and skill requirement of the equipped (right) weapon while Akimbo is active.
+	; Strength modes (MCM key 4): 0 = +0 (free), 1 = highest of both, 2 = highest +1, 3 = highest +50 percent of left, 4 = highest +100 percent of left.
+	; Skill modes (MCM key 5): 0 = +0 (free), 1 = highest of both, 2 = highest +25, 3 = highest +100 percent of left.
+	; iApply 1 = apply, 0 = only restore the original values.
+	ref rOld
+	ref rLeft
+	ref rEquip
+	int iMode
+	int iOrig
+	int iLeft
+	int iBase
+	int iNew
+
+	; Restore the weapons changed before
+	let rOld = Player.AuxVarGetRef "*_SAStrForm"
+	if rOld != 0
+		let iOrig = Player.AuxVarGetFlt "*_SAStrOrig"
+		Player.SetReqStr iOrig rOld
+		Player.AuxVarErase "*_SAStrForm"
+	endif
+	let rOld = Player.AuxVarGetRef "*_SASkForm"
+	if rOld != 0
+		let iOrig = Player.AuxVarGetFlt "*_SASkOrig"
+		Player.SetReqSkill iOrig rOld
+		Player.AuxVarErase "*_SASkForm"
+	endif
+
+	if iApply == 0
+		return
+	endif
+
+	let rLeft = Player.AuxVarGetRef "*_SALeftW"
+	let rEquip = Player.GetEquippedObject 5
+	if rLeft == 0
+		return
+	endif
+	if rEquip == 0
+		return
+	endif
+
+	; Strength
+	let iMode = Player.AuxVarGetFlt "*_SA_MCM" 4
+	if iMode != 0
+		let iOrig = Player.GetReqStr rEquip
+		let iLeft = Player.GetReqStr rLeft
+		let iBase = iOrig
+		if iLeft > iBase
+			let iBase = iLeft
+		endif
+		let iNew = iBase
+		if iMode == 2
+			let iNew = iBase + 1
+		elseif iMode == 3
+			let iNew = iBase + (iLeft / 2)
+		elseif iMode == 4
+			let iNew = iBase + iLeft
+		endif
+		Player.AuxVarSetFlt "*_SAStrOrig" iOrig
+		Player.AuxVarSetRef "*_SAStrForm" rEquip
+		Player.SetReqStr iNew rEquip
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SimpleAkimbo: strength req %g -> %g (mode %g)" iOrig iNew iMode
+		endif
+	endif
+
+	; Skill
+	let iMode = Player.AuxVarGetFlt "*_SA_MCM" 5
+	if iMode != 0
+		let iOrig = Player.GetReqSkill rEquip
+		let iLeft = Player.GetReqSkill rLeft
+		let iBase = iOrig
+		if iLeft > iBase
+			let iBase = iLeft
+		endif
+		let iNew = iBase
+		if iMode == 2
+			let iNew = iBase + 25
+		elseif iMode == 3
+			let iNew = iBase + iLeft
+		endif
+		Player.AuxVarSetFlt "*_SASkOrig" iOrig
+		Player.AuxVarSetRef "*_SASkForm" rEquip
+		Player.SetReqSkill iNew rEquip
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SimpleAkimbo: skill req %g -> %g (mode %g)" iOrig iNew iMode
+		endif
+	endif
+End

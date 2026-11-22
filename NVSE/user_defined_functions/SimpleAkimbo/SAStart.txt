@@ -58,6 +58,7 @@ Begin Function {}
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SATypeWatch.txt") 1 20 1
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMenuHint.txt") 1 15 2
 	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAShellClean.txt") 1 120 1
+	SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAMcmWatch.txt") 1 30 1
 
 	if Player.AuxVarGetFlt "*_SADebug" == 1
 		PrintC "SimpleAkimbo: ToggleKey=%g ModeKey=%g Mode=%g" iToggle iModeKey (Player.AuxVarGetFlt "*_SAMode")

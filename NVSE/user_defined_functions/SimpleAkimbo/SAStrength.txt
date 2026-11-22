@@ -1,0 +1,55 @@
+Begin Function {int iApply}
+	ref rOld
+	ref rLeft
+	ref rEquip
+	int iMode
+	int iOrig
+	int iLeftReq
+	int iAdd
+	int iNew
+
+	; Restore the previously changed weapon first
+	let rOld = Player.AuxVarGetRef "*_SAStrForm"
+	if rOld != 0
+		let iOrig = Player.AuxVarGetFlt "*_SAStrOrig"
+		Player.SetReqStr iOrig rOld
+		Player.AuxVarErase "*_SAStrForm"
+	endif
+
+	if iApply == 0
+		return
+	endif
+
+	let iMode = Player.AuxVarGetFlt "*_SA_MCM" 4
+	if iMode == 0
+		return
+	endif
+
+	let rLeft = Player.AuxVarGetRef "*_SALeftW"
+	let rEquip = Player.GetEquippedObject 5
+	if rLeft == 0
+		return
+	endif
+	if rEquip == 0
+		return
+	endif
+
+	; Mode 1 = +1, mode 2 = half, mode 3 = full strength requirement of the left weapon
+	let iOrig = Player.GetReqStr rEquip
+	let iLeftReq = Player.GetReqStr rLeft
+	if iMode == 1
+		let iAdd = 1
+	elseif iMode == 2
+		let iAdd = iLeftReq / 2
+	else
+		let iAdd = iLeftReq
+	endif
+	let iNew = iOrig + iAdd
+
+	Player.AuxVarSetFlt "*_SAStrOrig" iOrig
+	Player.AuxVarSetRef "*_SAStrForm" rEquip
+	Player.SetReqStr iNew rEquip
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SimpleAkimbo: strength req %g -> %g (mode %g)" iOrig iNew iMode
+	endif
+End

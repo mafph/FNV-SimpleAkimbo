@@ -1,0 +1,8 @@
+Begin Function { float fValue, int iMenu, int iSubmenu, int iOption, array_var aMenuMap }
+	; Called by the MCM when the strength option is changed. fValue is the new value (0 to 4).
+	int iOn
+	Player.AuxVarSetFlt "*_SA_MCM" fValue 4
+	Player.AuxVarSetFlt "*_SAStrMode" fValue
+	let iOn = Player.AuxVarGetFlt "*_SAkimbo"
+	Call (CompileScript "SimpleAkimbo\SAReq.txt") iOn
+End

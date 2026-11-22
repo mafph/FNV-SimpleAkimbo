@@ -22,4 +22,5 @@ Begin Function {}
 		return
 	endif
 	Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+	Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 End

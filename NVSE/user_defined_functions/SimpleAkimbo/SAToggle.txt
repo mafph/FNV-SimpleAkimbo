@@ -113,10 +113,12 @@ Begin Function {int iKey}
 		Call (CompileScript "SimpleAkimbo\SAAutoInit.txt")
 		Call (CompileScript "SimpleAkimbo\SAReload.txt") 0
 		PrintC "SimpleAkimbo: ON"
+		Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 	else
 		let sPath = Player.AuxVarGetStr "*_SAModel"
 		let sTarget = "Akimbo|*1*" + sPath
 		PrintC "SimpleAkimbo: removing %z" sTarget
+		Call (CompileScript "SimpleAkimbo\SAReq.txt") 0
 		Player.AuxVarSetFlt "*_SAkimbo" 0
 		Player.AuxVarSetFlt "*_SALPrio" 50
 		Player.AuxVarSetFlt "*_SALastR" 0

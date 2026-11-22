@@ -1,0 +1,8 @@
+Begin Function { float fValue, int iMenu, int iSubmenu, int iOption, array_var aMenuMap }
+	; Called by the MCM when the skill option is changed. fValue is the new value (0 to 3).
+	int iOn
+	Player.AuxVarSetFlt "*_SA_MCM" fValue 5
+	Player.AuxVarSetFlt "*_SASkMode" fValue
+	let iOn = Player.AuxVarGetFlt "*_SAkimbo"
+	Call (CompileScript "SimpleAkimbo\SAReq.txt") iOn
+End

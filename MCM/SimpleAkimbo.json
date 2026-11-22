@@ -3,10 +3,13 @@
 	"displayName": "$SA_ModName",
 	"description": "$SA_Desc",
 	"saveFile": "SimpleAkimbo.ini",
-	"minMCMVersion": 1.30,
-	"minModVersion": 1.00,
+	"minMCMVersion": 1.3,
+	"minModVersion": 1.0,
 	"requirements": [
-		{ "type": "file", "file": "NVSE/plugins/scripts/gr_SimpleAkimboMenu.txt" }
+		{
+			"type": "file",
+			"file": "NVSE/plugins/scripts/gr_SimpleAkimboMenu.txt"
+		}
 	],
 	"submenus": {
 		"0": {
@@ -27,30 +30,119 @@
 					"enable": 1,
 					"type": 3,
 					"mouse": "$SA_ToggleKeyTip",
-					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 0, "default": 36, "configINI": "General:iToggleKey" }]
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 0,
+							"default": 36,
+							"configINI": "General:iToggleKey"
+						}
+					]
 				},
 				"3": {
 					"title": "$SA_ModeKey",
 					"enable": 1,
 					"type": 3,
 					"mouse": "$SA_ModeKeyTip",
-					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 1, "default": 49, "configINI": "General:iModeKey" }]
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 1,
+							"default": 49,
+							"configINI": "General:iModeKey"
+						}
+					]
 				},
 				"4": {
 					"title": "$SA_Mode",
 					"enable": 1,
 					"type": 1,
 					"mouse": "$SA_ModeTip",
-					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 2, "default": 0, "configINI": "General:iMode" }],
-					"strings": [ "$SA_ModeA", "$SA_ModeB" ],
-					"call": { "type": "file", "value": "SimpleAkimbo/SAModeSync.txt" }
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 2,
+							"default": 0,
+							"configINI": "General:iMode"
+						}
+					],
+					"strings": [
+						"$SA_ModeA",
+						"$SA_ModeB"
+					],
+					"call": {
+						"type": "file",
+						"value": "SimpleAkimbo/SAModeSync.txt"
+					}
 				},
 				"5": {
 					"title": "$SA_Debug",
 					"enable": 1,
 					"type": 4,
 					"mouse": "$SA_DebugTip",
-					"vars": [{ "form": "Player", "auxVar": "*_SA_MCM", "key": 3, "default": 0, "configINI": "General:iDebug" }]
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 3,
+							"default": 0,
+							"configINI": "General:iDebug"
+						}
+					]
+				},
+				"6": {
+					"title": "$SA_Str",
+					"enable": 1,
+					"type": 1,
+					"mouse": "$SA_StrTip",
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 4,
+							"default": 0,
+							"configINI": "General:iStrMode"
+						}
+					],
+					"strings": [
+						"$SA_StrOff",
+						"$SA_StrHigh",
+						"$SA_StrHigh1",
+						"$SA_StrHighHalf",
+						"$SA_StrHighFull"
+					],
+					"call": {
+						"type": "file",
+						"value": "SimpleAkimbo/SAStrSync.txt"
+					}
+				},
+				"7": {
+					"title": "$SA_Skill",
+					"enable": 1,
+					"type": 1,
+					"mouse": "$SA_SkillTip",
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 5,
+							"default": 0,
+							"configINI": "General:iSkillMode"
+						}
+					],
+					"strings": [
+						"$SA_SkOff",
+						"$SA_SkHigh",
+						"$SA_SkHigh25",
+						"$SA_SkHighFull"
+					],
+					"call": {
+						"type": "file",
+						"value": "SimpleAkimbo/SASkSync.txt"
+					}
 				}
 			}
 		}

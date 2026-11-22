@@ -1,6 +1,5 @@
-Begin Function {float fValue}
-	; Called by the MCM when the fire mode is changed.
-	; fValue is the new value (0 or 1).
+Begin Function { float fValue, int iMenu, int iSubmenu, int iOption, array_var aMenuMap }
+	; Called by the MCM when the fire mode is changed. fValue is the new value (0 or 1).
 	Player.AuxVarSetFlt "*_SAMode" fValue
 	Player.AuxVarSetFlt "*_SA_MCM" fValue 2
 	Call (CompileScript "SimpleAkimbo\SAControls.txt")

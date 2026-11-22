@@ -1,0 +1,43 @@
+Begin Function {}
+	; Applies MCM changes without relying on what the MCM passes to a call script.
+	; Runs as a main loop callback (GameMode), see SAStart. Changes take effect shortly after the MCM is closed.
+	float fMode
+	float fSeen
+	float fStr
+	float fSkill
+	float fStrSeen
+	float fSkSeen
+	float fDebug
+	int iOn
+
+	; Debug messages
+	let fDebug = Player.AuxVarGetFlt "*_SA_MCM" 3
+	let fSeen = Player.AuxVarGetFlt "*_SADbgSeen"
+	if fDebug != fSeen
+		Player.AuxVarSetFlt "*_SADbgSeen" fDebug
+		Player.AuxVarSetFlt "*_SADebug" fDebug
+	endif
+
+	; Fire mode
+	let fMode = Player.AuxVarGetFlt "*_SA_MCM" 2
+	let fSeen = Player.AuxVarGetFlt "*_SAMode"
+	if fMode != fSeen
+		Player.AuxVarSetFlt "*_SAMode" fMode
+		Call (CompileScript "SimpleAkimbo\SAControls.txt")
+		if fDebug == 1
+			PrintC "SimpleAkimbo MCM: fire mode set to %g" fMode
+		endif
+	endif
+
+	; Strength and skill requirement
+	let fStr = Player.AuxVarGetFlt "*_SA_MCM" 4
+	let fSkill = Player.AuxVarGetFlt "*_SA_MCM" 5
+	let fStrSeen = Player.AuxVarGetFlt "*_SAStrMode"
+	let fSkSeen = Player.AuxVarGetFlt "*_SASkMode"
+	if fStr != fStrSeen || fSkill != fSkSeen
+		Player.AuxVarSetFlt "*_SAStrMode" fStr
+		Player.AuxVarSetFlt "*_SASkMode" fSkill
+		let iOn = Player.AuxVarGetFlt "*_SAkimbo"
+		Call (CompileScript "SimpleAkimbo\SAReq.txt") iOn
+	endif
+End
