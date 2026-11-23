@@ -34,23 +34,12 @@ Begin Function {int iKey}
 			PrintC "SimpleAkimbo: no weapon equipped"
 			return
 		endif
-		; only one-handed weapons (type 3 and 4), same warning as when marking a two-handed weapon with J in the inventory
-		let iWT = GetWeaponType rEquip
-		if iWT != 3 && iWT != 4
-			PrintC "SimpleAkimbo: %n is not a one-handed weapon" rEquip
-			MessageEx "%n is not a one-handed weapon" rEquip
-			return
-		endif
+		; weapon type restriction removed: any weapon type may be used (LMGs etc.)
 		; Model of the left weapon: remembered weapon (M), otherwise vanilla 9mm
 		let rWeap = Player.AuxVarGetRef "*_SALeftW"
 		if rWeap == 0
 			PrintC "SimpleAkimbo: no left weapon set, press J on a weapon in the inventory"
 			MessageEx "No left weapon set, press J on a weapon in the inventory"
-			return
-		endif
-		let iWT = GetWeaponType rWeap
-		if iWT != 3 && iWT != 4
-			PrintC "SimpleAkimbo: left weapon is not one-handed"
 			return
 		endif
 		if rWeap == rEquip
@@ -90,6 +79,14 @@ Begin Function {int iKey}
 			PrintC "SimpleAkimbo: InsertNode failed"
 			return
 		endif
+		; Extra node under Akimbo that only carries the rotation (kf files may override the transform of Akimbo itself)
+		let iOK = InsertNode Player 3 "Akimbo|AkimboRot"
+		if iOK != 0
+			let sTarget = "AkimboRot|*1*" + sPath
+			Player.AuxVarSetFlt "*_SARotNode" 1
+		else
+			Player.AuxVarSetFlt "*_SARotNode" 0
+		endif
 		let iOK = AttachModel Player 3 (sTarget)
 		if iOK == 0
 			PrintC "SimpleAkimbo: AttachModel failed"
@@ -99,6 +96,8 @@ Begin Function {int iKey}
 		; Node names of the left weapon
 		Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 0
 		Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SASlideRestore.txt")
+		; Rotate launcher-type left weapons (Missile Launcher, Fat Man), applied after the nodes exist
+		Player.CallAfterSeconds 0.2 (CompileScript "SimpleAkimbo\SALeftRot.txt")
 		Player.AuxVarSetFlt "*_SAkimbo" 1
 		Player.AuxVarSetFlt "*_SALPrio" 50
 		Player.AuxVarSetFlt "*_SALastR" 0
@@ -118,7 +117,11 @@ Begin Function {int iKey}
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 	else
 		let sPath = Player.AuxVarGetStr "*_SAModel"
-		let sTarget = "Akimbo|*1*" + sPath
+		if Player.AuxVarGetFlt "*_SARotNode" == 1
+			let sTarget = "AkimboRot|*1*" + sPath
+		else
+			let sTarget = "Akimbo|*1*" + sPath
+		endif
 		PrintC "SimpleAkimbo: removing %z" sTarget
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") 0
 		Player.AuxVarSetFlt "*_SAkimbo" 0
@@ -128,6 +131,9 @@ Begin Function {int iKey}
 		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
 		Call (CompileScript "SimpleAkimbo\SAControls.txt")
 		AttachModel Player 2 (sTarget)
+		if Player.AuxVarGetFlt "*_SARotNode" == 1
+			InsertNode Player 2 "Akimbo|AkimboRot"
+		endif
 		InsertNode Player 2 "Weapon|Akimbo"
 		Player.AuxVarSetFlt "*_SAJam" 0
 		Player.AuxVarSetFlt "*_SAJamPend" 0
@@ -154,10 +160,28 @@ Begin Function {int iKey}
 		endif
 	endif
 
+	; RefreshAnimData must run when turning ON as well (as in the working version): it binds the newly attached
+	; left model and its nodes (ProjectileNode1) to the animation data. It runs BEFORE SAEquipAnim, so it cannot
+	; clear the equip sequences.
 	Player.RefreshAnimData
-	; Equip animation when turning on and off. When turning off it comes from the re-equip (SAReEquip).
 	if fState == 0
-		Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
 		Player.AuxVarSetFlt "*_SASwapping" 0
+		if Player.IsWeaponOut == 0
+			; Weapons are holstered (e.g. left weapon marked with J while holstered): no equip animation / sound.
+			; Stay holstered; LMB (and RMB if MCM) draws via SAUnholster, which plays the equip animation.
+			Player.AuxVarSetFlt "*_SAHolstered" 1
+			Player.AuxVarSetFlt "*_SAHolsterCnt" 2
+			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+			Player.AuxVarSetFlt "*_SAHolsterLock" 0
+			Player.AuxVarSetFlt "*_SAEquipPhase" 0
+			Call (CompileScript "SimpleAkimbo\SAAnimOff.txt")
+			Player.AuxVarSetRef "*_SAEquipLast" (Player.GetEquippedObject 5)
+			PrintC "SimpleAkimbo: ON while holstered, no equip animation"
+		else
+			Player.AuxVarSetFlt "*_SAHolstered" 0
+			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+			Player.AuxVarSetFlt "*_SAHolsterLock" 0
+			Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+		endif
 	endif
 End

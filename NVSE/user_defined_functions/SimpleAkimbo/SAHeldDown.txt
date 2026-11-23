@@ -1,6 +1,5 @@
 Begin Function {int iKey}
-	; Mouse button held: remember the state (counterpart SAHeldUp) and, if the hand is automatic, register automatic fire (SAAuto).
-	; Also checks here whether the right weapon has changed since the last interval calculation (no frame comparison needed).
+	; Mouse button held: remember state and register auto-fire if needed.
 	ref rEquip
 	ref rLast
 	float fMode
@@ -16,6 +15,13 @@ Begin Function {int iKey}
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAEquipGuard" == 1
+		return
+	endif
+	; Holstered: SAInput handles unholster on key-down; no auto-fire while away
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
 		return
 	endif
 
@@ -37,14 +43,12 @@ Begin Function {int iKey}
 		let fInt = Player.AuxVarGetFlt "*_SAAutoIntB"
 	endif
 	if fInt > 0
-		; first automatic shot comes after the interval plus 0.1 s, a short click gives one shot
 		let fIdle = fInt + 0.1
 		if iKey == 257
 			Player.AuxVarSetFlt "*_SAAutoT1" fIdle
 		else
 			Player.AuxVarSetFlt "*_SAAutoT0" fIdle
 		endif
-		; unregister first, then register: never registered twice
 		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 0 1 1
 		SetGameMainLoopCallback (CompileScript "SimpleAkimbo\SAAuto.txt") 1 1 1
 	endif

@@ -14,6 +14,12 @@ Begin Function {int iHand}
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif
+	if Player.AuxVarGetFlt "*_SAEquipGuard" == 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		return
+	endif
 	if Player.AuxVarGetFlt "*_SAJam" == 1
 		return
 	endif

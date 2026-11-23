@@ -1,11 +1,17 @@
 Begin Function {}
 	; Idle hold: after equip and after every reload, hold the end pose of the attack kfs.
-	; Only they contain the correct left-hand pose. After the first shot everything is correct because the
-	; geklemmte Attack-Sequenz bleibt. SAReload entfernt sie vor dem Nachladen, deshalb hier neu anfordern.
 	; StartOver 0: a sequence that is still active is not restarted.
 	int iPrio
 
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		return
+	endif
+	; Equip still playing - ignore stale CallAfterSeconds from older equip calls
+	if Player.AuxVarGetFlt "*_SAEquipPhase" == 1
+		PrintC "SA IdleHold: skipped, equip phase active"
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SAReloading" == 1

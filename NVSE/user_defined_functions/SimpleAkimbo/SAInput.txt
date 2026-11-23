@@ -7,16 +7,29 @@ Begin Function {int iKey}
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		return
 	endif
+	if Player.AuxVarGetFlt "*_SAEquipGuard" == 1
+		return
+	endif
+	; Holstered: LMB always unholsters. RMB only if MCM UnholsterRMB (key 6).
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		if iKey == 256
+			Call (CompileScript "SimpleAkimbo\SAUnholster.txt")
+			return
+		endif
+		if iKey == 257 && Player.AuxVarGetFlt "*_SA_MCM" 6 == 1
+			Call (CompileScript "SimpleAkimbo\SAUnholster.txt")
+			return
+		endif
+		return
+	endif
 	let fMode = Player.AuxVarGetFlt "*_SAMode"
 	if fMode == 0
-		; Mode A: LMB left, RMB right
 		if iKey == 256
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") 0
 		elseif iKey == 257
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") 1
 		endif
 	else
-		; Mode B: only LMB, hand alternates per shot, RMB stays engine ADS
 		if iKey == 256
 			let fHand = Player.AuxVarGetFlt "*_SAHand"
 			Call (CompileScript "SimpleAkimbo\SAFire.txt") (fHand)

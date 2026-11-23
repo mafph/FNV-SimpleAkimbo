@@ -1,8 +1,6 @@
 Begin Function {}
-	; Reload lock and reload animation ActivateAnim, see SAReload: ends after the time *_SAReloadDur
-	; or immediately when Akimbo is turned off. At the end the reload sequences are deactivated,
-	; otherwise they stay clamped and override idle and shots.
-	; No restart of the animation when switching view: 1p and 3p run in parallel from the start.
+	; Reload lock ends after *_SAReloadDur (or immediately if Akimbo off).
+	; Deactivates reload sequences, then either applies a queued holster or returns to idle hold.
 	float fWait
 	float fDur
 	int iDone
@@ -34,6 +32,19 @@ Begin Function {}
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+
+		; Holster was requested mid-reload, or weapon is already away -> stay holstered
+		if Player.AuxVarGetFlt "*_SAHolsterQueued" == 1 || Player.IsWeaponOut == 0
+			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+			Player.AuxVarSetFlt "*_SAHolstered" 1
+			Player.AuxVarSetFlt "*_SAHolsterCnt" 2
+			Player.AuxVarSetFlt "*_SAHolsterLock" 1
+			Player.CallAfterSeconds 0.6 (CompileScript "SimpleAkimbo\SAHolsterLockEnd.txt")
+			Call (CompileScript "SimpleAkimbo\SAAnimOff.txt")
+			PrintC "SA ReloadEnd: holster applied after reload"
+			return
+		endif
+
 		Call (CompileScript "SimpleAkimbo\SAIdleHold.txt")
 		return
 	endif

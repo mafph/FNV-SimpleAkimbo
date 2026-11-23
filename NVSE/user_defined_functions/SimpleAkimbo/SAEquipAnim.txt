@@ -1,8 +1,6 @@
 Begin Function {}
-	; Equip animation fixed via ActivateAnim 1p and 3p. Also serves as an idle override:
-	; the sequence stays CLAMP active and holds the last pose until SAAnimOff removes it.
-	; Priority 2: below locomotion 3, shot 5 and reload 6. Changeable via *_SAEquipPrio.
-	; Called: SAToggle when turning on, and SAEquipWatch when the right weapon changes.
+	; Equip animation (1p + 3p). Clears holster flags.
+	; *_SAEquipPhase = 1 while equip plays so stale CallAfterSeconds IdleHold cannot kill it.
 	string_var sEquip1st
 	string_var sEquip3rd
 	ref rEquipNow
@@ -10,30 +8,40 @@ Begin Function {}
 	float fEquipLen
 	float fGuard
 
+	Player.AuxVarSetFlt "*_SAHolstered" 0
+	Player.AuxVarSetFlt "*_SAHolsterCnt" 0
+	Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+	Player.AuxVarSetFlt "*_SAHolsterLock" 0
+
+	; Block IdleHold until equip duration elapsed (invalidates old timers)
+	Player.AuxVarSetFlt "*_SAEquipPhase" 1
+
 	let sEquip1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf"
 	let sEquip3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf"
 	let iPrio = Player.AuxVarGetFlt "*_SAEquipPrio"
 	if iPrio <= 0
-		let iPrio = 2
+		let iPrio = 4
 	endif
 
 	Player.DeactivateAnim (sEquip1st) 0.0
 	Player.DeactivateAnim (sEquip3rd) 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
+	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+
 	Player.ActivateAnim (sEquip1st) 1 iPrio 1 1.0 0.0 ""
 	Player.ActivateAnim (sEquip3rd) 0 iPrio 1 1.0 0.0 ""
 
-	; After the equip time, SAIdleHold switches to the end pose of the attack kfs. Length via *_SAEquipLen, default 1.2 s.
 	let fEquipLen = Player.AuxVarGetFlt "*_SAEquipLen"
-	if fEquipLen <= 0
+	if fEquipLen < 0.8
 		let fEquipLen = 1.2
 	endif
-	; Additionally early and late, in case the engine removes the sequences again after the equip.
-	Player.CallAfterSeconds 0.4 (CompileScript "SimpleAkimbo\SAIdleHold.txt")
-	Player.CallAfterSeconds fEquipLen (CompileScript "SimpleAkimbo\SAIdleHold.txt")
-	Player.CallAfterSeconds 2.5 (CompileScript "SimpleAkimbo\SAIdleHold.txt")
-	PrintC "SA Equip: anim started, hold in 0.4 / %g / 2.5 s" fEquipLen
+	; Only transition to idle hold after equip finished (via SAEquipToIdle - respects phase)
+	Player.CallAfterSeconds fEquipLen (CompileScript "SimpleAkimbo\SAEquipToIdle.txt")
+	Player.CallAfterSeconds (fEquipLen + 1.0) (CompileScript "SimpleAkimbo\SAEquipToIdle.txt")
+	PrintC "SA Equip: anim started prio %g, hold in %g s" iPrio fEquipLen
 
-	; Equip phase: SATypeWatch must not replace the equip animation with a reload animation (ammo type changes with the weapon)
 	Player.AuxVarSetFlt "*_SAEquipGuard" 1
 	let fGuard = fEquipLen + 0.8
 	Player.CallAfterSeconds fGuard (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")

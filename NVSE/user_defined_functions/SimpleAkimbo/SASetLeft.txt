@@ -29,12 +29,7 @@ Begin Function {int iKey}
 		PrintC "SimpleAkimbo: selected item is not a weapon"
 		return
 	endif
-	let iWT = GetWeaponType rWeap
-	if iWT != 3 && iWT != 4
-		PrintC "SimpleAkimbo: %n is not a one-handed weapon" rWeap
-		MessageEx "%n is not a one-handed weapon" rWeap
-		return
-	endif
+	; weapon type restriction removed
 
 	let rEquip = Player.GetEquippedObject 5
 	if rWeap == rEquip
@@ -62,13 +57,6 @@ Begin Function {int iKey}
 	if Player.AuxVarGetFlt "*_SAkimbo" == 1
 		Player.AuxVarSetFlt "*_SASwapPend" 1
 	elseif rEquip != 0
-		let iEWT = GetWeaponType rEquip
-		if iEWT == 3 || iEWT == 4
-			Player.AuxVarSetFlt "*_SAStartPend" 1
-		else
-			; two-handed weapon equipped: same warning as when marking a two-handed weapon
-			PrintC "SimpleAkimbo: %n is not a one-handed weapon" rEquip
-			MessageEx "%n is not a one-handed weapon" rEquip
-		endif
+		Player.AuxVarSetFlt "*_SAStartPend" 1
 	endif
 End

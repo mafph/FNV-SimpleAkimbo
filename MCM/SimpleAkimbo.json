@@ -143,6 +143,21 @@
 						"type": "file",
 						"value": "SimpleAkimbo/SASkSync.txt"
 					}
+				},
+				"8": {
+					"title": "$SA_UnholsterRMB",
+					"enable": 1,
+					"type": 4,
+					"mouse": "$SA_UnholsterRMBTip",
+					"vars": [
+						{
+							"form": "PlayerRef",
+							"auxVar": "*_SA_MCM",
+							"key": 6,
+							"default": 0,
+							"configINI": "General:iUnholsterRMB"
+						}
+					]
 				}
 			}
 		}

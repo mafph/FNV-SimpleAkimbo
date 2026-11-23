@@ -85,8 +85,8 @@ Begin Function {int iApply}
 		; same skill: left requirement unchanged. Different skills: convert into the skill of the right weapon.
 		let iLeftAdj = iLeft
 		if iSkR != iSkL && iSkR > 0 && iSkL > 0
-			let iValR = Player.GetAV iSkR
-			let iValL = Player.GetAV iSkL
+			let iValR = Call (CompileScript "SimpleAkimbo\SASkillVal.txt") iSkR
+			let iValL = Call (CompileScript "SimpleAkimbo\SASkillVal.txt") iSkL
 			let iLeftAdj = iLeft + iValR - iValL
 			; remember the skill values: SAMcmWatch recalculates when they change (chems, level up)
 			Player.AuxVarSetFlt "*_SAReqAvR" iSkR

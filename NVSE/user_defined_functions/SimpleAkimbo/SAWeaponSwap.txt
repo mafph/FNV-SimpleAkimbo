@@ -18,13 +18,9 @@ Begin Function {}
 	let rEquip = Player.GetEquippedObject 5
 	Player.AuxVarSetRef "*_SAEquipLast" rEquip
 	let iForce = 0 - 1
-	let iWT = 0 - 1
-	if rEquip != 0
-		let iWT = GetWeaponType rEquip
-	endif
 
-	if iWT != 3 && iWT != 4
-		PrintC "SA WeaponSwap: new weapon is not one-handed, Akimbo off"
+	if rEquip == 0
+		PrintC "SA WeaponSwap: no weapon equipped, Akimbo off"
 		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iForce
 		return
 	endif

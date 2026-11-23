@@ -1,0 +1,15 @@
+Begin Function {}
+	; Called 0.15 s after SAUnholster: start the Akimbo equip animation after the engine draw has begun.
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		Player.AuxVarSetFlt "*_SAEquipGuard" 0
+		Player.AuxVarSetFlt "*_SAEquipPhase" 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		; holstered again in the meantime
+		Player.AuxVarSetFlt "*_SAEquipGuard" 0
+		Player.AuxVarSetFlt "*_SAEquipPhase" 0
+		return
+	endif
+	Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+End

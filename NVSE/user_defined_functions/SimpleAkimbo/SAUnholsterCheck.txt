@@ -1,0 +1,19 @@
+Begin Function {}
+	; 0.5 s after SAUnholster: fallback if the engine did not draw the weapon (SetWeaponOut had no effect).
+	; Ready Item (control 7) is not disabled by SAControls (only 4 and 6 are).
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if GetActiveMenuMode != 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		return
+	endif
+	if Player.IsWeaponOut == 1
+		return
+	endif
+	PrintC "SA Unholster: weapon still not out after 0.5 s, fallback TapControl 7 (Ready Item)"
+	EnableControl 7
+	TapControl 7
+End

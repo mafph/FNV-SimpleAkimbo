@@ -1,0 +1,23 @@
+Begin Function {}
+	; Draw the weapons from the holstered state. Called from SAInput on LMB (and RMB if MCM).
+	; 1) Engine draw via SetWeaponOut 1 (JIP LN NVSE). This also plays the engine draw / equip sound.
+	;    The old TapControl 5 pressed ACTIVATE (control 5), not "draw".
+	; 2) The Akimbo equip animation is started 0.15 s LATER (SAUnholsterAnim): the engine draw resets the animation state,
+	;    so an ActivateAnim in the same frame is overwritten and the equip animation is skipped.
+	; 3) After 0.5 s SAUnholsterCheck: if the engine still did not draw, fallback TapControl 7 (Ready Item).
+	; The equip guard blocks shots / input until the animation has started (SAEquipAnim renews it with the real length).
+	Player.AuxVarSetFlt "*_SAHolstered" 0
+	Player.AuxVarSetFlt "*_SAHolsterCnt" 0
+	Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+	Player.AuxVarSetFlt "*_SAHolsterLock" 0
+	Player.AuxVarSetFlt "*_SAEquipPhase" 1
+	Player.AuxVarSetFlt "*_SAEquipGuard" 1
+
+	Player.SetWeaponOut 1
+	Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SAUnholsterAnim.txt")
+	Player.CallAfterSeconds 0.5 (CompileScript "SimpleAkimbo\SAUnholsterCheck.txt")
+	; failsafe: never leave the guard set if the animation script does not run
+	Player.CallAfterSeconds 3 (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
+
+	PrintC "SA Unholster: draw requested (SetWeaponOut), equip animation follows in 0.15 s"
+End

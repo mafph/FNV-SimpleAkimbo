@@ -6,6 +6,8 @@ Begin Function {}
 	Player.AuxVarSetFlt "*_SASwapBusy" 0
 	Player.AuxVarSetFlt "*_SASwapping" 0
 	Player.AuxVarSetFlt "*_SAEquipGuard" 0
+	Player.AuxVarSetFlt "*_SARehangMiss" 0
+	Player.AuxVarSetFlt "*_SARehangTry" 0
 
 	; Load MCM settings (if not already done by gr_SimpleAkimboMenu)
 	if Player.AuxVarGetFlt "*_SA_MCM" 0 == 0
@@ -15,6 +17,7 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SA_MCM" 0 3
 		Player.AuxVarSetFlt "*_SA_MCM" 2 4
 		Player.AuxVarSetFlt "*_SA_MCM" 1 5
+		Player.AuxVarSetFlt "*_SA_MCM" 0 6
 	endif
 	; Mirror mode and debug
 	if Player.AuxVarGetFlt "*_SAMode" == 0 && Player.AuxVarGetFlt "*_SA_MCM" 2 != 0

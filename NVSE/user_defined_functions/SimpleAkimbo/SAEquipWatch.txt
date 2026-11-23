@@ -1,18 +1,99 @@
 Begin Function {}
 	; Main loop callback every 10 frames, GameMode (registered in SAStart).
-	; Detects a change of the right weapon while Akimbo is running and hands over to SAWeaponSwap:
-	; other one-handed weapon = Akimbo briefly off and on again (with equip animation), otherwise Akimbo off.
-	; Without Akimbo the weapon is only remembered.
+	; Holster: IsWeaponOut == 0 -> *_SAHolstered + SAAnimOff.
+	; Unholster only via SAUnholster (LMB) - never auto-equip when Holstered.
+	; During reload: only queue holster. Do not force-draw (that kept weapons equipped).
 	ref rNow
 	ref rLast
+	int iOut
+	float fCnt
+	array_var aChk
+	int iModel
+	int iSize
+	float fMiss
+	float fTry
 
 	let rNow = Player.GetEquippedObject 5
 	let rLast = Player.AuxVarGetRef "*_SAEquipLast"
 
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		Player.AuxVarSetRef "*_SAEquipLast" rNow
+		Player.AuxVarSetFlt "*_SAHolstered" 0
+		Player.AuxVarSetFlt "*_SAHolsterCnt" 0
+		Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+		Player.AuxVarSetFlt "*_SAHolsterLock" 0
 		return
 	endif
+
+	; ---------- Holster during reload: queue only (no TapControl / force-draw) ----------
+	if GetActiveMenuMode == 0 && Player.AuxVarGetFlt "*_SAReloading" == 1
+		if Player.IsWeaponOut == 0
+			Player.AuxVarSetFlt "*_SAHolsterQueued" 1
+			PrintC "SA Equip: holster during reload queued"
+		endif
+		return
+	endif
+
+	; Not during menus, swap or the equip phase
+	if GetActiveMenuMode == 0 && Player.AuxVarGetFlt "*_SASwapBusy" != 1 && Player.AuxVarGetFlt "*_SAEquipGuard" != 1
+		let iOut = Player.IsWeaponOut
+		if iOut == 0
+			if Player.AuxVarGetFlt "*_SAHolstered" != 1
+				let fCnt = Player.AuxVarGetFlt "*_SAHolsterCnt"
+				let fCnt = fCnt + 1
+				Player.AuxVarSetFlt "*_SAHolsterCnt" fCnt
+				if fCnt >= 2
+					Player.AuxVarSetFlt "*_SAHolstered" 1
+					Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+					Call (CompileScript "SimpleAkimbo\SAAnimOff.txt")
+					PrintC "SA Equip: holstered, akimbo animations removed"
+				endif
+			endif
+			return
+		else
+			Player.AuxVarSetFlt "*_SAHolsterCnt" 0
+			; While holstered/locked: never auto equip - only SAUnholster
+			if Player.AuxVarGetFlt "*_SAHolstered" == 1 || Player.AuxVarGetFlt "*_SAHolsterLock" == 1
+				return
+			endif
+			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
+		endif
+	endif
+
+	; ---------- Self-repair: left model / node "Akimbo" is gone ----------
+	; Happens when the engine rebuilds the player 3D (save load, draw from holster, equip change).
+	; Without the node the left weapon is invisible and ProjectileNode1 is missing (flash only on the right).
+	; Fix: same path as a weapon swap (Akimbo off, then on again), max. 3 tries until the node is seen again.
+	; Console: player.AuxVarSetFlt "*_SARehangOff" 1 disables this check.
+	if GetActiveMenuMode == 0 && rNow != 0 && Player.IsWeaponOut == 1 && Player.AuxVarGetFlt "*_SARehangOff" != 1
+		if Player.AuxVarGetFlt "*_SASwapBusy" != 1 && Player.AuxVarGetFlt "*_SAEquipGuard" != 1 && Player.AuxVarGetFlt "*_SAHolstered" != 1 && Player.AuxVarGetFlt "*_SAReloading" != 1
+			let iModel = 2
+			if IsPC1stPerson == 1
+				let iModel = 1
+			endif
+			let aChk = Player.GetNifBlockTranslation "Akimbo" 0 iModel
+			let iSize = ar_Size aChk
+			if iSize == 3
+				Player.AuxVarSetFlt "*_SARehangMiss" 0
+				Player.AuxVarSetFlt "*_SARehangTry" 0
+			else
+				let fMiss = Player.AuxVarGetFlt "*_SARehangMiss"
+				let fMiss = fMiss + 1
+				Player.AuxVarSetFlt "*_SARehangMiss" fMiss
+				if fMiss >= 3
+					Player.AuxVarSetFlt "*_SARehangMiss" 0
+					let fTry = Player.AuxVarGetFlt "*_SARehangTry"
+					if fTry < 3
+						Player.AuxVarSetFlt "*_SARehangTry" (fTry + 1)
+						PrintC "SA Equip: node Akimbo missing (model %g), re-attaching, try %g" iModel (fTry + 1)
+						Call (CompileScript "SimpleAkimbo\SAWeaponSwap.txt")
+						return
+					endif
+				endif
+			endif
+		endif
+	endif
+
 	if rNow == rLast
 		return
 	endif
@@ -21,13 +102,16 @@ Begin Function {}
 		return
 	endif
 	if rNow == 0
-		; weapon unequipped: wait for the next one
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SASwapBusy" == 1
 		return
 	endif
 	if GetActiveMenuMode != 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		Player.AuxVarSetRef "*_SAEquipLast" rNow
 		return
 	endif
 	Call (CompileScript "SimpleAkimbo\SAWeaponSwap.txt")

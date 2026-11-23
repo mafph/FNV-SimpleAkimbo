@@ -9,6 +9,11 @@ Begin Function {int iKey}
 	string_var sAnim1st
 	string_var sAnim3rd
 	int iPrio
+	int iDrop
+	int iKL
+	int iKR
+	ref rWL
+	ref rWR
 
 	if GetActiveMenuMode != 0
 		PrintC "SimpleAkimbo: SAReload aborted (menu open)"
@@ -17,6 +22,14 @@ Begin Function {int iKey}
 	Call (CompileScript "SimpleAkimbo\SACheck.txt")
 	if Player.AuxVarGetFlt "*_SAkimbo" != 1
 		PrintC "SimpleAkimbo: SAReload aborted (Akimbo off)"
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAEquipGuard" == 1
+		PrintC "SimpleAkimbo: SAReload aborted (equip guard)"
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		PrintC "SimpleAkimbo: SAReload aborted (holstered)"
 		return
 	endif
 	if Player.AuxVarGetFlt "*_SAJam" == 1
@@ -76,11 +89,27 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SALastR" 0
 	Player.AuxVarSetFlt "*_SASlide3rdSeq" (Player.AuxVarGetFlt "*_SASlide3rdSeq" + 1)
 
+	; Weapon class per hand (SAWeaponKind): 1 = pistol (kf reload), 2 = other (drop fallback), 0 = none.
+	; If at least one hand is "other", both weapons use the drop fallback (SAReloadDrop). Console override: *_SAReloadKf 1 = always kf.
+	let rWL = Player.AuxVarGetRef "*_SALeftW"
+	let rWR = Player.GetEquippedWeapon
+	let iKL = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWL 0
+	let iKR = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWR 1
+	let iDrop = 0
+	if iKL == 2 || iKR == 2
+		let iDrop = 1
+	endif
+	if Player.AuxVarGetFlt "*_SAReloadKf" == 1
+		let iDrop = 0
+	endif
+
 	; Timer lock
 	; Lock duration = length of the reload kf (full 5.05 s, partial 4.42 s); overridable via *_SAReloadLen
 	let fDur = Player.AuxVarGetFlt "*_SAReloadLen"
 	if fDur <= 0
-		if fPartial == 1
+		if iDrop == 1
+			let fDur = 3.0
+		elseif fPartial == 1
 			let fDur = 4.45
 		else
 			let fDur = 5.1
@@ -107,9 +136,16 @@ Begin Function {int iKey}
 		let sAnim1st = "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf"
 		let sAnim3rd = "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf"
 	endif
-	let iPrio = 6
-	Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
-	Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
+	if iDrop == 1
+		Player.AuxVarSetFlt "*_SADropT" 0
+		Player.AuxVarSetFlt "*_SADropZ" 0
+		Player.AuxVarSetFlt "*_SADropK" 0
+		Player.CallAfterSeconds 0.03 (CompileScript "SimpleAkimbo\SAReloadDrop.txt")
+	else
+		let iPrio = 6
+		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
+		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
+	endif
 	Player.CallAfterSeconds 0.05 (CompileScript "SimpleAkimbo\SAReloadEnd.txt")
 
 	if iKey != 45

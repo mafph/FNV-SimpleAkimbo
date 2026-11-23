@@ -8,6 +8,7 @@
 ; key 3 = Debug     (0/1)
 ; key 4 = StrMode  (0 = +0, 1 = highest of both, 2 = +1, 3 = +50% of left, 4 = +100% of left)
 ; key 5 = SkillMode (0 = +0, 1 = highest of both, 2 = +25, 3 = +100% of left)
+; key 6 = UnholsterRMB (0/1, default 0)
 
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iToggleKey" "SimpleAkimbo.ini" 36) 1 255)) 0
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iModeKey" "SimpleAkimbo.ini" 49) 1 255)) 1
@@ -15,6 +16,7 @@ Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iMode"
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iDebug" "SimpleAkimbo.ini" 0) 0 1)) 3
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iStrMode" "SimpleAkimbo.ini" 2) 0 4)) 4
 Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iSkillMode" "SimpleAkimbo.ini" 1) 0 3)) 5
+Player.AuxVarSetFlt "*_SA_MCM" (Floor (Clamp (GetINIFloat_Cached "General:iUnholsterRMB" "SimpleAkimbo.ini" 0) 0 1)) 6
 
 ; Also mirror mode and debug into the existing runtime vars
 Player.AuxVarSetFlt "*_SAMode" (Player.AuxVarGetFlt "*_SA_MCM" 2)
@@ -38,5 +40,5 @@ SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SAToggle.txt") 1 iToggle
 SetOnKeyDownEventHandler (CompileScript "SimpleAkimbo\SATestKey.txt") 1 iModeKey
 
 if Player.AuxVarGetFlt "*_SADebug" == 1
-	PrintC "SimpleAkimbo MCM: ToggleKey=%g ModeKey=%g Mode=%g Debug=%g" iToggle iModeKey (Player.AuxVarGetFlt "*_SAMode") (Player.AuxVarGetFlt "*_SADebug")
+	PrintC "SimpleAkimbo MCM: ToggleKey=%g ModeKey=%g Mode=%g Debug=%g UnholsterRMB=%g" iToggle iModeKey (Player.AuxVarGetFlt "*_SAMode") (Player.AuxVarGetFlt "*_SADebug") (Player.AuxVarGetFlt "*_SA_MCM" 6)
 endif
