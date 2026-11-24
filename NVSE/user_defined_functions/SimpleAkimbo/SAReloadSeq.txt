@@ -1,0 +1,201 @@
+Begin Function {}
+	; Single-hand reload sequence for non-pistols (called by SAReload, then by itself via CallAfterSeconds).
+	; Akimbo is switched off, so each weapon is the only (real) weapon and uses its own
+	; Equip / Reload / UnEquip groups. Nothing has to be hidden.
+	;
+	; Steps (*_SASeqStep):
+	;  0 start: Akimbo unequip kf
+	;  1 Akimbo off
+	;  2 right: Equip
+	;  3 right: reload group of the weapon
+	;  4 right: UnEquip
+	;  5 equip left weapon (engine swap, fixed wait *_SASeqSwapLen)
+	;  6 left: reload group
+	;  7 left: UnEquip
+	;  8 equip right weapon again (engine swap, fixed wait *_SASeqSwapLen)
+	;  9 Akimbo on (SAToggle plays the Akimbo equip animation), sequence done
+	;
+	; Only hands that actually got rounds take part (*_SASeqNeedR / *_SASeqNeedL, set in SAReload):
+	; a full weapon is skipped (right: steps 2-4, left: steps 5-7). Ammo type change: both hands.
+	;
+	; Wait times (steps 0, 2, 3, 4, 6, 7): kf length via SASeqGroup (path) and SASeqLen.
+	; If no path or no attributes are found, the fallback is used: AuxVar if above 0, otherwise the default:
+	;  *_SASeqAkUnequipLen 0.6, *_SASeqGap 0.2, *_SASeqEquipLen 0.8
+	;  *_SASeqReloadLen 3.0, *_SASeqUnequipLen 0.6, *_SASeqSwapLen 0.8
+	int iSeqStepCurrent
+	float fSeqWaitSeconds
+	float fSeqDefaultSeconds
+	ref rSeqLeftWeapon
+	ref rSeqRightWeapon
+	ref rSeqCurrentWeapon
+	string_var sSeqKfPath
+
+	if Player.AuxVarGetFlt "*_SAReloading" != 1
+		return
+	endif
+	if GetActiveMenuMode != 0
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	let iSeqStepCurrent = Player.AuxVarGetFlt "*_SASeqStep"
+	let rSeqLeftWeapon = Player.AuxVarGetRef "*_SALeftW"
+	let rSeqRightWeapon = Player.AuxVarGetRef "*_SASeqRightW"
+
+	; skip a hand that needs no reload
+	if iSeqStepCurrent == 2 && Player.AuxVarGetFlt "*_SASeqNeedR" != 1
+		let iSeqStepCurrent = 5
+		Player.AuxVarSetFlt "*_SASeqStep" 5
+		PrintC "SA Seq: right weapon needs no reload, skipped"
+	endif
+	if iSeqStepCurrent == 5 && Player.AuxVarGetFlt "*_SASeqNeedL" != 1
+		let iSeqStepCurrent = 8
+		Player.AuxVarSetFlt "*_SASeqStep" 8
+		PrintC "SA Seq: left weapon needs no reload, skipped"
+	endif
+
+	if iSeqStepCurrent == 0
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqAkUnequipLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 0.6
+		endif
+		let sSeqKfPath = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf"
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SAReloadHolster" 0
+		Player.AuxVarSetFlt "*_SAEquipPhase" 0
+		Call (CompileScript "SimpleAkimbo\SAAnimOff.txt")
+		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 1 6 1 1.0 0.0
+		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0 6 1 1.0 0.0
+		Player.AuxVarSetFlt "*_SASeqStep" 1
+		PrintC "SA Seq: akimbo unequip (%g s)" fSeqWaitSeconds
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 1
+		let fSeqWaitSeconds = Player.AuxVarGetFlt "*_SASeqGap"
+		if fSeqWaitSeconds <= 0
+			let fSeqWaitSeconds = 0.2
+		endif
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 0.0
+		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0.0
+		Player.AuxVarSetFlt "*_SASwapping" 1
+		let iSeqStepCurrent = 0 - 1
+		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iSeqStepCurrent
+		Player.AuxVarSetFlt "*_SASeqStep" 2
+		PrintC "SA Seq: akimbo off"
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 2
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqEquipLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 0.8
+		endif
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SASeqGroup.txt") rSeqRightWeapon 0 1
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SASeqStep" 3
+		PrintC "SA Seq: right equip (%g s) %z" fSeqWaitSeconds sSeqKfPath
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 3
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqReloadLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 3.0
+		endif
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SASeqGroup.txt") rSeqRightWeapon 1 1
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SASeqStep" 4
+		PrintC "SA Seq: right reload (%g s) %z" fSeqWaitSeconds sSeqKfPath
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 4
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqUnequipLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 0.6
+		endif
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SASeqGroup.txt") rSeqRightWeapon 2 1
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SASeqStep" 5
+		PrintC "SA Seq: right unequip (%g s) %z" fSeqWaitSeconds sSeqKfPath
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 5
+		let fSeqWaitSeconds = Player.AuxVarGetFlt "*_SASeqSwapLen"
+		if fSeqWaitSeconds <= 0
+			let fSeqWaitSeconds = 0.8
+		endif
+		if rSeqLeftWeapon != rSeqRightWeapon
+			Player.EquipItem rSeqLeftWeapon 0 1
+		endif
+		Player.AuxVarSetFlt "*_SASeqStep" 6
+		PrintC "SA Seq: left weapon equipped (%g s)" fSeqWaitSeconds
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 6
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqReloadLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 3.0
+		endif
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SASeqGroup.txt") rSeqLeftWeapon 1 1
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SASeqStep" 7
+		PrintC "SA Seq: left reload (%g s) %z" fSeqWaitSeconds sSeqKfPath
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 7
+		let fSeqDefaultSeconds = Player.AuxVarGetFlt "*_SASeqUnequipLen"
+		if fSeqDefaultSeconds <= 0
+			let fSeqDefaultSeconds = 0.6
+		endif
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SASeqGroup.txt") rSeqLeftWeapon 2 1
+		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
+		Player.AuxVarSetFlt "*_SASeqStep" 8
+		PrintC "SA Seq: left unequip (%g s) %z" fSeqWaitSeconds sSeqKfPath
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 8
+		let fSeqWaitSeconds = Player.AuxVarGetFlt "*_SASeqSwapLen"
+		if fSeqWaitSeconds <= 0
+			let fSeqWaitSeconds = 0.8
+		endif
+		let rSeqCurrentWeapon = Player.GetEquippedObject 5
+		if rSeqCurrentWeapon != rSeqRightWeapon
+			Player.EquipItem rSeqRightWeapon 0 1
+		else
+			; right weapon is already in hand: no swap, only a short gap
+			let fSeqWaitSeconds = Player.AuxVarGetFlt "*_SASeqGap"
+			if fSeqWaitSeconds <= 0
+				let fSeqWaitSeconds = 0.2
+			endif
+		endif
+		Player.AuxVarSetFlt "*_SASeqStep" 9
+		PrintC "SA Seq: right weapon equipped again (%g s)" fSeqWaitSeconds
+		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
+		return
+	endif
+
+	if iSeqStepCurrent == 9
+		Player.AuxVarSetFlt "*_SASeqStep" 0
+		Player.AuxVarSetFlt "*_SAReloading" 0
+		Player.AuxVarSetFlt "*_SAReloadWait" 0
+		Player.AuxVarSetFlt "*_SAReloadSeen" 0
+		PrintC "SA Seq: done, akimbo on"
+		Call (CompileScript "SimpleAkimbo\SAToggle.txt") 0
+		Player.AuxVarSetFlt "*_SASwapping" 0
+		return
+	endif
+End

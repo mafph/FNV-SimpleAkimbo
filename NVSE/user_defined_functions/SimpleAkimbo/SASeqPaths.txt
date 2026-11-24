@@ -1,0 +1,18 @@
+Begin Function {}
+	; kf paths for the single-hand reload sequence (read by SASeqGroup for SAReloadSeq).
+	; Only set the paths you know. A path that is not set here stays empty,
+	; and SAReloadSeq then uses the fixed fallback time for that step.
+	; R = weapon in the right hand (equipped), L = left weapon (*_SALeftW).
+	; Path format as in ActivateAnim, relative to meshes, e.g. "Characters\_1stPerson\XXXReloadA.kf"
+	;
+	; Available keys (remove the leading ; and fill in the path):
+	;Player.AuxVarSetStr "*_SASeqPathREquip" "Characters\_1stPerson\XXXEquip.kf"
+	;Player.AuxVarSetStr "*_SASeqPathRReload" "Characters\_1stPerson\XXXReloadA.kf"
+	;Player.AuxVarSetStr "*_SASeqPathRUnequip" "Characters\_1stPerson\XXXUnequip.kf"
+	;Player.AuxVarSetStr "*_SASeqPathLEquip" "Characters\_1stPerson\XXXEquip.kf"
+	;Player.AuxVarSetStr "*_SASeqPathLReload" "Characters\_1stPerson\XXXReloadA.kf"
+	;Player.AuxVarSetStr "*_SASeqPathLUnequip" "Characters\_1stPerson\XXXUnequip.kf"
+
+	; harmless marker line so the function body is not empty
+	Player.AuxVarSetFlt "*_SASeqPathsLoaded" 1
+End

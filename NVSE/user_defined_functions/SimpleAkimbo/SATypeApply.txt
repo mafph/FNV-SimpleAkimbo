@@ -80,7 +80,10 @@ Begin Function {int iWithAnim}
 	; Always play the Akimbo animation (key 19: both hands, animation ReloadL).
 	; SALoaded is set to 0 beforehand, so afterwards it shows whether SAReload actually loaded.
 	Player.AuxVarSetFlt "*_SALoaded" 0
+	; type change: both weapons always take part in the single-hand sequence (read and cleared in SAReload)
+	Player.AuxVarSetFlt "*_SAReloadForceBoth" 1
 	Call (CompileScript "SimpleAkimbo\SAReload.txt") 19
+	Player.AuxVarSetFlt "*_SAReloadForceBoth" 0
 	let fLoadedNow = Player.AuxVarGetFlt "*_SALoaded"
 	if fLoadedNow <= 0
 		; SAReload exited early (reload running, jam, menu ...) or there was no stock.

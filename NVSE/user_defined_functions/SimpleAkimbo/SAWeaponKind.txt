@@ -1,0 +1,38 @@
+Begin Function {ref rWeap}
+	; Weapon class for Akimbo reload / anim path.
+	; Returns: 0 = none, 1 = pistol (kf reload), 2 = other (drop fallback).
+	; GetWeaponType (JIP) on the weapon form - same values as the anim type:
+	;   3 = OneHandPistol, 4 = OneHandPistolEnergy -> pistol (kf reload fits)
+	;   anything else with a valid weapon (melee, rifle, launcher ...) -> other (reload kf does not fit,
+	;   weapons are moved offscreen during the reload, see SAReloadDrop + SALeftRot)
+	int iAnim
+	int iKind
+	int iType
+
+	let iKind = 0
+	if rWeap == 0
+		SetFunctionValue 0
+		return
+	endif
+
+	let iType = GetType rWeap
+	if iType != 40
+		SetFunctionValue 0
+		return
+	endif
+
+	let iAnim = GetWeaponType rWeap
+	if iAnim == 3
+		let iKind = 1
+	elseif iAnim == 4
+		let iKind = 1
+	else
+		let iKind = 2
+	endif
+
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SA WeaponKind: form=%i type=%g kind=%g (1=pistol 2=other)" rWeap iAnim iKind
+	endif
+
+	SetFunctionValue iKind
+End

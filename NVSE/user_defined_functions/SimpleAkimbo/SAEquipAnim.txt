@@ -34,16 +34,15 @@ Begin Function {}
 	Player.ActivateAnim (sEquip3rd) 0 iPrio 1 1.0 0.0 ""
 
 	let fEquipLen = Player.AuxVarGetFlt "*_SAEquipLen"
-	if fEquipLen < 0.8
-		let fEquipLen = 1.2
+	if fEquipLen <= 0
+		let fEquipLen = 0.8
 	endif
-	; Only transition to idle hold after equip finished (via SAEquipToIdle - respects phase)
 	Player.CallAfterSeconds fEquipLen (CompileScript "SimpleAkimbo\SAEquipToIdle.txt")
 	Player.CallAfterSeconds (fEquipLen + 1.0) (CompileScript "SimpleAkimbo\SAEquipToIdle.txt")
 	PrintC "SA Equip: anim started prio %g, hold in %g s" iPrio fEquipLen
 
 	Player.AuxVarSetFlt "*_SAEquipGuard" 1
-	let fGuard = fEquipLen + 0.8
+	let fGuard = fEquipLen + 0.1
 	Player.CallAfterSeconds fGuard (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
 
 	let rEquipNow = Player.GetEquippedObject 5

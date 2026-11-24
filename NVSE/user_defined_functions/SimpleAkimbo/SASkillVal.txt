@@ -1,0 +1,36 @@
+Begin Function {int iAV}
+	; Player skill value for an actor value CODE. The compiler rejects Player.GetAV with a variable ("Invalid actor value"),
+	; so each skill is listed with its fixed name. Codes: geck.uesp.net/wiki/Actor_Value_Codes
+	int iVal
+	let iVal = 0
+	if iAV == 32
+		let iVal = Player.GetAV Barter
+	elseif iAV == 33
+		let iVal = Player.GetAV BigGuns
+	elseif iAV == 34
+		let iVal = Player.GetAV EnergyWeapons
+	elseif iAV == 35
+		let iVal = Player.GetAV Explosives
+	elseif iAV == 36
+		let iVal = Player.GetAV Lockpick
+	elseif iAV == 37
+		let iVal = Player.GetAV Medicine
+	elseif iAV == 38
+		let iVal = Player.GetAV MeleeWeapons
+	elseif iAV == 39
+		let iVal = Player.GetAV Repair
+	elseif iAV == 40
+		let iVal = Player.GetAV Science
+	elseif iAV == 41
+		let iVal = Player.GetAV Guns
+	elseif iAV == 42
+		let iVal = Player.GetAV Sneak
+	elseif iAV == 43
+		let iVal = Player.GetAV Speech
+	elseif iAV == 44
+		let iVal = Player.GetAV Survival
+	elseif iAV == 45
+		let iVal = Player.GetAV Unarmed
+	endif
+	SetFunctionValue iVal
+End

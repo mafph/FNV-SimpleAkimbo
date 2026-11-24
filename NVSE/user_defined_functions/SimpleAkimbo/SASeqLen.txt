@@ -1,0 +1,30 @@
+Begin Function {string_var sPath, float fDef}
+	; Length of a kf in seconds: (endKeyTime - beginKeyTime) * *_SASeqCut (default 1.0, max 1.0).
+	; Returns fDef if the path is empty or GetAnimationAttributes finds nothing.
+	array_var aAttr
+	float fB
+	float fE
+	float fLen
+	float fCut
+	int iSize
+	int iLen
+
+	let fLen = fDef
+	let iLen = sv_Length sPath
+	if iLen > 0
+		let aAttr = GetAnimationAttributes sPath
+		let iSize = ar_Size aAttr
+		if iSize > 0
+			let fB = aAttr["beginKeyTime"]
+			let fE = aAttr["endKeyTime"]
+			if fE > fB
+				let fCut = Player.AuxVarGetFlt "*_SASeqCut"
+				if fCut <= 0 || fCut > 1
+					let fCut = 1
+				endif
+				let fLen = (fE - fB) * fCut
+			endif
+		endif
+	endif
+	SetFunctionValue fLen
+End

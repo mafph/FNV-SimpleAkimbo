@@ -1,0 +1,13 @@
+Begin Function {}
+	; Called after equip duration. Clears equip phase and applies idle hold.
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		Player.AuxVarSetFlt "*_SAEquipPhase" 0
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		Player.AuxVarSetFlt "*_SAEquipPhase" 0
+		return
+	endif
+	Player.AuxVarSetFlt "*_SAEquipPhase" 0
+	Call (CompileScript "SimpleAkimbo\SAIdleHold.txt")
+End

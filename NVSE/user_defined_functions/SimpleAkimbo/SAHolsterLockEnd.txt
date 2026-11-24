@@ -1,0 +1,4 @@
+Begin Function {}
+	; Ends the brief lock after a queued holster is applied at reload end.
+	Player.AuxVarSetFlt "*_SAHolsterLock" 0
+End

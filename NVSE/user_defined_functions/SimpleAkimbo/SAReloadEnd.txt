@@ -1,9 +1,13 @@
 Begin Function {}
-	; Reload lock ends after *_SAReloadDur (or immediately if Akimbo off).
-	; Deactivates reload sequences, then either applies a queued holster or returns to idle hold.
+	; Ends the reload lock at *_SAReloadDur (normally 90% of kf endKeyTime).
+	; Also ends early if the ActivateAnim sequence was seen and has already stopped.
 	float fWait
 	float fDur
 	int iDone
+	int iPlaying
+	int iSeen
+	string_var sPath1st
+	string_var sPath3rd
 
 	if Player.AuxVarGetFlt "*_SAReloading" != 1
 		return
@@ -16,24 +20,69 @@ Begin Function {}
 		let fWait = Player.AuxVarGetFlt "*_SAReloadWait"
 		let fWait += 0.05
 		Player.AuxVarSetFlt "*_SAReloadWait" fWait
+
 		let fDur = Player.AuxVarGetFlt "*_SAReloadDur"
 		if fDur <= 0
-			let fDur = 5.1
+			let fDur = 4.5
 		endif
+
+		; Primary cut: duration (90% of endKeyTime) – trims the long tail of the kf
 		if fWait >= fDur
 			let iDone = 1
+			PrintC "SA ReloadEnd: cut at %g / %g s" fWait fDur
+		else
+			let sPath1st = Player.AuxVarGetStr "*_SAReloadPath1st"
+			let sPath3rd = Player.AuxVarGetStr "*_SAReloadPath3rd"
+			let iPlaying = 0
+			if Player.IsAnimSequencePlaying (sPath1st)
+				let iPlaying = 1
+			elseif Player.IsAnimSequencePlaying (sPath3rd)
+				let iPlaying = 1
+			endif
+			let iSeen = Player.AuxVarGetFlt "*_SAReloadSeen"
+			if iPlaying == 1
+				Player.AuxVarSetFlt "*_SAReloadSeen" 1
+			elseif iSeen == 1
+				let iDone = 1
+				PrintC "SA ReloadEnd: sequence ended early at %g s" fWait
+			endif
 		endif
 	endif
 
 	if iDone == 1
+		; Reload fallback drop: put weapons back (SALeftRot with DropZ/DropK = 0 restores the rest pose)
+		if Player.AuxVarGetFlt "*_SADropZ" != 0 || Player.AuxVarGetFlt "*_SADropK" != 0 || Player.AuxVarGetFlt "*_SADropMovedL" == 1 || Player.AuxVarGetFlt "*_SADropMovedR" == 1
+			Player.AuxVarSetFlt "*_SADropZ" 0
+			Player.AuxVarSetFlt "*_SADropK" 0
+			Call (CompileScript "SimpleAkimbo\SALeftRot.txt")
+		endif
 		Player.AuxVarSetFlt "*_SAReloading" 0
 		Player.AuxVarSetFlt "*_SAReloadWait" 0
+		Player.AuxVarSetFlt "*_SAReloadSeen" 0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
 		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
 
-		; Holster was requested mid-reload, or weapon is already away -> stay holstered
+		; Non-pistol reload: SAReload played the Akimbo unequip kf (SAReloadHolster = 1). Remove it and play the equip animation.
+		; A holster queued by the player in the meantime skips the equip animation (handled by the holster branch below).
+		if Player.AuxVarGetFlt "*_SAReloadHolster" == 1
+			Player.AuxVarSetFlt "*_SAReloadHolster" 0
+			Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 0.0
+			Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0.0
+			if Player.AuxVarGetFlt "*_SAHolsterQueued" != 1
+				if Player.AuxVarGetFlt "*_SAkimbo" == 1
+					PrintC "SA ReloadEnd: unequip done, playing equip animation"
+					Player.AuxVarSetFlt "*_SAEquipPhase" 1
+					Player.AuxVarSetFlt "*_SAEquipGuard" 1
+					Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+					; failsafe: never leave the guard set if the animation script does not run
+					Player.CallAfterSeconds 2 (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
+				endif
+				return
+			endif
+		endif
+
 		if Player.AuxVarGetFlt "*_SAHolsterQueued" == 1 || Player.IsWeaponOut == 0
 			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
 			Player.AuxVarSetFlt "*_SAHolstered" 1

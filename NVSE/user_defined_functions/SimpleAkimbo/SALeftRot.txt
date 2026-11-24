@@ -1,0 +1,515 @@
+Begin Function {}
+	; Rotates and moves the left AND right weapon model for weapon types whose NIF does not fit the pistol grip (launchers: Missile Launcher, Fat Man).
+	; Called 0.2 s after Akimbo is turned on (SAToggle). Left works on the extra node AkimboRot, which no kf animates.
+	; The values are lost on Update3D, but every weapon swap goes through SAToggle again.
+	; Tuning without recompiling (console), then switch Akimbo off and on again with J:
+	;   player.AuxVarSetFlt "*_SALeftRotSet" 1
+	;   player.AuxVarSetFlt "*_SALeftRotX" <deg>   (same for Y and Z)
+	;   player.AuxVarSetFlt "*_SALeftPosX" <units> (same for Y and Z, parent space: +Y forward, +Z up, +X right)
+	; Fat Man missile (##NifRound): only turned for the Fat Man itself, the Missile Launcher keeps its own rotation (auto detect by base form).
+	;   player.AuxVarSetFlt "*_SARightNifRoundMode" <0 = auto, 1 = always turn, 2 = never turn>
+	; Right weapon: same with the prefix *_SARight (RightRotSet, RightRotX/Y/Z, RightPosX/Y/Z).
+	; Drop direction (reload fallback), per hand, vector in the same space as the position offsets. Default 0 0 1 = down (-Z).
+	;   player.AuxVarSetFlt "*_SADropDirSet" 1
+	;   player.AuxVarSetFlt "*_SADropDirLX" <x>  (same for LY, LZ; right: RX, RY, RZ)
+	; Launchers (type 9) have their own drop direction, because their nodes (AkimboRot / NIF children) live in a different coordinate frame than pistols etc.
+	; Default 1 0 0. If the launchers go UP instead of down, flip the sign; if they still go sideways, try 0 1 0 or 0 0 -1.
+	;   player.AuxVarSetFlt "*_SADropDirLaunchSet" 1
+	; Tilt of the launchers while dropping (degrees added to the rotation at full drop, scaled by *_SADropK 0..1). Default 0 0 45 per hand.
+	; If they tilt the wrong way, flip the sign; if they twist instead of tilting, try the X or Y entry.
+	;   player.AuxVarSetFlt "*_SADropTiltSet" 1
+	;   player.AuxVarSetFlt "*_SADropTiltLZ" <deg>  (same for LX, LY; right: RX, RY, RZ)
+	;   player.AuxVarSetFlt "*_SADropDirLLX" <x>  (same for LLY, LLZ; right: RLX, RLY, RLZ)
+	ref rWeap
+	ref rWeapR
+	int iWT
+	int iWTR
+	float fX
+	float fY
+	float fZ
+	float fPX
+	float fPY
+	float fPZ
+	float fRX
+	float fRY
+	float fRZ
+	float fRPX
+	float fRPY
+	float fRPZ
+	string_var sNode
+	string_var sNodeR
+	array_var aT
+	int iPM
+	int iMode
+	float fSg
+	float fA
+	float fSX
+	float fCX
+	float fSY
+	float fCY
+	float fSZ
+	float fCZ
+	float fTX
+	float fTY
+	float fTZ
+	float fNX
+	float fNY
+	float fNZ
+	float fC11
+	float fC12
+	float fC13
+	float fC21
+	float fC22
+	float fC23
+	float fC31
+	float fC32
+	float fC33
+	float fEX
+	float fSv
+	float fCv
+	float fRr
+	float fLo
+	float fHi
+	float fMid
+	float fT
+	float fAng
+	int iK
+	int iB
+	float fEY
+	float fEZ
+	float fDrop
+	float fLDX
+	float fLDY
+	float fLDZ
+	float fRDX
+	float fRDY
+	float fRDZ
+	float fLLX
+	float fLLY
+	float fLLZ
+	float fRLX
+	float fRLY
+	float fRLZ
+	float fKd
+	float fTLX
+	float fTLY
+	float fTLZ
+	float fTRX
+	float fTRY
+	float fTRZ
+	float fM11
+	float fM12
+	float fM13
+	float fM21
+	float fM22
+	float fM23
+	float fM31
+	float fM32
+	float fM33
+	ref rFatManForm
+	int iFatManRound
+	int iNifRoundMode
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+
+	; Reload fallback without animation (SAReloadDrop): weapons are swung down out of the picture, *_SADropZ = units down (0 = normal).
+	let fDrop = Player.AuxVarGetFlt "*_SADropZ"
+	; Drop direction per hand (default: straight down)
+	let fLDX = 0
+	let fLDY = 0
+	let fLDZ = 1
+	let fRDX = 0
+	let fRDY = 0
+	let fRDZ = 1
+	if Player.AuxVarGetFlt "*_SADropDirSet" == 1
+		let fLDX = Player.AuxVarGetFlt "*_SADropDirLX"
+		let fLDY = Player.AuxVarGetFlt "*_SADropDirLY"
+		let fLDZ = Player.AuxVarGetFlt "*_SADropDirLZ"
+		let fRDX = Player.AuxVarGetFlt "*_SADropDirRX"
+		let fRDY = Player.AuxVarGetFlt "*_SADropDirRY"
+		let fRDZ = Player.AuxVarGetFlt "*_SADropDirRZ"
+	endif
+	; Launcher drop direction (separate from the pistol/other direction above)
+	let fLLX = 1
+	let fLLY = 0
+	let fLLZ = 0
+	let fRLX = 1
+	let fRLY = 0
+	let fRLZ = 0
+	if Player.AuxVarGetFlt "*_SADropDirLaunchSet" == 1
+		let fLLX = Player.AuxVarGetFlt "*_SADropDirLLX"
+		let fLLY = Player.AuxVarGetFlt "*_SADropDirLLY"
+		let fLLZ = Player.AuxVarGetFlt "*_SADropDirLLZ"
+		let fRLX = Player.AuxVarGetFlt "*_SADropDirRLX"
+		let fRLY = Player.AuxVarGetFlt "*_SADropDirRLY"
+		let fRLZ = Player.AuxVarGetFlt "*_SADropDirRLZ"
+	endif
+	; Tilt (rotation added to the launchers while dropping)
+	let fKd = Player.AuxVarGetFlt "*_SADropK"
+	let fTLX = 0
+	let fTLY = 0
+	let fTLZ = 45
+	let fTRX = 0
+	let fTRY = 0
+	let fTRZ = 45
+	if Player.AuxVarGetFlt "*_SADropTiltSet" == 1
+		let fTLX = Player.AuxVarGetFlt "*_SADropTiltLX"
+		let fTLY = Player.AuxVarGetFlt "*_SADropTiltLY"
+		let fTLZ = Player.AuxVarGetFlt "*_SADropTiltLZ"
+		let fTRX = Player.AuxVarGetFlt "*_SADropTiltRX"
+		let fTRY = Player.AuxVarGetFlt "*_SADropTiltRY"
+		let fTRZ = Player.AuxVarGetFlt "*_SADropTiltRZ"
+	endif
+
+	; ---------- LEFT weapon ----------
+	let rWeap = Player.AuxVarGetRef "*_SALeftW"
+	if rWeap != 0
+		let iWT = GetWeaponType rWeap
+		if iWT == 9
+			; TwoHandLauncher defaults, tuned in game: rot 35 0 -90, pos -30 20 5
+			let fX = 35
+			let fY = 0
+			let fZ = 0 - 90
+			let fPX = 0 - 30
+			let fPY = 20
+			let fPZ = 5
+			if Player.AuxVarGetFlt "*_SALeftRotSet" == 1
+				let fX = Player.AuxVarGetFlt "*_SALeftRotX"
+				let fY = Player.AuxVarGetFlt "*_SALeftRotY"
+				let fZ = Player.AuxVarGetFlt "*_SALeftRotZ"
+				let fPX = Player.AuxVarGetFlt "*_SALeftPosX"
+				let fPY = Player.AuxVarGetFlt "*_SALeftPosY"
+				let fPZ = Player.AuxVarGetFlt "*_SALeftPosZ"
+			endif
+
+			let fX = fX + fKd * fTLX
+			let fY = fY + fKd * fTLY
+			let fZ = fZ + fKd * fTLZ
+			let fPX = fPX - fDrop * fLLX
+			let fPY = fPY - fDrop * fLLY
+			let fPZ = fPZ - fDrop * fLLZ
+			let sNode = "Akimbo"
+			if Player.AuxVarGetFlt "*_SARotNode" == 1
+				let sNode = "AkimboRot"
+			endif
+			Player.SetNifBlockRotation (sNode) fX fY fZ 0 1
+			Player.SetNifBlockRotation (sNode) fX fY fZ 0 2
+			Player.SetNifBlockTranslation (sNode) fPX fPY fPZ 1
+			Player.SetNifBlockTranslation (sNode) fPX fPY fPZ 2
+			if fDrop == 0
+				PrintC "SimpleAkimbo: left rot %g %g %g pos %g %g %g (type %g)" fX fY fZ fPX fPY fPZ iWT
+			endif
+		else
+			; Other weapons (no launcher): move the node "Akimbo" by the drop offset (base offset of SAToggle is not known here -> back to 0 afterwards)
+			if fDrop != 0 || Player.AuxVarGetFlt "*_SADropMovedL" == 1
+				let fPX = 0 - fDrop * fLDX
+				let fPY = 0 - fDrop * fLDY
+				let fPZ = 0 - fDrop * fLDZ
+				Player.SetNifBlockTranslation "Akimbo" fPX fPY fPZ 1
+				Player.SetNifBlockTranslation "Akimbo" fPX fPY fPZ 2
+				Player.AuxVarSetFlt "*_SADropMovedL" (fDrop != 0)
+			endif
+		endif
+	endif
+
+	; ---------- RIGHT weapon ----------
+	let rWeapR = Player.GetEquippedWeapon
+	if rWeapR != 0
+		let iWTR = GetWeaponType rWeapR
+		if iWTR == 9
+			; Defaults tuned in game: rot 35 0 -90, pos -28 20 7.5. Override with *_SARightRotSet 1 + *_SARightRotX/Y/Z, *_SARightPosX/Y/Z.
+			let fRX = 35
+			let fRY = 0
+			let fRZ = 0 - 90
+			let fRPX = 0 - 28
+			let fRPY = 20
+			let fRPZ = 7.5
+			if Player.AuxVarGetFlt "*_SARightRotSet" == 1
+				let fRX = Player.AuxVarGetFlt "*_SARightRotX"
+				let fRY = Player.AuxVarGetFlt "*_SARightRotY"
+				let fRZ = Player.AuxVarGetFlt "*_SARightRotZ"
+				let fRPX = Player.AuxVarGetFlt "*_SARightPosX"
+				let fRPY = Player.AuxVarGetFlt "*_SARightPosY"
+				let fRPZ = Player.AuxVarGetFlt "*_SARightPosZ"
+			endif
+
+			let fRX = fRX + fKd * fTRX
+			let fRY = fRY + fKd * fTRY
+			let fRZ = fRZ + fKd * fTRZ
+			let fRPX = fRPX - fDrop * fRLX
+			let fRPY = fRPY - fDrop * fRLY
+			let fRPZ = fRPZ - fDrop * fRLZ
+
+			; "Weapon" (BSFadeNode) is overwritten by the kf files every frame, so the children of the NIF are rotated instead.
+			; Missile Launcher: MissileLauncher:0, ##mlControlBox, ##mlLoader.
+			; Fat Man: FatMan:0, FatMan:1, ##FMCradleSide, ##FMHandle, ##FMShuttle1 (Shuttle2-4 and the meshes hang below it).
+			; Blocks that do not exist in the equipped NIF are simply ignored by the engine.
+			; Every node with an offset in the NIF is moved: new = R * NIF value + right offset (NIF space of the weapon).
+			; Euler mode (*_SARightRotMode 1-4): 1 = Rx*Ry*Rz  2 = Rz*Ry*Rx  3 = Rz(-z)*Ry(-y)*Rx(-x)  4 = Rx(-x)*Ry(-y)*Rz(-z) (default, tuned in game)
+			let iMode = Player.AuxVarGetFlt "*_SARightRotMode"
+			if iMode < 1 || iMode > 4
+				let iMode = 4
+			endif
+			let fSg = 1
+			if iMode >= 3
+				let fSg = 0 - 1
+			endif
+			let fA = fSg * fRX
+			let fSX = Sin fA
+			let fCX = Cos fA
+			let fA = fSg * fRY
+			let fSY = Sin fA
+			let fCY = Cos fA
+			let fA = fSg * fRZ
+			let fSZ = Sin fA
+			let fCZ = Cos fA
+			if iMode == 1 || iMode == 4
+				; R = Rx * Ry * Rz
+				let fM11 = fCY * fCZ
+				let fM12 = 0 - fCY * fSZ
+				let fM13 = fSY
+				let fM21 = fCX * fSZ + fSX * fSY * fCZ
+				let fM22 = fCX * fCZ - fSX * fSY * fSZ
+				let fM23 = 0 - fSX * fCY
+				let fM31 = fSX * fSZ - fCX * fSY * fCZ
+				let fM32 = fSX * fCZ + fCX * fSY * fSZ
+				let fM33 = fCX * fCY
+			else
+				; R = Rz * Ry * Rx
+				let fM11 = fCZ * fCY
+				let fM12 = fCZ * fSY * fSX - fSZ * fCX
+				let fM13 = fCZ * fSY * fCX + fSZ * fSX
+				let fM21 = fSZ * fCY
+				let fM22 = fSZ * fSY * fSX + fCZ * fCX
+				let fM23 = fSZ * fSY * fCX - fCZ * fSX
+				let fM31 = 0 - fSY
+				let fM32 = fCY * fSX
+				let fM33 = fCY * fCX
+			endif
+
+			; ----- Missile Launcher -----
+			let sNodeR = "MissileLauncher:0"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0
+			let fTY = 0
+			let fTZ = 0
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "##mlControlBox"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0
+			let fTY = 0
+			let fTZ = 0
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "##mlLoader"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0 - 10.434863
+			let fTY = 0 - 8.169942
+			let fTZ = 0 - 16.967016
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ
+			if Player.AuxVarGetFlt "*_SARightLoaderSet" == 1
+				let fNX = Player.AuxVarGetFlt "*_SARightLoaderX"
+				let fNY = Player.AuxVarGetFlt "*_SARightLoaderY"
+				let fNZ = Player.AuxVarGetFlt "*_SARightLoaderZ"
+			endif
+			let fNX = fNX + fRPX
+			let fNY = fNY + fRPY
+			let fNZ = fNZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+
+			; ----- Fat Man (NIF values from fatman.nif) -----
+			let sNodeR = "FatMan:0"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0
+			let fTY = 0
+			let fTZ = 0
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "FatMan:1"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0
+			let fTY = 0
+			let fTZ = 0
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "##FMCradleSide"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0 - 7.629
+			let fTY = 0 - 18.947
+			let fTZ = 0 - 12.62
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "##FMHandle"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0 - 11.082
+			let fTY = 0 - 32.159
+			let fTZ = 0 - 11.302
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			let sNodeR = "##FMShuttle1"
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fRX fRY fRZ 0 2
+			let fTX = 0 - 1.642
+			let fTY = 22.372
+			let fTZ = 0 - 11.321
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			; Detect the Fat Man (base form FalloutNV.esm 00432C). *_SARightNifRoundMode: 0 = auto, 1 = always, 2 = never.
+			let rFatManForm = GetFormFromMod "FalloutNV.esm" "00432C"
+			let iFatManRound = 0
+			if rWeapR == rFatManForm
+				let iFatManRound = 1
+			endif
+			let iNifRoundMode = Player.AuxVarGetFlt "*_SARightNifRoundMode"
+			if iNifRoundMode == 1
+				let iFatManRound = 1
+			elseif iNifRoundMode == 2
+				let iFatManRound = 0
+			endif
+			if iFatManRound == 1
+			; ----- Fat Man missile ##NifRound: has its own NIF rotation M, so the new rotation is R * M (turned back into Euler angles) -----
+			; M (from fatman.nif) = [0 -0.010878 -0.999941 / 0 0.999941 -0.010878 / 1 0 0], position -1.579 4.348 -11.209
+			let fC11 = fM13
+			let fC12 = 0 - fM11 * 0.010878 + fM12 * 0.999941
+			let fC13 = 0 - fM11 * 0.999941 - fM12 * 0.010878
+			let fC21 = fM23
+			let fC22 = 0 - fM21 * 0.010878 + fM22 * 0.999941
+			let fC23 = 0 - fM21 * 0.999941 - fM22 * 0.010878
+			let fC31 = fM33
+			let fC32 = 0 - fM31 * 0.010878 + fM32 * 0.999941
+			let fC33 = 0 - fM31 * 0.999941 - fM32 * 0.010878
+			; No ASin/ATan2 in this NVSE: inverse via bisection on Sin (30 steps), angle = atan2(sin, cos) in degrees.
+			let iK = 1
+			while iK <= 3
+				if iMode == 1 || iMode == 4
+					if iK == 1
+						let fSv = fC13
+						let fCv = 1
+					elseif iK == 2
+						let fSv = 0 - fC23
+						let fCv = fC33
+					else
+						let fSv = 0 - fC12
+						let fCv = fC11
+					endif
+				else
+					if iK == 1
+						let fSv = 0 - fC31
+						let fCv = 1
+					elseif iK == 2
+						let fSv = fC32
+						let fCv = fC33
+					else
+						let fSv = fC21
+						let fCv = fC11
+					endif
+				endif
+				if iK == 1
+					; pitch-like angle in [-90,90]: cos = sqrt(1 - sin^2) >= 0
+					let fSv = fSv
+					let fCv = Sqrt (1 - fSv * fSv)
+				endif
+				let fRr = Sqrt (fSv * fSv + fCv * fCv)
+				let fAng = 0
+				if fRr > 0.000001
+					let fSv = fSv / fRr
+					let fCv = fCv / fRr
+					let fLo = 0 - 90
+					let fHi = 90
+					let iB = 1
+					while iB <= 30
+						let fMid = (fLo + fHi) / 2
+						let fT = Sin fMid
+						if fT < fSv
+							let fLo = fMid
+						else
+							let fHi = fMid
+						endif
+						let iB = iB + 1
+					loop
+					let fAng = (fLo + fHi) / 2
+					if fCv < 0
+						let fAng = 180 - fAng
+						if fAng > 180
+							let fAng = fAng - 360
+						endif
+					endif
+				endif
+				if iK == 1
+					let fEY = fAng
+				elseif iK == 2
+					let fEX = fAng
+				else
+					let fEZ = fAng
+				endif
+				let iK = iK + 1
+			loop
+			let fEX = fSg * fEX
+			let fEY = fSg * fEY
+			let fEZ = fSg * fEZ
+			let sNodeR = "##NifRound"
+			Player.SetNifBlockRotation (sNodeR) fEX fEY fEZ 0 1
+			Player.SetNifBlockRotation (sNodeR) fEX fEY fEZ 0 2
+			let fTX = 0 - 1.578751
+			let fTY = 4.348087
+			let fTZ = 0 - 11.208802
+			let fNX = fM11 * fTX + fM12 * fTY + fM13 * fTZ + fRPX
+			let fNY = fM21 * fTX + fM22 * fTY + fM23 * fTZ + fRPY
+			let fNZ = fM31 * fTX + fM32 * fTY + fM33 * fTZ + fRPZ
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 1
+			Player.SetNifBlockTranslation (sNodeR) fNX fNY fNZ 2
+			if fDrop == 0
+				PrintC "SimpleAkimbo: NifRound rot %g %g %g pos %g %g %g" fEX fEY fEZ fNX fNY fNZ
+			endif
+			endif
+
+			if fDrop == 0
+				PrintC "SimpleAkimbo: right rot %g %g %g pos %g %g %g (type %g, mode %g, weapon %i, NifRound turned %g)" fRX fRY fRZ fRPX fRPY fRPZ iWTR iMode rWeapR iFatManRound
+			endif
+		else
+			; Other weapons (no launcher): move "Weapon" by the drop offset. Untested: kf files may overwrite this node (see above).
+			if fDrop != 0 || Player.AuxVarGetFlt "*_SADropMovedR" == 1
+				let fRPX = 0 - fDrop * fRDX
+				let fRPY = 0 - fDrop * fRDY
+				let fRPZ = 0 - fDrop * fRDZ
+				Player.SetNifBlockTranslation "Weapon" fRPX fRPY fRPZ 1
+				Player.SetNifBlockTranslation "Weapon" fRPX fRPY fRPZ 2
+				Player.AuxVarSetFlt "*_SADropMovedR" (fDrop != 0)
+			endif
+		endif
+	endif
+End

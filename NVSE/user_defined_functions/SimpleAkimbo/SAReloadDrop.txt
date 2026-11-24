@@ -1,0 +1,72 @@
+Begin Function {}
+	; Reload fallback for non-pistol weapons (SAWeaponKind == 2): the pistol reload kf does not fit, so both weapons are
+	; swung out of the picture while the kf plays (same mechanism and tuning as the launcher fix in SALeftRot).
+	; Runs every 0.03 s during the reload: *_SADropZ = units moved, *_SADropK = tilt 0..1, SALeftRot applies them.
+	; Timing: drop in 0.2 s, hold, back in during the last 0.25 s of *_SAReloadDur. SAReloadEnd resets everything.
+	; Tuning: *_SADropMax = units (default 50), *_SADropIn / *_SADropOut = seconds (defaults 0.2 / 0.25).
+	float fT
+	float fDur
+	float fMax
+	float fIn
+	float fOut
+	float fS
+	float fRem
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAReloading" != 1
+		; reload over or aborted: make sure the weapons are back
+		if Player.AuxVarGetFlt "*_SADropZ" != 0 || Player.AuxVarGetFlt "*_SADropK" != 0
+			Player.AuxVarSetFlt "*_SADropZ" 0
+			Player.AuxVarSetFlt "*_SADropK" 0
+			Call (CompileScript "SimpleAkimbo\SALeftRot.txt")
+		endif
+		return
+	endif
+	if Player.AuxVarGetFlt "*_SAHolstered" == 1
+		return
+	endif
+
+	let fMax = Player.AuxVarGetFlt "*_SADropMax"
+	if fMax <= 0
+		let fMax = 50
+	endif
+	let fIn = Player.AuxVarGetFlt "*_SADropIn"
+	if fIn <= 0
+		let fIn = 0.2
+	endif
+	let fOut = Player.AuxVarGetFlt "*_SADropOut"
+	if fOut <= 0
+		let fOut = 0.25
+	endif
+	let fDur = Player.AuxVarGetFlt "*_SAReloadDur"
+	if fDur <= 0
+		let fDur = 4.5
+	endif
+
+	let fT = Player.AuxVarGetFlt "*_SADropT"
+	let fT += 0.03
+	Player.AuxVarSetFlt "*_SADropT" fT
+
+	let fS = 1
+	if fT < fIn
+		let fS = fT / fIn
+	endif
+	let fRem = fDur - fT
+	if fRem < fOut
+		let fS = fRem / fOut
+	endif
+	if fS < 0
+		let fS = 0
+	endif
+	if fS > 1
+		let fS = 1
+	endif
+
+	Player.AuxVarSetFlt "*_SADropZ" (fMax * fS)
+	Player.AuxVarSetFlt "*_SADropK" fS
+	Call (CompileScript "SimpleAkimbo\SALeftRot.txt")
+
+	Player.CallAfterSeconds 0.03 (CompileScript "SimpleAkimbo\SAReloadDrop.txt")
+End

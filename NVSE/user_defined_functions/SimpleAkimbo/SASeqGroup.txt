@@ -1,0 +1,104 @@
+Begin Function {ref rWeap, int iKind, int iPlay}
+	; Path of the kf behind an animation group of the currently equipped weapon, and optionally plays the group.
+	; iKind: 0 = Equip, 1 = reload group of rWeap (GetWeaponReloadAnim), 2 = UnEquip
+	; iPlay: 1 = also PlayGroup it (player must have rWeap equipped, otherwise the path is of another weapon)
+	; Returns the first path of GetAnimationsByAnimGroup, "" if nothing is found.
+	; Reload index -> group: 0..11 = ReloadA..ReloadL, 19..22 = ReloadW..ReloadZ.
+	; Unknown index (12..18 etc.): falls back to ReloadA.
+	array_var aPaths
+	string_var sPath
+	int iReload
+	int iSize
+
+	let sPath = ""
+	let aPaths = ar_Construct "Array"
+
+	if iKind == 0
+		let aPaths = Player.GetAnimationsByAnimGroup Equip
+		if iPlay == 1
+			Player.PlayGroup Equip 1
+		endif
+	elseif iKind == 2
+		let aPaths = Player.GetAnimationsByAnimGroup UnEquip
+		if iPlay == 1
+			Player.PlayGroup UnEquip 1
+		endif
+	else
+		let iReload = GetWeaponReloadAnim rWeap
+		if iReload == 1
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadB
+		elseif iReload == 2
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadC
+		elseif iReload == 3
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadD
+		elseif iReload == 4
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadE
+		elseif iReload == 5
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadF
+		elseif iReload == 6
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadG
+		elseif iReload == 7
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadH
+		elseif iReload == 8
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadI
+		elseif iReload == 9
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadJ
+		elseif iReload == 10
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadK
+		elseif iReload == 11
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadL
+		elseif iReload == 19
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadW
+		elseif iReload == 20
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadX
+		elseif iReload == 21
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadY
+		elseif iReload == 22
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadZ
+		else
+			let aPaths = Player.GetAnimationsByAnimGroup ReloadA
+		endif
+
+		if iPlay == 1
+			if iReload == 1
+				Player.PlayGroup ReloadB 1
+			elseif iReload == 2
+				Player.PlayGroup ReloadC 1
+			elseif iReload == 3
+				Player.PlayGroup ReloadD 1
+			elseif iReload == 4
+				Player.PlayGroup ReloadE 1
+			elseif iReload == 5
+				Player.PlayGroup ReloadF 1
+			elseif iReload == 6
+				Player.PlayGroup ReloadG 1
+			elseif iReload == 7
+				Player.PlayGroup ReloadH 1
+			elseif iReload == 8
+				Player.PlayGroup ReloadI 1
+			elseif iReload == 9
+				Player.PlayGroup ReloadJ 1
+			elseif iReload == 10
+				Player.PlayGroup ReloadK 1
+			elseif iReload == 11
+				Player.PlayGroup ReloadL 1
+			elseif iReload == 19
+				Player.PlayGroup ReloadW 1
+			elseif iReload == 20
+				Player.PlayGroup ReloadX 1
+			elseif iReload == 21
+				Player.PlayGroup ReloadY 1
+			elseif iReload == 22
+				Player.PlayGroup ReloadZ 1
+			else
+				Player.PlayGroup ReloadA 1
+			endif
+		endif
+	endif
+
+	let iSize = ar_Size aPaths
+	if iSize > 0
+		let sPath = aPaths[0]
+	endif
+	SetFunctionValue sPath
+End

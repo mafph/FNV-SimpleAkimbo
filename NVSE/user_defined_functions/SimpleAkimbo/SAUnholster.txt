@@ -17,7 +17,7 @@ Begin Function {}
 	Player.CallAfterSeconds 0.15 (CompileScript "SimpleAkimbo\SAUnholsterAnim.txt")
 	Player.CallAfterSeconds 0.5 (CompileScript "SimpleAkimbo\SAUnholsterCheck.txt")
 	; failsafe: never leave the guard set if the animation script does not run
-	Player.CallAfterSeconds 3 (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
+	Player.CallAfterSeconds 2 (CompileScript "SimpleAkimbo\SAEquipGuardEnd.txt")
 
 	PrintC "SA Unholster: draw requested (SetWeaponOut), equip animation follows in 0.15 s"
 End

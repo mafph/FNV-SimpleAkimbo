@@ -11,6 +11,7 @@ Begin Function {int iKey}
 	int iMenu
 	int iMods
 	int iWT
+	int iEWT
 	string_var sHudPath
 	string_var sHudOrig
 
@@ -114,6 +115,10 @@ Begin Function {int iKey}
 		Call (CompileScript "SimpleAkimbo\SAAutoInit.txt")
 		Call (CompileScript "SimpleAkimbo\SAReload.txt") 0
 		PrintC "SimpleAkimbo: ON"
+		; Weapon kind check (left + right): 1=pistol kf reload, 2=other drop fallback
+		let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap
+		let iEWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rEquip
+		PrintC "SimpleAkimbo: weapon kinds L=%g R=%g (1=pistol 2=other)" iWT iEWT
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 	else
 		let sPath = Player.AuxVarGetStr "*_SAModel"
@@ -181,7 +186,8 @@ Begin Function {int iKey}
 			Player.AuxVarSetFlt "*_SAHolstered" 0
 			Player.AuxVarSetFlt "*_SAHolsterQueued" 0
 			Player.AuxVarSetFlt "*_SAHolsterLock" 0
-			Call (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
+			; Slight delay after RefreshAnimData so ActivateAnim is not cleared in the same frame
+			Player.CallAfterSeconds 0.1 (CompileScript "SimpleAkimbo\SAEquipAnim.txt")
 		endif
 	endif
 End
