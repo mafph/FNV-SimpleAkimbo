@@ -1,13 +1,22 @@
-Begin Function {ref rWeap}
+Begin Function {ref rWeap, int iSide}
 	; Weapon class for Akimbo reload / anim path.
+	; iSide: 0 = left weapon (subtree "Akimbo"), 1 = right weapon (subtree "Weapon" minus "Akimbo")
 	; Returns: 0 = none, 1 = pistol (kf reload), 2 = other (drop fallback).
 	; GetWeaponType (JIP) on the weapon form - same values as the anim type:
 	;   3 = OneHandPistol, 4 = OneHandPistolEnergy -> pistol (kf reload fits)
-	;   anything else with a valid weapon (melee, rifle, launcher ...) -> other (reload kf does not fit,
-	;   weapons are moved offscreen during the reload, see SAReloadDrop + SALeftRot)
+	;   anything else with a valid weapon (melee, rifle, launcher ...) -> other
+	; Revolvers (node name contains "cylinder") are filtered out of the pistols -> other.
+	; The node check needs the weapon to be loaded in the player's 3D (Akimbo ON or equipped right weapon).
 	int iAnim
 	int iKind
 	int iType
+	int iModel
+	int iCylTotal
+	int iCylAkimbo
+	int iCylFound
+	string_var sNodeName
+	array_var aNodes
+	array_var iter
 
 	let iKind = 0
 	if rWeap == 0
@@ -22,16 +31,55 @@ Begin Function {ref rWeap}
 	endif
 
 	let iAnim = GetWeaponType rWeap
-	if iAnim == 3
+	if iAnim == 3 || iAnim == 4
 		let iKind = 1
-	elseif iAnim == 4
-		let iKind = 1
+
+		; Revolver detection via node "*cylinder*" (case-insensitive substring)
+		let iCylTotal = 0
+		let iCylAkimbo = 0
+		let iModel = 1
+		while iModel <= 2
+			if iSide == 1
+				let aNodes := Player.GetChildBlocks "Weapon" iModel
+				if aNodes
+					foreach iter <- aNodes
+						let sNodeName := iter["value"]
+						if sv_Find "cylinder" sNodeName > -1
+							let iCylTotal += 1
+						endif
+					loop
+				endif
+			endif
+			let aNodes := Player.GetChildBlocks "Akimbo" iModel
+			if aNodes
+				foreach iter <- aNodes
+					let sNodeName := iter["value"]
+					if sv_Find "cylinder" sNodeName > -1
+						let iCylAkimbo += 1
+					endif
+				loop
+			endif
+			let iModel += 1
+		loop
+
+		if iSide == 1
+			let iCylFound = iCylTotal - iCylAkimbo
+		else
+			let iCylFound = iCylAkimbo
+		endif
+
+		if iCylFound > 0
+			let iKind = 2
+			if Player.AuxVarGetFlt "*_SADebug" == 1
+				PrintC "SA WeaponKind: revolver (cylinder node) -> other, form=%i side=%g" rWeap iSide
+			endif
+		endif
 	else
 		let iKind = 2
 	endif
 
 	if Player.AuxVarGetFlt "*_SADebug" == 1
-		PrintC "SA WeaponKind: form=%i type=%g kind=%g (1=pistol 2=other)" rWeap iAnim iKind
+		PrintC "SA WeaponKind: form=%i type=%g kind=%g side=%g (1=pistol 2=other)" rWeap iAnim iKind iSide
 	endif
 
 	SetFunctionValue iKind
