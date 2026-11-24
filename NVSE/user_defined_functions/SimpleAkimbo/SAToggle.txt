@@ -116,8 +116,8 @@ Begin Function {int iKey}
 		Call (CompileScript "SimpleAkimbo\SAReload.txt") 0
 		PrintC "SimpleAkimbo: ON"
 		; Weapon kind check (left + right): 1=pistol kf reload, 2=other drop fallback
-		let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap
-		let iEWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rEquip
+		let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap 0
+		let iEWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rEquip 1
 		PrintC "SimpleAkimbo: weapon kinds L=%g R=%g (1=pistol 2=other)" iWT iEWT
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 	else
