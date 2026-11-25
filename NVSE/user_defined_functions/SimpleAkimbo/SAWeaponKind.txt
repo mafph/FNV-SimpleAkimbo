@@ -1,12 +1,11 @@
 Begin Function {ref rWeap, int iSide}
-	; Weapon class for Akimbo reload / anim path.
+	; Weapon class for the animation pack choice (SAPackApply).
 	; iSide: 0 = left weapon (subtree "Akimbo"), 1 = right weapon (subtree "Weapon" minus "Akimbo")
-	; Returns: 0 = none, 1 = pistol (kf reload), 2 = other (drop fallback).
-	; GetWeaponType (JIP) on the weapon form - same values as the anim type:
-	;   3 = OneHandPistol, 4 = OneHandPistolEnergy -> pistol (kf reload fits)
-	;   anything else with a valid weapon (melee, rifle, launcher ...) -> other
-	; Revolvers (node name contains "cylinder") are filtered out of the pistols -> other.
-	; The node check needs the weapon to be loaded in the player's 3D (Akimbo ON or equipped right weapon).
+	; Returns: 0 = none / other / unsupported, 1 = pistol, 2 = revolver, 3 = double barrel (sawed off), 4 = lever action
+	; 1/2: GetWeaponType 3 (OneHandPistol) or 4 (OneHandPistolEnergy); node name containing "cylinder" -> revolver.
+	;      The node check needs the weapon in the player's 3D (right weapon: equipped, left weapon: Akimbo ON).
+	; 3/4: by substring of the weapon's model path. Pattern 3 = "sawedoff" (guess from the pack's model name, check with *_SADebug),
+	;      pattern 4 (lever action) still EMPTY = off: look up the model path with *_SADebug and enter it in the PATTERN line.
 	int iAnim
 	int iKind
 	int iType
@@ -14,7 +13,12 @@ Begin Function {ref rWeap, int iSide}
 	int iCylTotal
 	int iCylAkimbo
 	int iCylFound
+	int iLen
+	int iPos
 	string_var sNodeName
+	string_var sModel
+	string_var sPat3
+	string_var sPat4
 	array_var aNodes
 	array_var iter
 
@@ -34,7 +38,6 @@ Begin Function {ref rWeap, int iSide}
 	if iAnim == 3 || iAnim == 4
 		let iKind = 1
 
-		; Revolver detection via node "*cylinder*" (case-insensitive substring)
 		let iCylTotal = 0
 		let iCylAkimbo = 0
 		let iModel = 1
@@ -44,6 +47,9 @@ Begin Function {ref rWeap, int iSide}
 				if aNodes
 					foreach iter <- aNodes
 						let sNodeName := iter["value"]
+						if Player.AuxVarGetFlt "*_SADebugNodes" == 1
+							PrintC "SA Node: Weapon model=%g %z" iModel sNodeName
+						endif
 						if sv_Find "cylinder" sNodeName > -1
 							let iCylTotal += 1
 						endif
@@ -54,6 +60,9 @@ Begin Function {ref rWeap, int iSide}
 			if aNodes
 				foreach iter <- aNodes
 					let sNodeName := iter["value"]
+					if Player.AuxVarGetFlt "*_SADebugNodes" == 1
+						PrintC "SA Node: Akimbo model=%g %z" iModel sNodeName
+					endif
 					if sv_Find "cylinder" sNodeName > -1
 						let iCylAkimbo += 1
 					endif
@@ -67,19 +76,35 @@ Begin Function {ref rWeap, int iSide}
 		else
 			let iCylFound = iCylAkimbo
 		endif
-
 		if iCylFound > 0
 			let iKind = 2
-			if Player.AuxVarGetFlt "*_SADebug" == 1
-				PrintC "SA WeaponKind: revolver (cylinder node) -> other, form=%i side=%g" rWeap iSide
-			endif
 		endif
 	else
-		let iKind = 2
+		; PATTERN: lower-case part of the model path, e.g. "sawedoff"; empty = off
+		let sPat3 = "sawedoff"
+		let sPat4 = ""
+		let sModel = GetWeaponModel rWeap 0
+		if Player.AuxVarGetFlt "*_SADebug" == 1
+			PrintC "SA WeaponKind model: %z" sModel
+		endif
+		let iLen = sv_Length sPat3
+		if iLen > 0
+			let iPos = sv_Find sPat3 sModel
+			if iPos > -1
+				let iKind = 3
+			endif
+		endif
+		let iLen = sv_Length sPat4
+		if iKind == 0 && iLen > 0
+			let iPos = sv_Find sPat4 sModel
+			if iPos > -1
+				let iKind = 4
+			endif
+		endif
 	endif
 
 	if Player.AuxVarGetFlt "*_SADebug" == 1
-		PrintC "SA WeaponKind: form=%i type=%g kind=%g side=%g (1=pistol 2=other)" rWeap iAnim iKind iSide
+		PrintC "SA WeaponKind: form=%i type=%g kind=%g side=%g (0 other 1 pistol 2 revolver 3 double 4 lever)" rWeap iAnim iKind iSide
 	endif
 
 	SetFunctionValue iKind

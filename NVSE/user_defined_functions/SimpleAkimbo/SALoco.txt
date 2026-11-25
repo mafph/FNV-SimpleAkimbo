@@ -60,7 +60,13 @@ Begin Function {int iForceOff}
 		return
 	endif
 
-	let sBase = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\Locomotion"
+	; Locomotion folder comes from the active pack (slot Loco, 1st person only)
+	let sName = Player.AuxVarGetStr "*_SAP_Loco_D"
+	let iPass = sv_Length sName
+	if iPass == 0
+		return
+	endif
+	let sBase = sv_Construct "AnimGroupOverride\%z\_1stPerson\Locomotion" sName
 	let iPass = 0
 	while iPass < 2
 		if iPass == 0

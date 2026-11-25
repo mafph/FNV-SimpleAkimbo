@@ -16,8 +16,8 @@ Begin Function {}
 	; Block IdleHold until equip duration elapsed (invalidates old timers)
 	Player.AuxVarSetFlt "*_SAEquipPhase" 1
 
-	let sEquip1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf"
-	let sEquip3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf"
+	let sEquip1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "Equip" 1
+	let sEquip3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "Equip" 0
 	let iPrio = Player.AuxVarGetFlt "*_SAEquipPrio"
 	if iPrio <= 0
 		let iPrio = 4
@@ -25,10 +25,8 @@ Begin Function {}
 
 	Player.DeactivateAnim (sEquip1st) 0.0
 	Player.DeactivateAnim (sEquip3rd) 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkL"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkR"
 
 	Player.ActivateAnim (sEquip1st) 1 iPrio 1 1.0 0.0 ""
 	Player.ActivateAnim (sEquip3rd) 0 iPrio 1 1.0 0.0 ""

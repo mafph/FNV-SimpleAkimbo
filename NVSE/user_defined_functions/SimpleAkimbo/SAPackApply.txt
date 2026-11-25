@@ -1,0 +1,104 @@
+Begin Function {int iKL, int iKR}
+	; Chooses and loads the animation pack for the current weapon pair. Called by SAToggle (and SAPackLate).
+	; iKL / iKR: weapon class of left / right (SAWeaponKind): 0 other, 1 pistol, 2 revolver, 3 double barrel, 4 lever.
+	; Rule: only if BOTH hands have the same class (> 0) the class pack is used, otherwise fallback = base pack.
+	; Steps: 1) clear, load base pack (1 bundled, else 2 Johnsonn in place)  2) class pack (kind + 1) on top, slot by slot
+	;        3) decide the reload path: kf reload only if the class pack itself brings the dual reload kf
+	; Result AuxVars: *_SAPack (id of the pack whose folders are active, also used by the kNVSE json conditions),
+	;   *_SAPackKind, *_SAPackReloadKf (1 = kf reload, 0 = single-hand sequence), *_SAKindL, *_SAKindR.
+	; Returns the pack id, 0 = no usable pack installed.
+	string_var sRelBase
+	string_var sRelNew
+	int iKind
+	int iBase
+	int iUsed
+	int iHit
+	int iOver
+	int iReload
+	int iCmp
+	int iLen
+
+	let iKind = 0
+	if iKL > 0 && iKL == iKR
+		let iKind = iKL
+	endif
+
+	; 1) base pack
+	Player.AuxVarSetFlt "*_SAPackProbe" 0
+	Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 0
+	Player.AuxVarSetFlt "*_SAPackProbe" 1
+	let iBase = 0
+	let iHit = Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 1
+	if iHit == 2
+		let iBase = 1
+	else
+		Player.AuxVarSetFlt "*_SAPackProbe" 0
+		Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 0
+		Player.AuxVarSetFlt "*_SAPackProbe" 1
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 2
+		if iHit == 2
+			let iBase = 2
+		else
+			; emergency switch: trust that the Johnsonn pack
+			; is installed and use it unprobed. Default ON (the file probe is unreliable here). *_SANoAssume = 1 gives the "no pack" rejection instead.
+			if Player.AuxVarGetFlt "*_SANoAssume" != 1
+				Player.AuxVarSetFlt "*_SAPackProbe" 0
+				Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 0
+				Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 2
+				let iBase = 2
+				if Player.AuxVarGetFlt "*_SADebug" == 1
+					PrintC "SA Pack: probe found nothing, assuming Johnsonn pack (unprobed)"
+				endif
+			endif
+		endif
+	endif
+	if iBase == 0
+		Player.AuxVarSetFlt "*_SAPackProbe" 0
+		Player.AuxVarSetFlt "*_SAPack" 0
+		Player.AuxVarSetFlt "*_SAPackReloadKf" 0
+		SetFunctionValue 0
+		return
+	endif
+
+	let iUsed = iBase
+	let iReload = 0
+	let sRelBase = Player.AuxVarGetStr "*_SAP_RelFull_D"
+
+	if iKind == 1
+		; pistol pair: the base pack is the class pack
+		let iLen = sv_Length sRelBase
+		if iLen > 0
+			let iReload = 1
+		endif
+	elseif iKind >= 2
+		; 2) class pack on top of the base pack
+		let iOver = iKind + 1
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackDef.txt") iOver
+		if iHit == 2
+			let iUsed = iOver
+			let sRelNew = Player.AuxVarGetStr "*_SAP_RelFull_D"
+			let iCmp = sv_Compare sRelBase sRelNew 1
+			if iCmp != 0
+				let iReload = 1
+			endif
+		else
+			; class pack missing or incomplete: back to the plain base pack
+			Player.AuxVarSetFlt "*_SAPackProbe" 0
+			Call (CompileScript "SimpleAkimbo\SAPackDef.txt") 0
+			Player.AuxVarSetFlt "*_SAPackProbe" 1
+			Call (CompileScript "SimpleAkimbo\SAPackDef.txt") iBase
+		endif
+	endif
+
+	Player.AuxVarSetFlt "*_SAPackProbe" 0
+	Player.AuxVarSetFlt "*_SAPack" iUsed
+	Player.AuxVarSetFlt "*_SAPackKind" iKind
+	Player.AuxVarSetFlt "*_SAPackReloadKf" iReload
+	Player.AuxVarSetFlt "*_SAKindL" iKL
+	Player.AuxVarSetFlt "*_SAKindR" iKR
+
+	if Player.AuxVarGetFlt "*_SADebug" == 1
+		PrintC "SA Pack: L=%g R=%g kind=%g base=%g used=%g kfReload=%g" iKL iKR iKind iBase iUsed iReload
+	endif
+	SetFunctionValue iUsed
+End

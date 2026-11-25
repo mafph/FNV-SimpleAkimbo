@@ -1,32 +1,57 @@
 [
     {
         "folder": "SA_Januusz9mm",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") < 2",
         "pollCondition": true
     },
     {
         "folder": "SA_HandL",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 0",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 0 && (AuxVarGetFlt \"*_SAPack\") < 2",
         "pollCondition": true
     },
     {
         "folder": "SA_HandR",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 1",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 1 && (AuxVarGetFlt \"*_SAPack\") < 2",
         "pollCondition": true
     },
     {
         "folder": "SA_HandRLast",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 1 && (AuxVarGetFlt \"*_SALastR\") == 1",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAHandSel\") == 1 && (AuxVarGetFlt \"*_SALastR\") == 1 && (AuxVarGetFlt \"*_SAPack\") < 2",
         "pollCondition": true
     },
     {
         "folder": "SA_ReloadFull",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPartial\") == 0",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPartial\") == 0 && (AuxVarGetFlt \"*_SAPack\") < 2",
         "pollCondition": true
     },
     {
         "folder": "SA_ReloadPartial",
-        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPartial\") == 1",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPartial\") == 1 && (AuxVarGetFlt \"*_SAPack\") < 2",
+        "pollCondition": true
+    },
+    {
+        "folder": "Johnsonn_9mmAkimbo",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") == 2",
+        "pollCondition": true
+    },
+    {
+        "folder": "DualRevolvers",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") == 3",
+        "pollCondition": true
+    },
+    {
+        "folder": "Johnsonn_AkimboSawedOff",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") == 4",
+        "pollCondition": true
+    },
+    {
+        "folder": "Johnsonn_AkimboSawedOffRight",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") == 4",
+        "pollCondition": true
+    },
+    {
+        "folder": "SIGMA_AkimboShotguns",
+        "condition": "(AuxVarGetFlt \"*_SAkimbo\") == 1 && (AuxVarGetFlt \"*_SAPack\") == 5",
         "pollCondition": true
     }
 ]

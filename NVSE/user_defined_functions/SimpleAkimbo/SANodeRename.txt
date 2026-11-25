@@ -1,0 +1,107 @@
+Begin Function {}
+	; Revolver pack node fix (pack 3). fix14: integer-only logic (no sv_SubString, no string compare, no sv_Length test),
+	; per-candidate trace. Renames ##xxxHammer / Trigger / Cylinder (right: no suffix, left: suffix "1") to ##357...
+	int iModel
+	int iOK
+	int iPos
+	int iLen
+	int iRest
+	int iDone
+	int iPack
+	int iHash
+	int i357
+	int iColon
+	int iDbg
+	int iKind
+	int iKlen
+	int iSuf
+	int iLast
+	string_var sName
+	string_var sNew
+	array_var aNodes
+	array_var iter
+
+	let iPack = Player.AuxVarGetFlt "*_SAPack"
+	let iDbg = Player.AuxVarGetFlt "*_SADebugNodes"
+	if iPack != 3
+		return
+	endif
+
+	let iDone = 0
+	let iModel = 1
+	while iModel <= 2
+		let aNodes := Player.GetChildBlocks "Weapon" iModel
+		if aNodes
+			foreach iter <- aNodes
+				let sName := iter["value"]
+				let iHash = sv_Find "##" sName
+				let i357 = sv_Find "357" sName
+				let iColon = sv_Find ":" sName
+				if iHash == 0 && i357 == -1 && iColon == -1
+					let iLen = sv_Length sName
+					let iKind = 0
+					let iKlen = 0
+					let iPos = sv_Find "Hammer" sName
+					if iPos > 2
+						let iKind = 1
+						let iKlen = 6
+					else
+						let iPos = sv_Find "Trigger" sName
+						if iPos > 2
+							let iKind = 2
+							let iKlen = 7
+						else
+							let iPos = sv_Find "Cylinder" sName
+							if iPos > 2
+								let iKind = 3
+								let iKlen = 8
+							endif
+						endif
+					endif
+					if iDbg == 1 && iKind > 0
+						PrintC "SA NodeRename: cand '%z' kind=%g pos=%g len=%g" sName iKind iPos iLen
+					endif
+					if iKind > 0
+						let iRest = iLen - iPos - iKlen
+						let iSuf = -1
+						if iRest == 0
+							let iSuf = 0
+						elseif iRest == 1
+							let iLast = sv_Find "1" sName (iLen - 1)
+							if iLast == iLen - 1
+								let iSuf = 1
+							endif
+						endif
+						if iDbg == 1
+							PrintC "SA NodeRename:   rest=%g suf=%g" iRest iSuf
+						endif
+						if iSuf >= 0
+							if iKind == 1 && iSuf == 0
+								let sNew = "##357Hammer"
+							elseif iKind == 1
+								let sNew = "##357Hammer1"
+							elseif iKind == 2 && iSuf == 0
+								let sNew = "##357Trigger"
+							elseif iKind == 2
+								let sNew = "##357Trigger1"
+							elseif iKind == 3 && iSuf == 0
+								let sNew = "##357Cylinder"
+							else
+								let sNew = "##357Cylinder1"
+							endif
+							let iOK = Player.RenameNifBlock (sName) (sNew) iModel
+							let iDone += 1
+							if iDbg == 1
+								PrintC "SA NodeRename: %z -> %z (model %g) ok=%g" sName sNew iModel iOK
+							endif
+						endif
+					endif
+				endif
+			loop
+		endif
+		let iModel += 1
+	loop
+	if iDbg == 1
+		PrintC "SA NodeRename: done, %g renamed" iDone
+	endif
+End

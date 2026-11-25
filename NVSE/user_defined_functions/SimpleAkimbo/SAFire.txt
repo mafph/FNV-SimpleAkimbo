@@ -35,6 +35,7 @@ Begin Function {int iHand}
 		let sNode = "ProjectileNode"
 	endif
 
+	Call (CompileScript "SimpleAkimbo\SANodeRename.txt")
 	let fAmmo = Player.AuxVarGetFlt (sKeyAmmo)
 	if fAmmo <= 0
 		let fAmmoL = Player.AuxVarGetFlt "*_SAAmmoL"
@@ -70,21 +71,19 @@ Begin Function {int iHand}
 	if iHand == 0
 		; Do NOT set HandSel here: switching to 0 aborts the running right animation (SA_HandR)
 
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkL"
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkLLast"
 
 		; Fixed priority: 5 normal, 6 last shot
 		let iPrio = 5
 
 		if fAmmo == 0
-			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf"
-			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf"
+			let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkLLast" 1
+			let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkLLast" 0
 			let iPrio = 6
 		else
-			let sAnim1st = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf"
-			let sAnim3rd = "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf"
+			let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkL" 1
+			let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkL" 0
 		endif
 
 		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
@@ -102,12 +101,11 @@ Begin Function {int iHand}
 		Player.AuxVarSetFlt "*_SAHandSel" 1
 
 		; Right like left via ActivateAnim with a fixed path: independent of weapon-specific folders of other mods
-		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkR"
 
 		let iPrio = 5
-		let sAnim1st = "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf"
-		let sAnim3rd = "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf"
+		let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkR" 1
+		let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "AtkR" 0
 		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
 		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""
 	endif

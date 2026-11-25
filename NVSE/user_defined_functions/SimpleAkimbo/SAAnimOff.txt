@@ -4,17 +4,12 @@ Begin Function {}
 	Call (CompileScript "SimpleAkimbo\SALoco.txt") 1
 	Player.AuxVarSetFlt "*_SALocoState" 0
 
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "Equip"
 
 
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "Unequip"
 
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkR"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkL"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkLLast"
 End

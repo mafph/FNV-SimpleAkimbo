@@ -1,0 +1,18 @@
+Begin Function {string_var sAct, int iPrio, int iStartOver}
+	; ActivateAnim of a slot of the active pack, 1st + 3rd person.
+	; iStartOver 0 = a sequence that is already active is not restarted (idle hold), 1 = restart.
+	string_var sP1
+	string_var sP3
+	int iLen
+
+	let sP1 = Call (CompileScript "SimpleAkimbo\SAAnim.txt") sAct 1
+	let sP3 = Call (CompileScript "SimpleAkimbo\SAAnim.txt") sAct 0
+	let iLen = sv_Length sP1
+	if iLen > 0
+		Player.ActivateAnim (sP1) 1 iPrio iStartOver 1.0 0.0 ""
+	endif
+	let iLen = sv_Length sP3
+	if iLen > 0
+		Player.ActivateAnim (sP3) 0 iPrio iStartOver 1.0 0.0 ""
+	endif
+End

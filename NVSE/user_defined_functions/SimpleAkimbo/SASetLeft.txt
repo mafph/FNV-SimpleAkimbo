@@ -53,9 +53,9 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SALeftMods" iMods
 	MessageEx "Akimbo left: %n" rWeap
 	PrintC "SimpleAkimbo: left weapon = %i" rWeap
-	; Log kind (1=pistol kf reload, 2=other drop fallback)
-	let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap
-	PrintC "SimpleAkimbo: left weapon kind=%g (1=pistol 2=other)" iWT
+	; Log kind (0 other, 1 pistol, 2 revolver, 3 double barrel, 4 lever). Cylinder node only if Akimbo is on.
+	let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap 0
+	PrintC "SimpleAkimbo: left weapon kind=%g" iWT
 
 	if Player.AuxVarGetFlt "*_SAkimbo" == 1
 		Player.AuxVarSetFlt "*_SASwapPend" 1

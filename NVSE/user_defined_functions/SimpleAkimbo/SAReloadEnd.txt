@@ -59,17 +59,14 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SAReloading" 0
 		Player.AuxVarSetFlt "*_SAReloadWait" 0
 		Player.AuxVarSetFlt "*_SAReloadSeen" 0
-		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelFull"
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelPart"
 
 		; Non-pistol reload: SAReload played the Akimbo unequip kf (SAReloadHolster = 1). Remove it and play the equip animation.
 		; A holster queued by the player in the meantime skips the equip animation (handled by the holster branch below).
 		if Player.AuxVarGetFlt "*_SAReloadHolster" == 1
 			Player.AuxVarSetFlt "*_SAReloadHolster" 0
-			Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 0.0
-			Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0.0
+			Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "Unequip"
 			if Player.AuxVarGetFlt "*_SAHolsterQueued" != 1
 				if Player.AuxVarGetFlt "*_SAkimbo" == 1
 					PrintC "SA ReloadEnd: unequip done, playing equip animation"

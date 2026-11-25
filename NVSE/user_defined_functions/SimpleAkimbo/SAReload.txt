@@ -102,15 +102,13 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SASeqNeedR" iReloadNeedRight
 
 	Player.AuxVarSetFlt "*_SAPartial" fPartial
+	Call (CompileScript "SimpleAkimbo\SANodeRename.txt")
 	Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 1
 	Call (CompileScript "SimpleAkimbo\SANodeFix.txt") 0
 
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeftLast.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeftLast.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkL"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkLLast"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "AtkR"
 
 	Player.SetNifBlockTranslation "##nmBar" 0 0 0 1
 	Player.SetNifBlockTranslation "##nmBar" 0 0 0 2
@@ -119,15 +117,17 @@ Begin Function {int iKey}
 	Player.AuxVarSetFlt "*_SALastR" 0
 	Player.AuxVarSetFlt "*_SASlide3rdSeq" (Player.AuxVarGetFlt "*_SASlide3rdSeq" + 1)
 
-	; Weapon class per hand (SAWeaponKind): 1 = pistol (kf reload), 2 = other (single-hand sequence), 0 = none.
+	; Reload path per pack (*_SAPackReloadKf): 1 = kf reload, 0 = single-hand sequence.
 	; If at least one hand is "other", SAReloadSeq runs (each weapon reloads on its own). Console override: *_SAReloadKf 1 = always kf.
 	let rWL = Player.AuxVarGetRef "*_SALeftW"
 	let rWR = Player.GetEquippedWeapon
-	let iKL = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWL
-	let iKR = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWR
-	let iDrop = 0
-	if iKL == 2 || iKR == 2
-		let iDrop = 1
+	; Weapon classes and the pack were chosen at turn-on (SAPackApply). kf reload only if the pack
+	; itself brings a dual reload kf for this class, otherwise each weapon reloads on its own (SAReloadSeq).
+	let iKL = Player.AuxVarGetFlt "*_SAKindL"
+	let iKR = Player.AuxVarGetFlt "*_SAKindR"
+	let iDrop = 1
+	if Player.AuxVarGetFlt "*_SAPackReloadKf" == 1
+		let iDrop = 0
 	endif
 	if Player.AuxVarGetFlt "*_SAReloadKf" == 1
 		let iDrop = 0
@@ -135,17 +135,15 @@ Begin Function {int iKey}
 
 	; Choose kf, then duration from GetAnimationAttributes endKeyTime (90% cut – feels less long).
 	; Only used for pistols (iDrop == 0). Optional: *_SAReloadCut (default 0.9), *_SAReloadLen / Full / Partial absolute overrides.
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelFull"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelPart"
 	if fPartial == 1
-		let sAnim1st = "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf"
-		let sAnim3rd = "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf"
+		let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelPart" 1
+		let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelPart" 0
 		let fEnd = 4.417
 	else
-		let sAnim1st = "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf"
-		let sAnim3rd = "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf"
+		let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelFull" 1
+		let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelFull" 0
 		let fEnd = 5.05
 	endif
 	; Real stop time from the kf if available (GetAnimationAttributes -> endKeyTime)

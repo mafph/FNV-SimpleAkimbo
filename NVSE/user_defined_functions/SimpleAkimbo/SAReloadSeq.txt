@@ -59,13 +59,12 @@ Begin Function {}
 		if fSeqDefaultSeconds <= 0
 			let fSeqDefaultSeconds = 0.6
 		endif
-		let sSeqKfPath = "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf"
+		let sSeqKfPath = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "Unequip" 1
 		let fSeqWaitSeconds = Call (CompileScript "SimpleAkimbo\SASeqLen.txt") sSeqKfPath fSeqDefaultSeconds
 		Player.AuxVarSetFlt "*_SAReloadHolster" 0
 		Player.AuxVarSetFlt "*_SAEquipPhase" 0
 		Call (CompileScript "SimpleAkimbo\SAAnimOff.txt")
-		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 1 6 1 1.0 0.0
-		Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0 6 1 1.0 0.0
+		Call (CompileScript "SimpleAkimbo\SAAnimPlay.txt") "Unequip" 6 1
 		Player.AuxVarSetFlt "*_SASeqStep" 1
 		PrintC "SA Seq: akimbo unequip (%g s)" fSeqWaitSeconds
 		Player.CallAfterSeconds fSeqWaitSeconds (CompileScript "SimpleAkimbo\SAReloadSeq.txt")
@@ -77,8 +76,7 @@ Begin Function {}
 		if fSeqWaitSeconds <= 0
 			let fSeqWaitSeconds = 0.2
 		endif
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpUnequip.kf" 0.0
-		Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpUnequip.kf" 0.0
+		Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "Unequip"
 		Player.AuxVarSetFlt "*_SASwapping" 1
 		let iSeqStepCurrent = 0 - 1
 		Call (CompileScript "SimpleAkimbo\SAToggle.txt") iSeqStepCurrent

@@ -1,0 +1,135 @@
+Begin Function {int iPack}
+	; Slot tables of the animation packs. Slot = folder (below Meshes\AnimGroupOverride) + file name.
+	; Slots: AtkL (left shot), AtkLLast (left last round), AtkR (right shot), Equip, Unequip, RelFull, RelPart,
+	;        Loco (folder only, file = probe file; SALoco builds <folder>\_1stPerson\Locomotion\1hp*.kf)
+	; The pack counts as installed if BOTH attack slots (AtkL, AtkR) exist. Returns the number of accepted attack slots (2 = ok).
+	; Only fill in what the pack really contains: slots whose kf is missing keep the value of the base pack (SAPackSet probe).
+	;
+	; Pack ids:
+	;   0 = clear all slots (no pack)
+	;   1 = bundled SimpleAkimbo copy (SA_* folders)         kind 1 pistol, base pack
+	;   2 = Johnsonn "Akimbo 9mm Pistol" used IN PLACE        kind 1 pistol, alternative base pack
+	;   3 = Dual Revolvers                                    kind 2 revolver   (template)
+	;   4 = Sawed Off                                         kind 3 double barrel (template)
+	;   5 = SIGMA lever action                                kind 4 lever (template)
+	; Overlay pack of a weapon class = kind + 1 (SAPackApply).
+	int iAtk
+	int iHit
+	int iEx
+
+	let iAtk = 0
+
+	if iPack == 0
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkLLast" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelPart" "" ""
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Loco" "" ""
+
+	elseif iPack == 1
+		let iEx = 1
+		if Player.AuxVarGetFlt "*_SAPackProbe" == 1
+			let iEx = FileExists "Meshes\AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 0
+		endif
+		if iEx <= 0
+			SetFunctionValue 0
+			return
+		endif
+		; bundled copy, identical to the Johnsonn files except 1st person AttackLeft (extra text key)
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "SA_Januusz9mm" "1hpAttackLeft.kf"
+		let iAtk += iHit
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "SA_HandR" "1hpAttackRight.kf"
+		let iAtk += iHit
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkLLast" "SA_Januusz9mm" "1hpAttackLeftLast.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "SA_Januusz9mm" "1hpEquip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "SA_Januusz9mm" "1hpUnequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "SA_ReloadFull" "1hpReloadL.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelPart" "SA_ReloadPartial" "1hpReloadL.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Loco" "SA_Januusz9mm" "Locomotion\1hpforward.kf"
+
+	elseif iPack == 2
+		let iEx = 1
+		if Player.AuxVarGetFlt "*_SAPackProbe" == 1
+			let iEx = FileExists "Meshes\AnimGroupOverride\Johnsonn_9mmAkimbo\_1stPerson\1hpAttackRight_order_2.kf" 0
+		endif
+		if iEx <= 0
+			SetFunctionValue 0
+			return
+		endif
+		; original mod "Akimbo 9mm Pistol" (Johnsonn_9mmAkimbo*), left = _order_2, right = _order_1
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "Johnsonn_9mmAkimbo" "1hpAttackRight_order_2.kf"
+		let iAtk += iHit
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "Johnsonn_9mmAkimbo" "1hpAttackRight_order_1.kf"
+		let iAtk += iHit
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkLLast" "Johnsonn_9mmAkimboLeftLast" "1hpAttackRight_order_2.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "Johnsonn_9mmAkimbo" "1hpEquip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "Johnsonn_9mmAkimbo" "1hpUnequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "Johnsonn_9mmAkimbo" "1hpReloadL.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelPart" "Johnsonn_9mmAkimbo" "1hpReloadL_Partial.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Loco" "Johnsonn_9mmAkimbo" "Locomotion\1hpforward.kf"
+
+	elseif iPack == 3
+		let iEx = 1
+		if Player.AuxVarGetFlt "*_SAPackProbe" == 1
+			let iEx = FileExists "Meshes\AnimGroupOverride\DualRevolvers\_1stPerson\1hpAttack5_order_2.kf" 0
+		endif
+		if iEx <= 0
+			SetFunctionValue 0
+			return
+		endif
+		; Dual Revolvers (kind 2). Left = _order_2, right = _order_1 (as in the pack's own LastLeft / LastRight folders).
+		; RelFull (empty magazine) = DualRevolversNoAmmo\1hpreloadm, RelPart (rounds left) = DualRevolvers\1hpReloadM (the pack picks these by GetCurrentAmmoRounds). (ReloadX / ReloadXStart = one-by-one loading, not used.) Cowboy/NoAmmo folders: not used.
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "DualRevolvers" "1hpAttack5_order_2.kf"
+		let iAtk += iHit
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "DualRevolvers" "1hpAttack5_order_1.kf"
+		let iAtk += iHit
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkLLast" "DualRevolversLastLeft" "1hpattack_order_2.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "DualRevolvers" "1hpequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "DualRevolvers" "1hpunequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "DualRevolversNoAmmo" "1hpreloadm.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelPart" "DualRevolvers" "1hpReloadM.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Loco" "DualRevolvers" "Locomotion\1hpForward.kf"
+	elseif iPack == 4
+		let iEx = 1
+		if Player.AuxVarGetFlt "*_SAPackProbe" == 1
+			let iEx = FileExists "Meshes\AnimGroupOverride\Johnsonn_AkimboSawedOffLeft\_1stPerson\1hpAttackLeft.kf" 0
+		endif
+		if iEx <= 0
+			SetFunctionValue 0
+			return
+		endif
+		; Johnsonn Akimbo Sawed Off (kind 3). Left/Right folders each hold ONE attack, both named 1hpAttackLeft.kf.
+		; UNVERIFIED: that the Left folder = left gun and the Right folder = right gun (taken from the folder names).
+		; Pack has no last-round attack; ReloadD = dual reload; locomotion only if the pack has it (else base pack).
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "Johnsonn_AkimboSawedOffLeft" "1hpAttackLeft.kf"
+		let iAtk += iHit
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "Johnsonn_AkimboSawedOffRight" "1hpAttackLeft.kf"
+		let iAtk += iHit
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "Johnsonn_AkimboSawedOff" "1hpEquip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "Johnsonn_AkimboSawedOff" "1hpUnequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "Johnsonn_AkimboSawedOff" "1hpReloadD.kf"
+	elseif iPack == 5
+		let iEx = 1
+		if Player.AuxVarGetFlt "*_SAPackProbe" == 1
+			let iEx = FileExists "Meshes\AnimGroupOverride\SIGMA_AkimboShotguns\_1stPerson\1hpattack5_order_2.kf" 0
+		endif
+		if iEx <= 0
+			SetFunctionValue 0
+			return
+		endif
+		; SIGMA lever action (kind 4). File names in lower case (harmless on Windows). Left = _order_2, right = _order_1.
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkL" "SIGMA_AkimboShotguns" "1hpattack5_order_2.kf"
+		let iAtk += iHit
+		let iHit = Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "AtkR" "SIGMA_AkimboShotguns" "1hpattack5_order_1.kf"
+		let iAtk += iHit
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Equip" "SIGMA_AkimboShotguns" "1hpEquip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Unequip" "SIGMA_AkimboShotguns" "1hpunequip.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "RelFull" "SIGMA_AkimboShotguns" "1hpreloadA.kf"
+		Call (CompileScript "SimpleAkimbo\SAPackSet.txt") "Loco" "SIGMA_AkimboShotguns" "Locomotion\1hpForward.kf"
+	endif
+
+	SetFunctionValue iAtk
+End

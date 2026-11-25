@@ -1,0 +1,24 @@
+Begin Function {}
+	; Shortly after turning on: the node check of SAWeaponKind (cylinder) only works once the left model is in the
+	; player's 3D. If the weapon classes turned out different from the first pass, the pack is chosen again.
+	ref rLeft
+	ref rRight
+	int iKL
+	int iKR
+	int iPack
+
+	if Player.AuxVarGetFlt "*_SAkimbo" != 1
+		return
+	endif
+	let rLeft = Player.AuxVarGetRef "*_SALeftW"
+	let rRight = Player.GetEquippedObject 5
+	Call (CompileScript "SimpleAkimbo\SANodeRename.txt")
+	let iKL = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rLeft 0
+	let iKR = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rRight 1
+	if iKL == Player.AuxVarGetFlt "*_SAKindL" && iKR == Player.AuxVarGetFlt "*_SAKindR"
+		return
+	endif
+	let iPack = Call (CompileScript "SimpleAkimbo\SAPackApply.txt") iKL iKR
+	PrintC "SimpleAkimbo: weapon kinds L=%g R=%g -> pack %g (second pass)" iKL iKR iPack
+	Call (CompileScript "SimpleAkimbo\SAIdleHold.txt")
+End

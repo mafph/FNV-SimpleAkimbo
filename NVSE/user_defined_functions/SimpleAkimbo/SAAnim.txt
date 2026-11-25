@@ -1,0 +1,28 @@
+Begin Function {string_var sAct, int iPOV}
+	; Resolves the kf path of an animation slot of the ACTIVE pack (filled by SAPackApply / SAPackDef).
+	; sAct: AtkL, AtkLLast, AtkR, Equip, Unequip, RelFull, RelPart
+	; iPOV: 1 = 1st person (_1stPerson), 0 = 3rd person (_Male)
+	; Returns the path relative to Meshes, "" if the slot is empty.
+	string_var sKey
+	string_var sDir
+	string_var sFile
+	string_var sPov
+	string_var sPath
+	int iLen
+
+	let sPath = ""
+	let sKey = sv_Construct "*_SAP_%z_D" sAct
+	let sDir = Player.AuxVarGetStr (sKey)
+	let iLen = sv_Length sDir
+	if iLen > 0
+		let sKey = sv_Construct "*_SAP_%z_F" sAct
+		let sFile = Player.AuxVarGetStr (sKey)
+		if iPOV == 1
+			let sPov = "_1stPerson"
+		else
+			let sPov = "_Male"
+		endif
+		let sPath = sv_Construct "AnimGroupOverride\%z\%z\%z" sDir sPov sFile
+	endif
+	SetFunctionValue sPath
+End

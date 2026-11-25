@@ -12,6 +12,7 @@ Begin Function {int iKey}
 	int iMods
 	int iWT
 	int iEWT
+	int iPackUsed
 	string_var sHudPath
 	string_var sHudOrig
 
@@ -36,6 +37,13 @@ Begin Function {int iKey}
 			return
 		endif
 		; weapon type restriction removed: any weapon type may be used (LMGs etc.)
+		; Animation pack present? (provisional pass with kind 0 = base pack, the real classes follow after attaching)
+		let iPackUsed = Call (CompileScript "SimpleAkimbo\SAPackApply.txt") 0 0
+		if iPackUsed == 0
+			PrintC "SimpleAkimbo: No supported animation pack installed."
+			MessageEx "SimpleAkimbo: No supported animation pack installed."
+			return
+		endif
 		; Model of the left weapon: remembered weapon (M), otherwise vanilla 9mm
 		let rWeap = Player.AuxVarGetRef "*_SALeftW"
 		if rWeap == 0
@@ -115,10 +123,13 @@ Begin Function {int iKey}
 		Call (CompileScript "SimpleAkimbo\SAAutoInit.txt")
 		Call (CompileScript "SimpleAkimbo\SAReload.txt") 0
 		PrintC "SimpleAkimbo: ON"
-		; Weapon kind check (left + right): 1=pistol kf reload, 2=other drop fallback
+		; Weapon class check (left + right) and animation pack choice
 		let iWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rWeap 0
 		let iEWT = Call (CompileScript "SimpleAkimbo\SAWeaponKind.txt") rEquip 1
-		PrintC "SimpleAkimbo: weapon kinds L=%g R=%g (1=pistol 2=other)" iWT iEWT
+		let iPackUsed = Call (CompileScript "SimpleAkimbo\SAPackApply.txt") iWT iEWT
+		PrintC "SimpleAkimbo: weapon kinds L=%g R=%g pack=%g (0 other 1 pistol 2 revolver 3 double 4 lever)" iWT iEWT iPackUsed
+		; the cylinder node of a left revolver may not exist yet right after AttachModel: check again a bit later
+		Player.CallAfterSeconds 0.3 (CompileScript "SimpleAkimbo\SAPackLate.txt")
 		Call (CompileScript "SimpleAkimbo\SAReq.txt") 1
 	else
 		let sPath = Player.AuxVarGetStr "*_SAModel"

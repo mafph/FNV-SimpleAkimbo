@@ -1,0 +1,17 @@
+Begin Function {string_var sAct}
+	; DeactivateAnim of a slot of the active pack, 1st + 3rd person.
+	string_var sP1
+	string_var sP3
+	int iLen
+
+	let sP1 = Call (CompileScript "SimpleAkimbo\SAAnim.txt") sAct 1
+	let sP3 = Call (CompileScript "SimpleAkimbo\SAAnim.txt") sAct 0
+	let iLen = sv_Length sP1
+	if iLen > 0
+		Player.DeactivateAnim (sP1) 0.0
+	endif
+	let iLen = sv_Length sP3
+	if iLen > 0
+		Player.DeactivateAnim (sP3) 0.0
+	endif
+End

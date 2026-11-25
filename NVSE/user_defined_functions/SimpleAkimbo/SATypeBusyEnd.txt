@@ -29,12 +29,10 @@ Begin Function {}
 		Player.AuxVarSetFlt "*_SATypeWait" 0
 		Player.AuxVarSetFlt "*_SATypeSeen" 0
 		; Reload animation via ActivateAnim (full) incl. lock; end and deactivation in SAReloadEnd
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_1stPerson\1hpReloadL.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_ReloadPartial\_Male\1hpReloadL.kf" 0.0
-		let sAnim1st = "AnimGroupOverride\SA_ReloadFull\_1stPerson\1hpReloadL.kf"
-		let sAnim3rd = "AnimGroupOverride\SA_ReloadFull\_Male\1hpReloadL.kf"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelFull"
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "RelPart"
+		let sAnim1st = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelFull" 1
+		let sAnim3rd = Call (CompileScript "SimpleAkimbo\SAAnim.txt") "RelFull" 0
 		let iPrio = 6
 		Player.ActivateAnim (sAnim1st) 1 iPrio 1 1.0 0.0 ""
 		Player.ActivateAnim (sAnim3rd) 0 iPrio 1 1.0 0.0 ""

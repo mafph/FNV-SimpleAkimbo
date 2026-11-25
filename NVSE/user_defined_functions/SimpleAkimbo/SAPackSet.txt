@@ -1,0 +1,12 @@
+Begin Function {string_var sAct, string_var sDir, string_var sFile}
+	; Writes ONE slot of the active pack: folder (below Meshes\AnimGroupOverride) + file name.
+	; No file check here (FileExists does not take a string_var in a UDF): the installed check is done once per pack
+	; in SAPackDef with literal paths. Returns 1.
+	string_var sKey
+
+	let sKey = sv_Construct "*_SAP_%z_D" sAct
+	Player.AuxVarSetStr (sKey) (sDir)
+	let sKey = sv_Construct "*_SAP_%z_F" sAct
+	Player.AuxVarSetStr (sKey) (sFile)
+	SetFunctionValue 1
+End

@@ -25,11 +25,8 @@ Begin Function {}
 	endif
 
 	PrintC "SA IdleHold: applied prio %g" iPrio
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpEquip.kf" 0.0
-	Player.DeactivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpEquip.kf" 0.0
+	Call (CompileScript "SimpleAkimbo\SAAnimStop.txt") "Equip"
 
-	Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_1stPerson\1hpAttackLeft.kf" 1 iPrio 0 1.0 0.0 ""
-	Player.ActivateAnim "AnimGroupOverride\SA_Januusz9mm\_Male\1hpAttackLeft.kf" 0 iPrio 0 1.0 0.0 ""
-	Player.ActivateAnim "AnimGroupOverride\SA_HandR\_1stPerson\1hpAttackRight.kf" 1 iPrio 0 1.0 0.0 ""
-	Player.ActivateAnim "AnimGroupOverride\SA_HandR\_Male\1hpAttackRight.kf" 0 iPrio 0 1.0 0.0 ""
+	Call (CompileScript "SimpleAkimbo\SAAnimPlay.txt") "AtkL" iPrio 0
+	Call (CompileScript "SimpleAkimbo\SAAnimPlay.txt") "AtkR" iPrio 0
 End
